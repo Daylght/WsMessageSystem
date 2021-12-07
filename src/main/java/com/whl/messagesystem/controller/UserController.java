@@ -1,22 +1,30 @@
 package com.whl.messagesystem.controller;
 
 import com.whl.messagesystem.model.Result;
+import com.whl.messagesystem.model.dto.UserRegisterDto;
+import com.whl.messagesystem.service.user.UserService;
 import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
 
 /**
  * @author whl
  * @date 2021/12/7 15:29
  */
+@SuppressWarnings("all")
 @RequestMapping("/user")
 @RestController
 public class UserController {
+
+    @Resource
+    UserService userService;
 
     /**
      * 注册新用户
      */
     @PostMapping("/")
-    public Result register() {  // todo:添加dto作为参数
-        return null;
+    public Result register(UserRegisterDto userRegisterDto) {
+        return userService.register(userRegisterDto);
     }
 
     /**
@@ -24,7 +32,7 @@ public class UserController {
      */
     @GetMapping("/{name}")
     public Result userInfo(String userName) {
-        return null;
+        return userService.getUserInfo(userName);
     }
 
     /**
@@ -32,7 +40,7 @@ public class UserController {
      */
     @PutMapping("/{name}")
     public Result updateUserInfo(String userName) {
-        return null;
+        return userService.updateUserInfo(userName);
     }
 
     /**
@@ -40,7 +48,7 @@ public class UserController {
      */
     @DeleteMapping("/{name}")
     public Result deleteUser(String userName) {
-        return null;
+        return userService.deleteUser(userName);
     }
 
 }

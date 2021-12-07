@@ -6,15 +6,13 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author whl
- * @date 2021/12/7 17:07
+ * @date 2021/12/7 18:30
  */
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-public class UserRegisterDto {
+@AllArgsConstructor
+public class LoginDto {
     private String userId;
-    private String userName;
     private String password;
-    private String email;
-    private String role;
+    private String serverCode;
 }
