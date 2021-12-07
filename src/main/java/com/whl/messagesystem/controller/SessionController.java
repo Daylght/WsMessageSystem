@@ -14,6 +14,7 @@ import javax.servlet.http.HttpSession;
  * @author whl
  * @date 2021/12/7 18:36
  */
+@SuppressWarnings("all")
 @RestController
 public class SessionController {
 
