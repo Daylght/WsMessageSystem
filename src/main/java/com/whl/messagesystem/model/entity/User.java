@@ -1,9 +1,14 @@
 package com.whl.messagesystem.model.entity;
 
+import com.whl.messagesystem.model.dto.UserRegisterDto;
+import lombok.Data;
+import lombok.ToString;
+
 /**
  * @author whl
  * @date 2021/12/7 17:05
  */
+@Data
 public class User {
     /**
      * todo:插入一个管理员账户作为后台管理系统的登录账号
@@ -20,4 +25,12 @@ public class User {
     private String email;
     private String role;
     private Integer showStatus;
+
+    public User(UserRegisterDto userRegisterDto) {
+        userName = userRegisterDto.getUserName();
+        password = userRegisterDto.getPassword();
+        email = userRegisterDto.getEmail();
+        role = userRegisterDto.getRole();
+        showStatus = 0;
+    }
 }

@@ -15,6 +15,7 @@ import javax.servlet.http.HttpSession;
  * @date 2021/12/7 18:36
  */
 @SuppressWarnings("all")
+@RequestMapping("/session")
 @RestController
 public class SessionController {
 
@@ -24,7 +25,7 @@ public class SessionController {
     /**
      * 获取当前会话的信息
      */
-    @GetMapping("/session")
+    @GetMapping("/getSessionInfo")
     public Result sessionInfo(HttpSession session) {
         return sessionService.getSessionInfo(session);
     }
@@ -32,7 +33,7 @@ public class SessionController {
     /**
      * 用户登录
      */
-    @PostMapping("/session")
+    @PostMapping("/login")
     public Result login(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
         return sessionService.login(loginDto, request, response);
     }
@@ -40,7 +41,7 @@ public class SessionController {
     /**
      * 更新会话信息
      */
-    @PutMapping("/session")
+    @PutMapping("/updateSession")
     public Result updateSession(HttpSession session) {
         return sessionService.updateSession(session);
     }
@@ -48,9 +49,17 @@ public class SessionController {
     /**
      * 登出，销毁当前会话
      */
-    @DeleteMapping("/session")
+    @DeleteMapping("/logout")
     public Result logout(HttpSession session) {
         return sessionService.logout(session);
+    }
+
+    /**
+     * 生成验证码
+     */
+    @GetMapping("/getVerifyCode")
+    public void verifyCode(HttpServletRequest request, HttpServletResponse response) {
+        sessionService.generateVerifyCode(request, response);
     }
 
 }

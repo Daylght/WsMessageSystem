@@ -32,4 +32,9 @@ public interface SessionService {
      * 登出，销毁当前会话
      */
     Result logout(HttpSession session);
+
+    /**
+     * 生成验证码并返回图片
+     */
+    void generateVerifyCode(HttpServletRequest request, HttpServletResponse response);
 }
