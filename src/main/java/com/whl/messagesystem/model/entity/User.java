@@ -1,6 +1,7 @@
 package com.whl.messagesystem.model.entity;
 
 import com.whl.messagesystem.model.dto.UserRegisterDto;
+import com.whl.messagesystem.model.dto.UserUpdateDto;
 import lombok.Data;
 import lombok.ToString;
 
@@ -32,5 +33,12 @@ public class User {
         email = userRegisterDto.getEmail();
         role = userRegisterDto.getRole();
         showStatus = 0;
+    }
+
+    public User(UserUpdateDto userUpdateDto) {
+        userId = userUpdateDto.getUserId();
+        userName = userUpdateDto.getUserName();
+        password = userUpdateDto.getPassword();
+        email = userUpdateDto.getEmail();
     }
 }

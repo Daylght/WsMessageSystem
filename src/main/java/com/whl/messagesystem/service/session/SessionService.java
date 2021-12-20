@@ -11,7 +11,6 @@ import javax.servlet.http.HttpSession;
  * @author whl
  * @date 2021/12/7 18:46
  */
-@SuppressWarnings("all")
 public interface SessionService {
     /**
      * 获取当前会话的信息

@@ -13,4 +13,11 @@ public interface UserDao {
      * 往user表中插入一条新的记录
      */
     Boolean insertAnUser(User user);
+
+    /**
+     * 更新user表中的一条记录
+     * @param user
+     * @return
+     */
+    Boolean updateAnUser(User user);
 }

@@ -14,7 +14,6 @@ import javax.servlet.http.HttpSession;
  * @author whl
  * @date 2021/12/7 18:36
  */
-@SuppressWarnings("all")
 @RequestMapping("/session")
 @RestController
 public class SessionController {
@@ -24,6 +23,7 @@ public class SessionController {
 
     /**
      * 获取当前会话的信息
+     * (当前用户基本信息、所在分组等)
      */
     @GetMapping("/getSessionInfo")
     public Result sessionInfo(HttpSession session) {

@@ -4,11 +4,13 @@ import com.whl.messagesystem.commons.utils.ResultUtil;
 import com.whl.messagesystem.dao.UserDao;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.UserRegisterDto;
+import com.whl.messagesystem.model.dto.UserUpdateDto;
 import com.whl.messagesystem.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.xml.bind.ValidationException;
 import java.sql.SQLException;
 
 /**
@@ -24,14 +26,14 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 新用户注册
-     * @param userRegisterDto
-     * 用户注册所需信息
+     *
+     * @param userRegisterDto 用户注册所需信息
      */
     @Override
     public Result register(UserRegisterDto userRegisterDto) {
         try {
             if (userRegisterDto == null) {
-                throw new NullPointerException("参数为空");
+                throw new ValidationException("参数为空");
             }
 
             User user = new User(userRegisterDto);
@@ -48,29 +50,32 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 获取用户信息
-     * @param userName
-     * 用户名
-     */
-    @Override
-    public Result getUserInfo(String userName) {
-        return null;
-    }
-
-    /**
      * 更新用户信息
-     * @param userName
-     * 用户名
      */
     @Override
-    public Result updateUserInfo(String userName) {
-        return null;
+    public Result updateUserInfo(UserUpdateDto userUpdateDto) {
+        try {
+            if (userUpdateDto == null) {
+                throw new ValidationException("参数为空");
+            }
+
+            log.info("更新的用户信息: {}", userUpdateDto);
+            User user = new User(userUpdateDto);
+            if (userDao.updateAnUser(user)) {
+                return ResultUtil.success();
+            }
+
+            throw new SQLException("更新用户记录失败");
+        } catch (Exception e) {
+            log.error("更新用户信息失败: {}", e.getMessage());
+            return ResultUtil.error();
+        }
     }
 
     /**
      * 删除用户
-     * @param userName
-     * 用户名
+     *
+     * @param userName 用户名
      */
     @Override
     public Result deleteUser(String userName) {

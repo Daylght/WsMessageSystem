@@ -7,4 +7,10 @@
         INSERT INTO user (username, password, email, role, showstatus)
         VALUES (#{userName}, #{password}, #{email}, #{role}, #{showStatus})
     </insert>
+
+    <update id="updateAnUser">
+        UPDATE user
+        SET username = #{userName}, password = #{password}, email = #{email}
+        WHERE userid = #{userId}
+    </update>
 </mapper>

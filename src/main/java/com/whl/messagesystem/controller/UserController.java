@@ -2,7 +2,10 @@ package com.whl.messagesystem.controller;
 
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.UserRegisterDto;
+import com.whl.messagesystem.model.dto.UserUpdateDto;
+import com.whl.messagesystem.model.entity.User;
 import com.whl.messagesystem.service.user.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -11,7 +14,7 @@ import javax.annotation.Resource;
  * @author whl
  * @date 2021/12/7 15:29
  */
-@SuppressWarnings("all")
+@Slf4j
 @RequestMapping("/user")
 @RestController
 public class UserController {
@@ -28,19 +31,11 @@ public class UserController {
     }
 
     /**
-     * 获取用户信息，包括用户基本信息、所在分组等
-     */
-    @GetMapping("/getUserInfo/{name}")
-    public Result userInfo(String userName) {
-        return userService.getUserInfo(userName);
-    }
-
-    /**
      * 更新用户信息
      */
-    @PutMapping("/updateUserInfo/{name}")
-    public Result updateUserInfo(String userName) {
-        return userService.updateUserInfo(userName);
+    @PutMapping("/updateUserInfo")
+    public Result updateUserInfo(@RequestBody UserUpdateDto userUpdateDto) {
+        return userService.updateUserInfo(userUpdateDto);
     }
 
     /**
