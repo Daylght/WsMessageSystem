@@ -20,4 +20,9 @@ public interface UserDao {
      * @return
      */
     Boolean updateAnUser(User user);
+
+    /**
+     * 逻辑删除一个用户，即把user表中某条记录的showStatus置为1
+     */
+    Boolean logicalDeleteAnUser(String userName);
 }

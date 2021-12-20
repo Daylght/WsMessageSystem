@@ -79,6 +79,20 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Result deleteUser(String userName) {
-        return null;
+        try {
+            if (userName == null) {
+                throw new ValidationException("参数为空");
+            }
+
+            log.info("删除的用户名为: {}", userName);
+            if (userDao.logicalDeleteAnUser(userName)) {
+                return ResultUtil.success();
+            }
+
+            throw new SQLException("逻辑删除用户失败");
+        } catch (Exception e) {
+            log.error("删除用户失败: {}", e.getMessage());
+            return ResultUtil.error();
+        }
     }
 }

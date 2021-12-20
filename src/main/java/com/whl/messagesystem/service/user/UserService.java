@@ -3,9 +3,6 @@ package com.whl.messagesystem.service.user;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.UserRegisterDto;
 import com.whl.messagesystem.model.dto.UserUpdateDto;
-import com.whl.messagesystem.model.entity.User;
-
-import javax.servlet.http.HttpSession;
 
 /**
  * @author whl

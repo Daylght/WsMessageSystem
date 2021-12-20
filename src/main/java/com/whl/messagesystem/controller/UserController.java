@@ -3,7 +3,6 @@ package com.whl.messagesystem.controller;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.UserRegisterDto;
 import com.whl.messagesystem.model.dto.UserUpdateDto;
-import com.whl.messagesystem.model.entity.User;
 import com.whl.messagesystem.service.user.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +41,7 @@ public class UserController {
      * 删除用户
      */
     @DeleteMapping("/deleteUser/{name}")
-    public Result deleteUser(String userName) {
+    public Result deleteUser(@PathVariable("name") String userName) {
         return userService.deleteUser(userName);
     }
 

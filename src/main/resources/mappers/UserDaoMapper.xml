@@ -13,4 +13,10 @@
         SET username = #{userName}, password = #{password}, email = #{email}
         WHERE userid = #{userId}
     </update>
+
+    <update id="logicalDeleteAnUser">
+        UPDATE user
+        SET showstatus = 1
+        WHERE username = #{userName}
+    </update>
 </mapper>
