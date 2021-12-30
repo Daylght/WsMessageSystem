@@ -16,7 +16,7 @@ import javax.annotation.Resource;
  */
 @Configuration
 @EnableWebSocket
-public class WebsocketConfig implements WebSocketConfigurer {
+public class WebsocketConfiguration implements WebSocketConfigurer {
 
     @Resource
     private MessageServiceImpl messageService;

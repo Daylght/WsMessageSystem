@@ -4,19 +4,33 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.whl.messagesystem.dao.UserDao">
     <insert id="insertAnUser">
-        INSERT INTO user (username, password, email, role, showstatus)
-        VALUES (#{userName}, #{password}, #{email}, #{role}, #{showStatus})
+        INSERT INTO user (user_name, password, show_status)
+        VALUES (#{userName}, #{password}, 0)
     </insert>
 
-    <update id="updateAnUser">
+    <update id="updateUserNameAndPassword">
         UPDATE user
-        SET username = #{userName}, password = #{password}, email = #{email}
-        WHERE userid = #{userId}
+        SET user_name = #{userName}, password = #{password}
+        WHERE user_id = #{userId}
     </update>
 
     <update id="logicalDeleteAnUser">
         UPDATE user
-        SET showstatus = 1
-        WHERE username = #{userName}
+        SET show_status = 1
+        WHERE user_id = #{userId}
     </update>
+
+    <select id="getActiveUsersCountWithNameAndPassword" resultType="int">
+        SELECT count(*)
+        FROM user
+        WHERE user_name = #{userName}
+          AND password = #{password}
+          AND show_status = 0
+    </select>
+
+    <select id="getUserIdWithName" resultType="java.lang.String">
+        SELECT user_id
+        FROM user
+        WHERE user_name = #{userName}
+    </select>
 </mapper>

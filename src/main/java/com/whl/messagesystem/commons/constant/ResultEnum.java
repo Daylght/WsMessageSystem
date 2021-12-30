@@ -13,7 +13,7 @@ public enum ResultEnum {
     SUCCESS(0,"成功"),
     ERROR(1,"失败");
 
-    private final Integer status;
+    private final int status;
     private final String msg;
 
     ResultEnum(int status, String msg) {
@@ -21,7 +21,7 @@ public enum ResultEnum {
         this.msg = msg;
     }
 
-    public Integer getStatus() {
+    public int getStatus() {
         return status;
     }
 

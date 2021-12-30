@@ -4,13 +4,10 @@ import lombok.Data;
 
 /**
  * @author whl
- * @date 2021/12/21 21:50
+ * @date 2021/12/29 15:07
  */
 @Data
-public class Group {
+public class GroupAdmin {
     private String groupId;
-    private String groupName;
-    private int maxCount;
     private String adminId;
-    private String creatorId;
 }

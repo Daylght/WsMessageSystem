@@ -1,5 +1,6 @@
 package com.whl.messagesystem.service.user;
 
+import com.whl.messagesystem.commons.constant.UserConstant;
 import com.whl.messagesystem.commons.utils.ResultUtil;
 import com.whl.messagesystem.dao.UserDao;
 import com.whl.messagesystem.model.Result;
@@ -7,9 +8,11 @@ import com.whl.messagesystem.model.dto.UserRegisterDto;
 import com.whl.messagesystem.model.dto.UserUpdateDto;
 import com.whl.messagesystem.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 import javax.xml.bind.ValidationException;
 import java.sql.SQLException;
 
@@ -26,18 +29,18 @@ public class UserServiceImpl implements UserService {
 
     /**
      * 新用户注册
-     *
-     * @param userRegisterDto 用户注册所需信息
      */
     @Override
-    public Result register(UserRegisterDto userRegisterDto) {
+    public Result register(String userName, String password) {
         try {
-            if (userRegisterDto == null) {
+            if (StringUtils.isAnyBlank(userName, password)) {
                 throw new ValidationException("参数为空");
             }
 
-            User user = new User(userRegisterDto);
-            log.info("新用户信息: {}", user);
+            User user = new User();
+            user.setUserName(userName);
+            user.setPassword(password);
+            log.info("要插入的用户信息为: {}", user);
             if (userDao.insertAnUser(user)) {
                 return ResultUtil.success();
             }
@@ -50,18 +53,23 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
-     * 更新用户信息
+     * 更新用户名、密码
      */
     @Override
-    public Result updateUserInfo(UserUpdateDto userUpdateDto) {
+    public Result updateUserNameAndPassword(String userId, String userName, String password, HttpSession session) {
         try {
-            if (userUpdateDto == null) {
+            if (StringUtils.isAnyBlank(userId, userName, password)) {
                 throw new ValidationException("参数为空");
             }
 
-            log.info("更新的用户信息: {}", userUpdateDto);
-            User user = new User(userUpdateDto);
-            if (userDao.updateAnUser(user)) {
+            User user = new User();
+            user.setUserId(userId);
+            user.setUserName(userName);
+            user.setPassword(password);
+            log.info("更新的用户信息: {}", user);
+            if (userDao.updateUserNameAndPassword(user)) {
+                // 更新会话
+                session.setAttribute(UserConstant.USER, user);
                 return ResultUtil.success();
             }
 
@@ -75,17 +83,17 @@ public class UserServiceImpl implements UserService {
     /**
      * 删除用户
      *
-     * @param userName 用户名
+     * @param userId 用户id
      */
     @Override
-    public Result deleteUser(String userName) {
+    public Result deleteUser(String userId) {
         try {
-            if (userName == null) {
+            if (StringUtils.isAnyBlank(userId)) {
                 throw new ValidationException("参数为空");
             }
 
-            log.info("删除的用户名为: {}", userName);
-            if (userDao.logicalDeleteAnUser(userName)) {
+            log.info("删除的用户id为: {}", userId);
+            if (userDao.logicalDeleteAnUser(userId)) {
                 return ResultUtil.success();
             }
 

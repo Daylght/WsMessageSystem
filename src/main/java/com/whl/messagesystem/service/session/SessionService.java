@@ -20,12 +20,7 @@ public interface SessionService {
     /**
      * 用户登录
      */
-    Result login(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response);
-
-    /**
-     * 更新会话信息
-     */
-    Result updateSession(HttpSession session);
+    Result userLogin(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response);
 
     /**
      * 登出，销毁当前会话

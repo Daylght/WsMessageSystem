@@ -3,6 +3,7 @@ package com.whl.messagesystem.controller;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.LoginDto;
 import com.whl.messagesystem.service.session.SessionService;
+import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -25,6 +26,7 @@ public class SessionController {
      * 获取当前会话的信息
      * (当前用户基本信息、所在分组等)
      */
+    @ApiOperation("获取当前会话的信息")
     @GetMapping("/getSessionInfo")
     public Result sessionInfo(HttpSession session) {
         return sessionService.getSessionInfo(session);
@@ -33,22 +35,16 @@ public class SessionController {
     /**
      * 用户登录
      */
-    @PostMapping("/login")
-    public Result login(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
-        return sessionService.login(loginDto, request, response);
-    }
-
-    /**
-     * 更新会话信息
-     */
-    @PutMapping("/updateSession")
-    public Result updateSession(HttpSession session) {
-        return sessionService.updateSession(session);
+    @ApiOperation("用户登录")
+    @PostMapping("/userLogin")
+    public Result userLogin(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
+        return sessionService.userLogin(loginDto, request, response);
     }
 
     /**
      * 登出，销毁当前会话
      */
+    @ApiOperation("登出，销毁当前会话")
     @DeleteMapping("/logout")
     public Result logout(HttpSession session) {
         return sessionService.logout(session);
@@ -57,6 +53,7 @@ public class SessionController {
     /**
      * 生成验证码
      */
+    @ApiOperation("生成验证码")
     @GetMapping("/getVerifyCode")
     public void verifyCode(HttpServletRequest request, HttpServletResponse response) {
         sessionService.generateVerifyCode(request, response);

@@ -6,7 +6,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     username: root
-    password: root
-    url: jdbc:mysql://localhost:3306/WsMS?serverTimezone=UTC
+    password: Wang147896321.
+    url: jdbc:mysql://47.108.139.22:3306/WsMS?serverTimezone=UTC
 mybatis:
   mapper-locations: classpath:mappers/*xml

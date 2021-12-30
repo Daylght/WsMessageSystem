@@ -3,12 +3,14 @@ package com.whl.messagesystem.model.entity;
 import com.whl.messagesystem.model.dto.UserRegisterDto;
 import com.whl.messagesystem.model.dto.UserUpdateDto;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 /**
  * @author whl
  * @date 2021/12/7 17:05
  */
+@NoArgsConstructor
 @Data
 public class User {
     /**
@@ -23,15 +25,11 @@ public class User {
     private String userId;
     private String userName;
     private String password;
-    private String email;
-    private String role;
-    private Integer showStatus;
+    private int showStatus;
 
     public User(UserRegisterDto userRegisterDto) {
         userName = userRegisterDto.getUserName();
         password = userRegisterDto.getPassword();
-        email = userRegisterDto.getEmail();
-        role = userRegisterDto.getRole();
         showStatus = 0;
     }
 
@@ -39,6 +37,5 @@ public class User {
         userId = userUpdateDto.getUserId();
         userName = userUpdateDto.getUserName();
         password = userUpdateDto.getPassword();
-        email = userUpdateDto.getEmail();
     }
 }

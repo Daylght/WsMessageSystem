@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class LoginDto {
-    private String userId;
+    private String userName;
     private String password;
     private String serverCode;
 }
