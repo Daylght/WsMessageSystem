@@ -2,6 +2,9 @@ package com.whl.messagesystem.dao;
 
 import com.whl.messagesystem.model.entity.User;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.math.BigInteger;
 
 /**
  * @author whl
@@ -24,12 +27,19 @@ public interface UserDao {
     /**
      * 逻辑删除一个用户，即把user表中某条记录的showStatus置为1
      */
-    Boolean logicalDeleteAnUser(String userId);
+    Boolean logicalDeleteAnUser(int userId);
 
     /**
      * 在user表中根据userName和password查找表中能与之对应的未被删除的学生数量
+     * 这个方法在登录中使用
      */
-    int getActiveUsersCountWithNameAndPassword(String userName, String password);
+    int getActiveUsersCountWithNameAndPassword(@Param("userName") String userName, @Param("password") String password);
 
     String getUserIdWithName(String userName);
+
+    /**
+     * 在user表中根据userName查找表中能与之对应的学生数量
+     * 这个方法在注册中使用
+     */
+    int getUserCountByUserName(String userName);
 }

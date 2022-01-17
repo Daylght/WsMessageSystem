@@ -49,7 +49,8 @@ public class SessionServiceImpl implements SessionService {
     }
 
     /**
-     * 用户登录
+     * 用户登录<br>
+     * 需要注意，这个方法只会查询出未被逻辑删除的用户，即是说show_status为1的是无法登录成功的
      */
     @Override
     public Result userLogin(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
@@ -73,6 +74,7 @@ public class SessionServiceImpl implements SessionService {
                 String password = loginDto.getPassword();
 
                 if (userDao.getActiveUsersCountWithNameAndPassword(userName, password) == 1) {
+                    System.out.println(1);
                     User user = new User();
                     user.setUserId(userDao.getUserIdWithName(userName));
                     user.setUserName(userName);

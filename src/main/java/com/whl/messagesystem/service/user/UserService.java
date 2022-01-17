@@ -24,6 +24,6 @@ public interface UserService {
     /**
      * 删除用户
      */
-    Result deleteUser(String userId);
+    Result deleteUser(int userId);
 
 }

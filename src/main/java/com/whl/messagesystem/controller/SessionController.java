@@ -3,6 +3,8 @@ package com.whl.messagesystem.controller;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.LoginDto;
 import com.whl.messagesystem.service.session.SessionService;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,7 +39,7 @@ public class SessionController {
      */
     @ApiOperation("用户登录")
     @PostMapping("/userLogin")
-    public Result userLogin(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
+    public Result userLogin(@RequestBody LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
         return sessionService.userLogin(loginDto, request, response);
     }
 

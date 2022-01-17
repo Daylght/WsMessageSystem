@@ -10,7 +10,8 @@
 
     <update id="updateUserNameAndPassword">
         UPDATE user
-        SET user_name = #{userName}, password = #{password}
+        SET user_name = #{userName},
+            password  = #{password}
         WHERE user_id = #{userId}
     </update>
 
@@ -32,5 +33,11 @@
         SELECT user_id
         FROM user
         WHERE user_name = #{userName}
+    </select>
+
+    <select id="getUserCountByUserName" resultType="java.lang.Integer">
+        select count(*)
+        from user
+        where user_name = #{userName}
     </select>
 </mapper>

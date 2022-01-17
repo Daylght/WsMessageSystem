@@ -9,9 +9,11 @@ public enum ResultEnum {
      * 状态码
      * 0----成功
      * 1----失败
+     * 2----用户已存在
      */
-    SUCCESS(0,"成功"),
-    ERROR(1,"失败");
+    SUCCESS(0, "成功"),
+    ERROR(1, "失败"),
+    USER_EXIST(2, "用户已存在");
 
     private final int status;
     private final String msg;

@@ -37,6 +37,14 @@ public class ResultUtil {
         return result;
     }
 
+    public static Result userExist() {
+        Result<Object> result = new Result<>();
+        result.setStatus(ResultEnum.USER_EXIST.getStatus());
+        result.setMessage(ResultEnum.USER_EXIST.getMsg());
+        result.setData(null);
+        return result;
+    }
+
     public static Result error() {
         return error(ResultEnum.ERROR.getStatus(), ResultEnum.ERROR.getMsg());
     }

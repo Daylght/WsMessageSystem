@@ -4,8 +4,6 @@ import com.whl.messagesystem.commons.constant.UserConstant;
 import com.whl.messagesystem.commons.utils.ResultUtil;
 import com.whl.messagesystem.dao.UserDao;
 import com.whl.messagesystem.model.Result;
-import com.whl.messagesystem.model.dto.UserRegisterDto;
-import com.whl.messagesystem.model.dto.UserUpdateDto;
 import com.whl.messagesystem.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -14,6 +12,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import javax.xml.bind.ValidationException;
+import java.math.BigInteger;
 import java.sql.SQLException;
 
 /**
@@ -41,7 +40,14 @@ public class UserServiceImpl implements UserService {
             user.setUserName(userName);
             user.setPassword(password);
             log.info("要插入的用户信息为: {}", user);
+
+            if (userDao.getUserCountByUserName(userName) > 0) {
+                log.error("用户已存在");
+                return ResultUtil.userExist();
+            }
+
             if (userDao.insertAnUser(user)) {
+                log.info("用户注册成功");
                 return ResultUtil.success();
             }
 
@@ -86,9 +92,9 @@ public class UserServiceImpl implements UserService {
      * @param userId 用户id
      */
     @Override
-    public Result deleteUser(String userId) {
+    public Result deleteUser(int userId) {
         try {
-            if (StringUtils.isAnyBlank(userId)) {
+            if (userId == 0) {
                 throw new ValidationException("参数为空");
             }
 
