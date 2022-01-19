@@ -1,8 +1,7 @@
 package com.whl.messagesystem.service.user;
 
 import com.whl.messagesystem.model.Result;
-import com.whl.messagesystem.model.dto.UserRegisterDto;
-import com.whl.messagesystem.model.dto.UserUpdateDto;
+import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpSession;
 
@@ -14,16 +13,20 @@ public interface UserService {
     /**
      * 新用户注册
      */
-    Result register(String userName, String password);
+    ResponseEntity<Result> register(String userName, String password);
 
     /**
      * 更新用户名、密码
      */
-    Result updateUserNameAndPassword(String userId, String userName, String password, HttpSession session);
+    ResponseEntity<Result> updateUserNameAndPassword(String userId, String userName, String password, HttpSession session);
 
     /**
-     * 删除用户
+     * 逻辑删除用户
      */
-    Result deleteUser(int userId);
+    ResponseEntity<Result> logicalDeleteUser(int userId);
 
+    /**
+     * 永久删除用户
+     */
+    ResponseEntity<Result> completelyDeleteUser(int userId);
 }

@@ -13,7 +13,8 @@ public enum ResultEnum {
      */
     SUCCESS(0, "成功"),
     ERROR(1, "失败"),
-    USER_EXIST(2, "用户已存在");
+    USER_EXIST(2, "用户已存在"),
+    NOT_LOGIN(3, "用户未登录");
 
     private final int status;
     private final String msg;

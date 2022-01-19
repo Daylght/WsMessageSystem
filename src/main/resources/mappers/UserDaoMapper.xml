@@ -3,6 +3,14 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.whl.messagesystem.dao.UserDao">
+
+    <resultMap id="userMap" type="com.whl.messagesystem.model.entity.User">
+        <id property="userId" column="user_id"/>
+        <result property="userName" column="user_name"/>
+        <result property="password" column="password"/>
+        <result property="showStatus" column="show_status"/>
+    </resultMap>
+
     <insert id="insertAnUser">
         INSERT INTO user (user_name, password, show_status)
         VALUES (#{userName}, #{password}, 0)
@@ -20,6 +28,12 @@
         SET show_status = 1
         WHERE user_id = #{userId}
     </update>
+
+    <delete id="completelyDeleteAnUser">
+        delete
+        from user
+        where user_id = #{userId}
+    </delete>
 
     <select id="getActiveUsersCountWithNameAndPassword" resultType="int">
         SELECT count(*)
@@ -39,5 +53,12 @@
         select count(*)
         from user
         where user_name = #{userName}
+    </select>
+
+    <select id="getActiveUserWithName" resultMap="userMap">
+        select user_id, user_name, password, show_status
+        from user
+        where user_name = #{userName}
+          and show_status = 0
     </select>
 </mapper>

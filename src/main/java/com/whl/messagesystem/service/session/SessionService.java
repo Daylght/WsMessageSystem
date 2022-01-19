@@ -2,6 +2,7 @@ package com.whl.messagesystem.service.session;
 
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.LoginDto;
+import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -15,17 +16,17 @@ public interface SessionService {
     /**
      * 获取当前会话的信息
      */
-    Result getSessionInfo(HttpSession session);
+    ResponseEntity<Result> getSessionInfo(HttpSession session);
 
     /**
      * 用户登录
      */
-    Result userLogin(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response);
+    ResponseEntity<Result> userLogin(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response);
 
     /**
      * 登出，销毁当前会话
      */
-    Result logout(HttpSession session);
+    ResponseEntity<Result> logout(HttpSession session);
 
     /**
      * 生成验证码并返回图片

@@ -42,4 +42,14 @@ public interface UserDao {
      * 这个方法在注册中使用
      */
     int getUserCountByUserName(String userName);
+
+    /**
+     * 在user表中根据userName查找表中能与之对应的未被删除的学生信息
+     */
+    User getActiveUserWithName(String userName);
+
+    /**
+     * 根据userId删除一条user记录
+     */
+    boolean completelyDeleteAnUser(int userId);
 }

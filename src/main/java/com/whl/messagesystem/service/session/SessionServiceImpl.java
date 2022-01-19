@@ -1,6 +1,7 @@
 package com.whl.messagesystem.service.session;
 
 import com.whl.messagesystem.commons.constant.LoginResultConstant;
+import com.whl.messagesystem.commons.constant.ResultEnum;
 import com.whl.messagesystem.commons.constant.UserConstant;
 import com.whl.messagesystem.commons.utils.ResultUtil;
 import com.whl.messagesystem.commons.utils.verifyCode.IVerifyCodeGen;
@@ -10,6 +11,8 @@ import com.whl.messagesystem.model.VerifyCode;
 import com.whl.messagesystem.model.dto.LoginDto;
 import com.whl.messagesystem.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -17,7 +20,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.sql.SQLException;
 
 /**
  * @author whl
@@ -37,14 +39,20 @@ public class SessionServiceImpl implements SessionService {
      * 获取当前会话的信息
      */
     @Override
-    public Result getSessionInfo(HttpSession session) {
+    public ResponseEntity<Result> getSessionInfo(HttpSession session) {
         try {
             User user = (User) session.getAttribute(UserConstant.USER);
             log.info("当前用户信息: {}", user);
-            return ResultUtil.success(user);
+
+            if (user == null) {
+                Result result = new Result(ResultEnum.ERROR.getStatus(), "用户未登录", null);
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(result);
+            }
+
+            return ResponseEntity.ok(ResultUtil.success(user));
         } catch (Exception e) {
             log.error("获取当前用户信息异常: {}", e.getMessage());
-            return ResultUtil.error();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
 
@@ -53,7 +61,7 @@ public class SessionServiceImpl implements SessionService {
      * 需要注意，这个方法只会查询出未被逻辑删除的用户，即是说show_status为1的是无法登录成功的
      */
     @Override
-    public Result userLogin(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Result> userLogin(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
         try {
             HttpSession session = request.getSession();
 
@@ -64,7 +72,9 @@ public class SessionServiceImpl implements SessionService {
             String sessionVerifyCode = (String) session.getAttribute("VerifyCode");
             sessionVerifyCode = sessionVerifyCode.toLowerCase();
             if (!loginDto.getServerCode().toLowerCase().equals(sessionVerifyCode)) {
-                return new Result(LoginResultConstant.WRONG_VERIFYCODE.getCode(), LoginResultConstant.WRONG_VERIFYCODE.getMessage(), null);
+                log.error("验证码错误");
+                Result result = new Result(LoginResultConstant.WRONG_VERIFYCODE.getCode(), LoginResultConstant.WRONG_VERIFYCODE.getMessage(), null);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
             } else {
 
                 /*
@@ -73,21 +83,28 @@ public class SessionServiceImpl implements SessionService {
                 String userName = loginDto.getUserName();
                 String password = loginDto.getPassword();
 
-                if (userDao.getActiveUsersCountWithNameAndPassword(userName, password) == 1) {
-                    System.out.println(1);
-                    User user = new User();
-                    user.setUserId(userDao.getUserIdWithName(userName));
-                    user.setUserName(userName);
-                    user.setPassword(password);
-                    session.setAttribute(UserConstant.USER, user);
-                    return ResultUtil.success();
+                User user = userDao.getActiveUserWithName(userName);
+
+                if (user != null) {
+
+                    if (user.getPassword().equals(password)) {
+                        log.info("用户名、密码校验通过");
+                        session.setAttribute(UserConstant.USER, user);
+                        return ResponseEntity.ok(ResultUtil.success());
+                    } else {
+                        log.error("密码错误");
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Result(ResultEnum.ERROR.getStatus(), "密码错误", null));
+                    }
+
+                } else {
+                    log.error("用户不存在");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Result(ResultEnum.ERROR.getStatus(), "用户不存在", null));
                 }
 
-                throw new SQLException("该用户不存在");
             }
         } catch (Exception e) {
             log.error("登录异常: {}", e.getMessage());
-            return ResultUtil.error();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
 
@@ -95,14 +112,14 @@ public class SessionServiceImpl implements SessionService {
      * 登出，销毁当前会话
      */
     @Override
-    public Result logout(HttpSession session) {
+    public ResponseEntity<Result> logout(HttpSession session) {
         try {
             session.removeAttribute(UserConstant.USER);
             log.info("当前用户登出成功");
-            return ResultUtil.success();
+            return ResponseEntity.ok(ResultUtil.success());
         } catch (Exception e) {
             log.error("登出异常: {}", e.getMessage());
-            return ResultUtil.error();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
 

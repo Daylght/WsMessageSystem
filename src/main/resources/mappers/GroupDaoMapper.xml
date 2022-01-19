@@ -3,9 +3,42 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.whl.messagesystem.dao.GroupDao">
-    <select id="findGroupByGroupName" resultType="com.whl.messagesystem.model.entity.Group">
-        SELECT groupname, adminid, membercount
-        FROM group
-        WHERE groupname = #{groupName}
+
+    <resultMap id="groupMap" type="com.whl.messagesystem.model.entity.Group">
+        <id column="group_id" property="groupId"/>
+        <result column="group_name" property="groupName"/>
+        <result column="max_count" property="maxCount"/>
+        <result column="admin_id" property="adminId"/>
+        <result column="creator_id" property="creatorId"/>
+    </resultMap>
+
+    <insert id="insertAGroup">
+        insert into `group` (group_name, max_count, admin_id, creator_id)
+        VALUES (#{groupName}, #{maxCount}, #{adminId}, #{creatorId})
+    </insert>
+
+    <update id="updateGroup">
+        update `group`
+        set group_name=#{group.groupName} and max_count = #{group.maxCount} and admin_id = #{group.adminId} and
+                       creator_id = #{group.creatorId}
+        where group_id = {group.groupId}
+    </update>
+
+    <delete id="deleteGroups">
+        delete from `group` where group_id in
+        <foreach collection="array" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="findGroupByGroupName" resultMap="groupMap">
+        select group_id, group_name, max_count, admin_id, creator_id
+        from `group`
+        where group_name = #{groupName}
+    </select>
+
+    <select id="selectAllGroups" resultType="com.whl.messagesystem.model.entity.Group">
+        select group_id, group_name, max_count, admin_id, creator_id
+        from `group`
     </select>
 </mapper>

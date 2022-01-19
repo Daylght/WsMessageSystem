@@ -5,10 +5,9 @@ import com.whl.messagesystem.model.dto.RegisterDto;
 import com.whl.messagesystem.model.dto.UserInfo;
 import com.whl.messagesystem.service.user.UserService;
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiImplicitParams;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -32,7 +31,7 @@ public class UserController {
      */
     @ApiOperation("注册新用户")
     @PostMapping("/register")
-    public Result register(@RequestBody RegisterDto registerDto) {
+    public ResponseEntity<Result> register(@RequestBody RegisterDto registerDto) {
         return userService.register(registerDto.getUserName(), registerDto.getPassword());
     }
 
@@ -41,7 +40,7 @@ public class UserController {
      */
     @ApiOperation("更新用户名、密码")
     @PutMapping("/updateNameAndPassword")
-    public Result updateUserNameAndPassword(@RequestBody UserInfo userInfo, HttpSession session) {
+    public ResponseEntity<Result> updateUserNameAndPassword(@RequestBody UserInfo userInfo, HttpSession session) {
         return userService.updateUserNameAndPassword(userInfo.getUserId(), userInfo.getUserName(), userInfo.getPassword(), session);
     }
 
@@ -49,9 +48,15 @@ public class UserController {
      * 逻辑删除用户
      */
     @ApiOperation("逻辑删除用户")
-    @DeleteMapping("/deleteUser")
-    public Result logicalDeleteUser(@RequestBody int userId) {
-        return userService.deleteUser(userId);
+    @DeleteMapping("/logicalDeleteUser")
+    public ResponseEntity<Result> logicalDeleteUser(@RequestBody int userId) {
+        return userService.logicalDeleteUser(userId);
+    }
+
+    @ApiOperation("彻底删除用户")
+    @DeleteMapping("/completelyDeleteUser")
+    public ResponseEntity<Result> completelyDeleteUser(@RequestBody int userId) {
+        return userService.completelyDeleteUser(userId);
     }
 
 }
