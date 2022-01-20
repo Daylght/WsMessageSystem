@@ -27,7 +27,7 @@ public class SessionController {
      * 获取当前会话的信息
      * (当前用户基本信息、所在分组等)
      */
-    @ApiOperation("获取当前会话的信息")
+    @ApiOperation("获取当前会话的信息(用户)")
     @GetMapping("/getSessionInfo")
     public ResponseEntity<Result> sessionInfo(HttpSession session) {
         return sessionService.getSessionInfo(session);
@@ -36,7 +36,7 @@ public class SessionController {
     /**
      * 用户登录
      */
-    @ApiOperation("用户登录")
+    @ApiOperation("用户登录(用户)")
     @PostMapping("/userLogin")
     public ResponseEntity<Result> userLogin(@RequestBody LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
         return sessionService.userLogin(loginDto, request, response);
@@ -45,7 +45,7 @@ public class SessionController {
     /**
      * 登出，销毁当前会话
      */
-    @ApiOperation("登出，销毁当前会话")
+    @ApiOperation("登出，销毁当前会话(用户)")
     @DeleteMapping("/logout")
     public ResponseEntity<Result> logout(HttpSession session) {
         return sessionService.logout(session);
@@ -54,7 +54,7 @@ public class SessionController {
     /**
      * 生成验证码
      */
-    @ApiOperation("生成验证码")
+    @ApiOperation("生成验证码(用户)")
     @GetMapping("/getVerifyCode")
     public void verifyCode(HttpServletRequest request, HttpServletResponse response) {
         sessionService.generateVerifyCode(request, response);

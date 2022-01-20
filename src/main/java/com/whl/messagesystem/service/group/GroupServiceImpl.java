@@ -3,9 +3,11 @@ package com.whl.messagesystem.service.group;
 import com.whl.messagesystem.commons.constant.ResultEnum;
 import com.whl.messagesystem.commons.utils.ResultUtil;
 import com.whl.messagesystem.dao.GroupDao;
+import com.whl.messagesystem.dao.UserGroupDao;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.CreateGroupDto;
 import com.whl.messagesystem.model.entity.Group;
+import com.whl.messagesystem.model.entity.UserGroup;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -30,6 +32,9 @@ public class GroupServiceImpl implements GroupService {
 
     @Resource
     GroupDao groupDao;
+
+    @Resource
+    UserGroupDao userGroupDao;
 
     @Override
     public ResponseEntity<Result> getGroupsList() {
@@ -131,4 +136,25 @@ public class GroupServiceImpl implements GroupService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
+
+    @Override
+    public ResponseEntity<Result> joinGroup(UserGroup userGroup) {
+        try {
+            if (ObjectUtils.isEmpty(userGroup)) {
+                throw new ValidationException("参数为空");
+            }
+
+            // todo:未来这里要做websocket，通知加入分组的事件
+            if (userGroupDao.insertAnUserGroup(userGroup)) {
+                log.info("加入分组成功");
+                return ResponseEntity.ok(ResultUtil.success());
+            }
+
+            throw new SQLException("user_group表插入记录失败");
+        } catch (Exception e) {
+            log.error("加入分组失败: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
 }

@@ -29,7 +29,7 @@ public class UserController {
     /**
      * 注册新用户
      */
-    @ApiOperation("注册新用户")
+    @ApiOperation("注册新用户(用户)")
     @PostMapping("/register")
     public ResponseEntity<Result> register(@RequestBody RegisterDto registerDto) {
         return userService.register(registerDto.getUserName(), registerDto.getPassword());
@@ -38,7 +38,7 @@ public class UserController {
     /**
      * 更新用户名、密码
      */
-    @ApiOperation("更新用户名、密码")
+    @ApiOperation("更新用户名、密码(用户)")
     @PutMapping("/updateNameAndPassword")
     public ResponseEntity<Result> updateUserNameAndPassword(@RequestBody UserInfo userInfo, HttpSession session) {
         return userService.updateUserNameAndPassword(userInfo.getUserId(), userInfo.getUserName(), userInfo.getPassword(), session);
@@ -47,13 +47,16 @@ public class UserController {
     /**
      * 逻辑删除用户
      */
-    @ApiOperation("逻辑删除用户")
+    @ApiOperation("逻辑删除用户(用户)")
     @DeleteMapping("/logicalDeleteUser")
     public ResponseEntity<Result> logicalDeleteUser(@RequestBody int userId) {
         return userService.logicalDeleteUser(userId);
     }
 
-    @ApiOperation("彻底删除用户")
+    /**
+     * 彻底删除用户
+     */
+    @ApiOperation("彻底删除用户(管理员)")
     @DeleteMapping("/completelyDeleteUser")
     public ResponseEntity<Result> completelyDeleteUser(@RequestBody int userId) {
         return userService.completelyDeleteUser(userId);

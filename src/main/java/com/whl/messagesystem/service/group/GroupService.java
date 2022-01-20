@@ -3,6 +3,7 @@ package com.whl.messagesystem.service.group;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.CreateGroupDto;
 import com.whl.messagesystem.model.entity.Group;
+import com.whl.messagesystem.model.entity.UserGroup;
 import org.springframework.http.ResponseEntity;
 
 /**
@@ -45,4 +46,11 @@ public interface GroupService {
      * @return
      */
     ResponseEntity<Result> updateGroupInfo(Group group);
+
+    /**
+     * 指定用户加入指定的组
+     * @param userGroup
+     * @return
+     */
+    ResponseEntity<Result> joinGroup(UserGroup userGroup);
 }

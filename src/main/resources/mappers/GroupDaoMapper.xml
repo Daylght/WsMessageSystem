@@ -37,7 +37,7 @@
         where group_name = #{groupName}
     </select>
 
-    <select id="selectAllGroups" resultType="com.whl.messagesystem.model.entity.Group">
+    <select id="selectAllGroups" resultMap="groupMap">
         select group_id, group_name, max_count, admin_id, creator_id
         from `group`
     </select>
