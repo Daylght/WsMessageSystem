@@ -6,6 +6,8 @@ import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.UserGroup;
 import org.springframework.http.ResponseEntity;
 
+import javax.servlet.http.HttpSession;
+
 /**
  * @author whl
  * @date 2021/12/21 22:02
@@ -52,5 +54,5 @@ public interface GroupService {
      * @param userGroup
      * @return
      */
-    ResponseEntity<Result> joinGroup(UserGroup userGroup);
+    ResponseEntity<Result> joinGroup(UserGroup userGroup, HttpSession session);
 }

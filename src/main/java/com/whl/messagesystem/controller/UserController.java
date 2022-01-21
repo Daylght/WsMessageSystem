@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.util.Arrays;
 
 /**
  * @author whl
@@ -49,8 +50,8 @@ public class UserController {
      */
     @ApiOperation("逻辑删除用户(用户)")
     @DeleteMapping("/logicalDeleteUser")
-    public ResponseEntity<Result> logicalDeleteUser(@RequestBody int userId) {
-        return userService.logicalDeleteUser(userId);
+    public ResponseEntity<Result> logicalDeleteUser(@RequestBody String userId) {
+        return userService.logicalDeleteUser(Integer.parseInt(userId));
     }
 
     /**
@@ -58,8 +59,17 @@ public class UserController {
      */
     @ApiOperation("彻底删除用户(管理员)")
     @DeleteMapping("/completelyDeleteUser")
-    public ResponseEntity<Result> completelyDeleteUser(@RequestBody int userId) {
-        return userService.completelyDeleteUser(userId);
+    public ResponseEntity<Result> completelyDeleteUser(@RequestBody String[] userIds) {
+        return userService.completelyDeleteUser(Arrays.stream(userIds).mapToInt(Integer::parseInt).toArray());
+    }
+
+    /**
+     * 恢复用户
+     */
+    @ApiOperation("恢复被逻辑删除的用户(管理员)")
+    @PutMapping("/recover")
+    public ResponseEntity<Result> recoverUser(@RequestBody String[] userIds) {
+        return userService.recoverUser(Arrays.stream(userIds).mapToInt(Integer::parseInt).toArray());
     }
 
 }

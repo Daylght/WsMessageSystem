@@ -6,6 +6,7 @@ import com.whl.messagesystem.dao.GroupDao;
 import com.whl.messagesystem.dao.UserGroupDao;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.CreateGroupDto;
+import com.whl.messagesystem.model.dto.SessionInfo;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.UserGroup;
 import lombok.extern.slf4j.Slf4j;
@@ -16,9 +17,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 import javax.xml.bind.ValidationException;
 import java.sql.SQLException;
 import java.util.List;
+
+import static com.whl.messagesystem.commons.constant.StringConstant.SESSION_INFO;
 
 /**
  * @author whl
@@ -138,7 +142,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResponseEntity<Result> joinGroup(UserGroup userGroup) {
+    public ResponseEntity<Result> joinGroup(UserGroup userGroup, HttpSession session) {
         try {
             if (ObjectUtils.isEmpty(userGroup)) {
                 throw new ValidationException("参数为空");
@@ -146,6 +150,12 @@ public class GroupServiceImpl implements GroupService {
 
             // todo:未来这里要做websocket，通知加入分组的事件
             if (userGroupDao.insertAnUserGroup(userGroup)) {
+                Group group = groupDao.selectGroupByGroupId(Integer.parseInt(userGroup.getGroupId()));
+
+                SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+                sessionInfo.setGroup(group);
+                session.setAttribute(SESSION_INFO, sessionInfo);
+
                 log.info("加入分组成功");
                 return ResponseEntity.ok(ResultUtil.success());
             }

@@ -1,12 +1,13 @@
 package com.whl.messagesystem.service.user;
 
 import com.whl.messagesystem.commons.constant.ResultEnum;
-import com.whl.messagesystem.commons.constant.UserConstant;
 import com.whl.messagesystem.commons.utils.ResultUtil;
 import com.whl.messagesystem.dao.UserDao;
 import com.whl.messagesystem.model.Result;
+import com.whl.messagesystem.model.dto.SessionInfo;
 import com.whl.messagesystem.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,9 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import javax.xml.bind.ValidationException;
 import java.sql.SQLException;
+import java.util.Arrays;
+
+import static com.whl.messagesystem.commons.constant.StringConstant.SESSION_INFO;
 
 /**
  * @author whl
@@ -77,7 +81,10 @@ public class UserServiceImpl implements UserService {
             log.info("更新的用户信息: {}", user);
             if (userDao.updateUserNameAndPassword(user)) {
                 // 更新会话
-                session.setAttribute(UserConstant.USER, user);
+                SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+                sessionInfo.setUser(user);
+                session.setAttribute(SESSION_INFO, sessionInfo);
+
                 return ResponseEntity.ok(ResultUtil.success());
             }
 
@@ -115,25 +122,43 @@ public class UserServiceImpl implements UserService {
     /**
      * 永久删除用户
      *
-     * @param userId
+     * @param userIds
      */
     @Override
-    public ResponseEntity<Result> completelyDeleteUser(int userId) {
+    public ResponseEntity<Result> completelyDeleteUser(int[] userIds) {
         try {
-            if (userId == 0) {
+            if (ArrayUtils.isEmpty(userIds)) {
                 throw new ValidationException("参数为空");
             }
 
-            log.info("永久删除的用户id为: {}", userId);
-            if (userDao.completelyDeleteAnUser(userId)) {
+            log.info("永久删除的用户id为: {}", Arrays.toString(userIds));
+            if (userDao.completelyDeleteUsers(userIds)) {
                 return ResponseEntity.ok(ResultUtil.success());
             }
 
             throw new SQLException("user表永久删除用户失败");
         } catch (Exception e) {
-            log.error("永久删除用户失败: {}",e.getMessage());
+            log.error("永久删除用户失败: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
 
+    @Override
+    public ResponseEntity<Result> recoverUser(int[] userIds) {
+        try {
+            if (ArrayUtils.isEmpty(userIds)) {
+                throw new ValidationException("参数为空");
+            }
+
+            log.info("恢复的用户id为: {}", Arrays.toString(userIds));
+            if (userDao.recoverUsers(userIds)) {
+                return ResponseEntity.ok(ResultUtil.success());
+            }
+
+            throw new SQLException("user表恢复用户失败");
+        } catch (Exception e) {
+            log.error("恢复用户失败: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
 }

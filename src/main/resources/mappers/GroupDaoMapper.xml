@@ -21,7 +21,7 @@
         update `group`
         set group_name=#{group.groupName} and max_count = #{group.maxCount} and admin_id = #{group.adminId} and
                        creator_id = #{group.creatorId}
-        where group_id = {group.groupId}
+        where group_id = #{group.groupId}
     </update>
 
     <delete id="deleteGroups">
@@ -40,5 +40,18 @@
     <select id="selectAllGroups" resultMap="groupMap">
         select group_id, group_name, max_count, admin_id, creator_id
         from `group`
+    </select>
+
+    <select id="selectGroupByGroupId" resultMap="groupMap">
+        select group_id, group_name, max_count, admin_id, creator_id
+        from `group`
+        where group_id = #{groupId}
+    </select>
+
+    <select id="selectGroupByUserId" resultMap="groupMap">
+        select group_id, group_name, max_count, admin_id, creator_id
+        from `group`
+                 left join user_group ug on `group`.group_id = ug.group_id
+        where user_id = #{userId}
     </select>
 </mapper>

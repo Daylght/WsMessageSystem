@@ -4,8 +4,6 @@ import com.whl.messagesystem.model.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.math.BigInteger;
-
 /**
  * @author whl
  * @date 2021/12/7 23:14
@@ -49,7 +47,12 @@ public interface UserDao {
     User getActiveUserWithName(String userName);
 
     /**
-     * 根据userId删除一条user记录
+     * 根据userIds批量删除user记录
      */
-    boolean completelyDeleteAnUser(int userId);
+    boolean completelyDeleteUsers(int[] userIds);
+
+    /**
+     * 把指定userIds的记录的show_status批量置为0
+     */
+    boolean recoverUsers(int[] userIds);
 }

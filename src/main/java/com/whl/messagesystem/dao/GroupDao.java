@@ -20,6 +20,13 @@ public interface GroupDao {
     Group findGroupByGroupName(String groupName);
 
     /**
+     * 根据组id在group表中查找一条记录
+     * @param groupId
+     * @return
+     */
+    Group selectGroupByGroupId(int groupId);
+
+    /**
      * 插入一条组记录
      * @param groupName
      * @param creatorId
@@ -48,4 +55,11 @@ public interface GroupDao {
      * @return
      */
     int updateGroup(Group group);
+
+    /**
+     * 根据userId查询用户所在的组
+     * @param userId
+     * @return
+     */
+    Group selectGroupByUserId(int userId);
 }

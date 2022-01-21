@@ -2,13 +2,15 @@ package com.whl.messagesystem.service.session;
 
 import com.whl.messagesystem.commons.constant.LoginResultConstant;
 import com.whl.messagesystem.commons.constant.ResultEnum;
-import com.whl.messagesystem.commons.constant.UserConstant;
 import com.whl.messagesystem.commons.utils.ResultUtil;
 import com.whl.messagesystem.commons.utils.verifyCode.IVerifyCodeGen;
+import com.whl.messagesystem.dao.GroupDao;
 import com.whl.messagesystem.dao.UserDao;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.VerifyCode;
 import com.whl.messagesystem.model.dto.LoginDto;
+import com.whl.messagesystem.model.dto.SessionInfo;
+import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 
+import static com.whl.messagesystem.commons.constant.StringConstant.SESSION_INFO;
+
 /**
  * @author whl
  * @date 2021/12/7 18:47
@@ -30,10 +34,13 @@ import java.io.IOException;
 public class SessionServiceImpl implements SessionService {
 
     @Resource
-    IVerifyCodeGen iVerifyCodeGen;
+    private IVerifyCodeGen iVerifyCodeGen;
 
     @Resource
-    UserDao userDao;
+    private UserDao userDao;
+
+    @Resource
+    private GroupDao groupDao;
 
     /**
      * 获取当前会话的信息
@@ -41,15 +48,15 @@ public class SessionServiceImpl implements SessionService {
     @Override
     public ResponseEntity<Result> getSessionInfo(HttpSession session) {
         try {
-            User user = (User) session.getAttribute(UserConstant.USER);
-            log.info("当前用户信息: {}", user);
+            SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+            log.info("当前用户信息: {}", sessionInfo);
 
-            if (user == null) {
+            if (sessionInfo == null) {
                 Result result = new Result(ResultEnum.ERROR.getStatus(), "用户未登录", null);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(result);
             }
 
-            return ResponseEntity.ok(ResultUtil.success(user));
+            return ResponseEntity.ok(ResultUtil.success(sessionInfo));
         } catch (Exception e) {
             log.error("获取当前用户信息异常: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
@@ -66,7 +73,7 @@ public class SessionServiceImpl implements SessionService {
             HttpSession session = request.getSession();
 
             // 没太弄懂这行的作用，也许是在登录之前确保之前的账号已经被登出了
-            session.removeAttribute(UserConstant.USER);
+            session.removeAttribute(SESSION_INFO);
 
             // 判断用户输入的验证码是否正确
             String sessionVerifyCode = (String) session.getAttribute("VerifyCode");
@@ -89,7 +96,14 @@ public class SessionServiceImpl implements SessionService {
 
                     if (user.getPassword().equals(password)) {
                         log.info("用户名、密码校验通过");
-                        session.setAttribute(UserConstant.USER, user);
+
+                        Group group = groupDao.selectGroupByUserId(Integer.parseInt(user.getUserId()));
+
+                        SessionInfo sessionInfo = new SessionInfo();
+                        sessionInfo.setUser(user);
+                        sessionInfo.setGroup(group);
+                        session.setAttribute(SESSION_INFO, sessionInfo);
+
                         return ResponseEntity.ok(ResultUtil.success());
                     } else {
                         log.error("密码错误");
@@ -114,7 +128,7 @@ public class SessionServiceImpl implements SessionService {
     @Override
     public ResponseEntity<Result> logout(HttpSession session) {
         try {
-            session.removeAttribute(UserConstant.USER);
+            session.removeAttribute(SESSION_INFO);
             log.info("当前用户登出成功");
             return ResponseEntity.ok(ResultUtil.success());
         } catch (Exception e) {

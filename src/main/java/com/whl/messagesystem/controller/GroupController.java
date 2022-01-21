@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpSession;
 
 /**
  * @author whl
@@ -30,8 +31,8 @@ public class GroupController {
 
     @ApiOperation("加入分组(用户)")
     @PostMapping("/join")
-    public ResponseEntity<Result> joinGroup(@RequestBody UserGroup userGroup) {
-        return groupService.joinGroup(userGroup);
+    public ResponseEntity<Result> joinGroup(@RequestBody UserGroup userGroup, HttpSession session) {
+        return groupService.joinGroup(userGroup, session);
     }
 
     @ApiOperation("获取分组列表(用户)(管理员)")
