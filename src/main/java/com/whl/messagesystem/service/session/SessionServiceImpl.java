@@ -4,12 +4,14 @@ import com.whl.messagesystem.commons.constant.LoginResultConstant;
 import com.whl.messagesystem.commons.constant.ResultEnum;
 import com.whl.messagesystem.commons.utils.ResultUtil;
 import com.whl.messagesystem.commons.utils.verifyCode.IVerifyCodeGen;
+import com.whl.messagesystem.dao.AdminDao;
 import com.whl.messagesystem.dao.GroupDao;
 import com.whl.messagesystem.dao.UserDao;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.VerifyCode;
 import com.whl.messagesystem.model.dto.LoginDto;
 import com.whl.messagesystem.model.dto.SessionInfo;
+import com.whl.messagesystem.model.entity.Admin;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +43,9 @@ public class SessionServiceImpl implements SessionService {
 
     @Resource
     private GroupDao groupDao;
+
+    @Resource
+    private AdminDao adminDao;
 
     /**
      * 获取当前会话的信息
@@ -98,10 +103,12 @@ public class SessionServiceImpl implements SessionService {
                         log.info("用户名、密码校验通过");
 
                         Group group = groupDao.selectGroupByUserId(Integer.parseInt(user.getUserId()));
+                        Admin admin = adminDao.selectAdminByUserId(Integer.parseInt(user.getUserId()));
 
                         SessionInfo sessionInfo = new SessionInfo();
                         sessionInfo.setUser(user);
                         sessionInfo.setGroup(group);
+                        sessionInfo.setAdmin(admin);
                         session.setAttribute(SESSION_INFO, sessionInfo);
 
                         return ResponseEntity.ok(ResultUtil.success());

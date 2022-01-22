@@ -148,6 +148,11 @@ public class GroupServiceImpl implements GroupService {
                 throw new ValidationException("参数为空");
             }
 
+            if (userGroupDao.selectUserGroupCountByUserId(Integer.parseInt(userGroup.getUserId())) != 0) {
+                log.warn("该用户已经在分组内");
+                return ResponseEntity.ok(new Result(ResultEnum.ERROR.getStatus(), "该用户已经在分组内", null));
+            }
+
             // todo:未来这里要做websocket，通知加入分组的事件
             if (userGroupDao.insertAnUserGroup(userGroup)) {
                 Group group = groupDao.selectGroupByGroupId(Integer.parseInt(userGroup.getGroupId()));

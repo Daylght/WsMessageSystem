@@ -9,4 +9,10 @@
         values (#{userGroup.userId}, #{userGroup.groupId})
     </insert>
 
+    <select id="selectUserGroupCountByUserId" resultType="java.lang.Integer">
+        select count(*)
+        from user_group
+        where user_id = #{userId}
+    </select>
+
 </mapper>

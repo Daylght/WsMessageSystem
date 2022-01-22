@@ -49,9 +49,9 @@
     </select>
 
     <select id="selectGroupByUserId" resultMap="groupMap">
-        select group_id, group_name, max_count, admin_id, creator_id
-        from `group`
-                 left join user_group ug on `group`.group_id = ug.group_id
-        where user_id = #{userId}
+        select g.group_id, g.group_name, g.max_count, g.admin_id, g.creator_id
+        from `group` g
+                 left join user_group ug on g.group_id = ug.group_id
+        where ug.user_id = #{userId}
     </select>
 </mapper>

@@ -6,7 +6,6 @@ import com.whl.messagesystem.model.dto.UserInfo;
 import com.whl.messagesystem.service.user.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +18,6 @@ import java.util.Arrays;
  * @date 2021/12/7 15:29
  */
 @Api("用户")
-@Slf4j
 @RequestMapping("/user")
 @RestController
 public class UserController {
@@ -33,7 +31,7 @@ public class UserController {
     @ApiOperation("注册新用户(用户)")
     @PostMapping("/register")
     public ResponseEntity<Result> register(@RequestBody RegisterDto registerDto) {
-        return userService.register(registerDto.getUserName(), registerDto.getPassword());
+        return userService.register(registerDto.getUserName(), registerDto.getPassword(), registerDto.getAdminId());
     }
 
     /**

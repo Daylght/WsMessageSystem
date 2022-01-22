@@ -11,4 +11,11 @@ import org.apache.ibatis.annotations.Param;
 @Mapper
 public interface UserGroupDao {
     boolean insertAnUserGroup(@Param("userGroup") UserGroup userGroup);
+
+    /**
+     * 根据userId查询关系的数量
+     * @param userId
+     * @return
+     */
+    int selectUserGroupCountByUserId(int userId);
 }

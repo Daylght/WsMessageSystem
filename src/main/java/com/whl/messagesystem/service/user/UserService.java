@@ -13,7 +13,7 @@ public interface UserService {
     /**
      * 新用户注册
      */
-    ResponseEntity<Result> register(String userName, String password);
+    ResponseEntity<Result> register(String userName, String password, String adminId);
 
     /**
      * 更新用户名、密码

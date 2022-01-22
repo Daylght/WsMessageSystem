@@ -2,10 +2,12 @@ package com.whl.messagesystem.service.user;
 
 import com.whl.messagesystem.commons.constant.ResultEnum;
 import com.whl.messagesystem.commons.utils.ResultUtil;
+import com.whl.messagesystem.dao.UserAdminDao;
 import com.whl.messagesystem.dao.UserDao;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.SessionInfo;
 import com.whl.messagesystem.model.entity.User;
+import com.whl.messagesystem.model.entity.UserAdmin;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,13 +34,16 @@ public class UserServiceImpl implements UserService {
     @Resource
     UserDao userDao;
 
+    @Resource
+    UserAdminDao userAdminDao;
+
     /**
      * 新用户注册
      */
     @Override
-    public ResponseEntity<Result> register(String userName, String password) {
+    public ResponseEntity<Result> register(String userName, String password, String adminId) {
         try {
-            if (StringUtils.isAnyBlank(userName, password)) {
+            if (StringUtils.isAnyBlank(userName, password, adminId)) {
                 throw new ValidationException("参数为空");
             }
 
@@ -53,11 +58,15 @@ public class UserServiceImpl implements UserService {
             }
 
             if (userDao.insertAnUser(user)) {
-                log.info("用户注册成功");
-                return ResponseEntity.ok(ResultUtil.success());
+                String userId = userDao.getUserIdWithName(userName);
+                UserAdmin userAdmin = new UserAdmin(userId, adminId);
+                if (userAdminDao.insertAnUserAdmin(userAdmin)) {
+                    log.info("用户注册成功");
+                    return ResponseEntity.ok(ResultUtil.success());
+                }
             }
 
-            throw new SQLException("user表插入新用户失败");
+            throw new SQLException("user表插入新用户失败 || user_admin表插入关系失败");
         } catch (Exception e) {
             log.error("注册失败: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());

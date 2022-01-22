@@ -5,6 +5,7 @@ import com.whl.messagesystem.model.dto.CreateGroupDto;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.UserGroup;
 import com.whl.messagesystem.service.group.GroupService;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpSession;
  * @author whl
  * @date 2022/1/19 20:20
  */
+@Api("分组")
 @RestController
 @RequestMapping("/group")
 public class GroupController {
