@@ -9,12 +9,14 @@ import com.whl.messagesystem.model.dto.CreateGroupDto;
 import com.whl.messagesystem.model.dto.SessionInfo;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.UserGroup;
+import com.whl.messagesystem.model.vo.GroupVo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.socket.TextMessage;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
@@ -40,11 +42,12 @@ public class GroupServiceImpl implements GroupService {
     @Resource
     UserGroupDao userGroupDao;
 
+
     @Override
     public ResponseEntity<Result> getGroupsList() {
         try {
-            List<Group> groups = groupDao.selectAllGroups();
-            return ResponseEntity.ok(ResultUtil.success(groups));
+            List<GroupVo> groupVos = groupDao.selectAllGroupsAndCreators();
+            return ResponseEntity.ok(ResultUtil.success(groupVos));
         } catch (Exception e) {
             log.error("获取分组列表异常: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
@@ -88,11 +91,22 @@ public class GroupServiceImpl implements GroupService {
             }
 
             /*
+            然后判断当前用户是不是已经创建了组
+             */
+            if (groupDao.selectGroupCountByCreatorId(Integer.parseInt(creatorId)) > 0) {
+                log.warn("该用户已创建过分组");
+                return ResponseEntity.ok(new Result(ResultEnum.ERROR.getStatus(), "该用户已创建过分组", null));
+            }
+
+            /*
             如果未指定分组的人数上限，则默认为20
              */
             if (groupDao.insertAGroup(groupName, creatorId, adminId, maxCount == 0 ? DEFAULT_MEMBER_COUNT : maxCount)) {
                 // 查出本组的信息并传给前端
                 Group group = groupDao.findGroupByGroupName(groupName);
+
+
+
                 return ResponseEntity.ok(ResultUtil.success(group));
             }
 
@@ -160,6 +174,7 @@ public class GroupServiceImpl implements GroupService {
                 SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
                 sessionInfo.setGroup(group);
                 session.setAttribute(SESSION_INFO, sessionInfo);
+
 
                 log.info("加入分组成功");
                 return ResponseEntity.ok(ResultUtil.success());

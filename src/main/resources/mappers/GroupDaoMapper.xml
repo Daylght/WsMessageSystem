@@ -12,6 +12,16 @@
         <result column="creator_id" property="creatorId"/>
     </resultMap>
 
+    <resultMap id="groupVoMap" type="com.whl.messagesystem.model.vo.GroupVo">
+        <id column="group_id" property="groupId"/>
+        <result column="group_name" property="groupName"/>
+        <result column="max_count" property="maxCount"/>
+        <result column="admin_id" property="adminId"/>
+        <result column="admin_name" property="adminName"/>
+        <result column="creator_id" property="creatorId"/>
+        <result column="user_name" property="creatorName"/>
+    </resultMap>
+
     <insert id="insertAGroup">
         insert into `group` (group_name, max_count, admin_id, creator_id)
         VALUES (#{groupName}, #{maxCount}, #{adminId}, #{creatorId})
@@ -54,4 +64,21 @@
                  left join user_group ug on g.group_id = ug.group_id
         where ug.user_id = #{userId}
     </select>
+
+    <select id="selectAllGroupsAndCreators" resultMap="groupVoMap">
+        select group_id, group_name, max_count, `group`.admin_id, creator_id, user_name, admin_name
+        from `group`,
+             user,
+             admin
+        where `group`.creator_id = user.user_id
+          and `group`.admin_id = admin.admin_id
+    </select>
+
+    <select id="selectGroupCountByCreatorId" resultType="java.lang.Integer">
+        select count(*)
+        from `group`
+        where creator_id = #{creatorId}
+    </select>
+
+
 </mapper>
