@@ -6,4 +6,5 @@ package com.whl.messagesystem.commons.constant;
  */
 public class StringConstant {
     public static String SESSION_INFO = "sessionInfo";
+    public static String NO_GROUP = "NoGroup";
 }

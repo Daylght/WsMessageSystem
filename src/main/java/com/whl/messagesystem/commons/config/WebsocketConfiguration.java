@@ -29,7 +29,7 @@ public class WebsocketConfiguration implements WebSocketConfigurer {
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry){
-        //websocket地址 -> ws://localhost:8888/websocket?groupName=Xxx
+        //websocket地址 -> ws://localhost:8888/websocket?groupName=Xxx&adminId=Xxx
         registry.addHandler(websocketEndPoint,"/websocket")
                 .addInterceptors(handshakeInterceptorForWebSocket)
                 .setAllowedOrigins("*");

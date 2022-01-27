@@ -4,7 +4,9 @@ import com.whl.messagesystem.commons.constant.GroupConstant;
 import com.whl.messagesystem.commons.utils.ResultUtil;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.service.group.GroupService;
-import com.whl.messagesystem.service.user.UserService;
+
+import static com.whl.messagesystem.commons.constant.StringConstant.*;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -38,6 +40,8 @@ public class HandshakeInterceptorForWebSocket implements HandshakeInterceptor {
             final HttpServletRequest httpServletRequest = ((ServletServerHttpRequest) serverHttpRequest).getServletRequest();
             //获取指定的请求参数
             final String groupName = String.valueOf(httpServletRequest.getParameter(GroupConstant.GROUP_NAME));
+            final String adminId = String.valueOf(httpServletRequest.getParameter("adminId"));
+            log.info(adminId);
             //比赛校验是否存在
             /**
              * 下面这一块if用于处理groupName是错误的组名的情况（没有这个组）
@@ -55,6 +59,7 @@ public class HandshakeInterceptorForWebSocket implements HandshakeInterceptor {
             }
 
             map.put(GroupConstant.GROUP_NAME, groupName);
+            map.put("adminId", adminId);
 
             return true;
         } catch (Exception e) {

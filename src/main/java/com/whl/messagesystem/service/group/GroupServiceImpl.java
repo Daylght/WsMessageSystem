@@ -10,6 +10,7 @@ import com.whl.messagesystem.model.dto.SessionInfo;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.UserGroup;
 import com.whl.messagesystem.model.vo.GroupVo;
+import com.whl.messagesystem.service.message.WebsocketEndPoint;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -24,6 +25,7 @@ import javax.xml.bind.ValidationException;
 import java.sql.SQLException;
 import java.util.List;
 
+import static com.whl.messagesystem.commons.constant.StringConstant.NO_GROUP;
 import static com.whl.messagesystem.commons.constant.StringConstant.SESSION_INFO;
 
 /**
@@ -41,6 +43,9 @@ public class GroupServiceImpl implements GroupService {
 
     @Resource
     UserGroupDao userGroupDao;
+
+    @Resource
+    WebsocketEndPoint websocketEndPoint;
 
 
     @Override
@@ -105,7 +110,7 @@ public class GroupServiceImpl implements GroupService {
                 // 查出本组的信息并传给前端
                 Group group = groupDao.findGroupByGroupName(groupName);
 
-
+                websocketEndPoint.publish(NO_GROUP + adminId, new TextMessage("新分组创建成功: " + groupName));
 
                 return ResponseEntity.ok(ResultUtil.success(group));
             }
