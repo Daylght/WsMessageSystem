@@ -72,4 +72,10 @@
         where user_name = #{userName}
           and show_status = 0
     </select>
+
+    <select id="selectUserWithUserId" resultMap="userMap">
+        select user_id, user_name, password, show_status
+        from user
+        where user_id = #{userId}
+    </select>
 </mapper>

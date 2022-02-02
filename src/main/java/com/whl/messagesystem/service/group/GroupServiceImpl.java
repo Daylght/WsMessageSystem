@@ -1,8 +1,12 @@
 package com.whl.messagesystem.service.group;
 
+import com.alibaba.fastjson.JSONObject;
 import com.whl.messagesystem.commons.constant.ResultEnum;
 import com.whl.messagesystem.commons.utils.ResultUtil;
+import com.whl.messagesystem.commons.utils.WsResultUtil;
+import com.whl.messagesystem.dao.AdminDao;
 import com.whl.messagesystem.dao.GroupDao;
+import com.whl.messagesystem.dao.UserDao;
 import com.whl.messagesystem.dao.UserGroupDao;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.CreateGroupDto;
@@ -43,6 +47,12 @@ public class GroupServiceImpl implements GroupService {
 
     @Resource
     UserGroupDao userGroupDao;
+
+    @Resource
+    AdminDao adminDao;
+
+    @Resource
+    UserDao userDao;
 
     @Resource
     WebsocketEndPoint websocketEndPoint;
@@ -109,8 +119,13 @@ public class GroupServiceImpl implements GroupService {
             if (groupDao.insertAGroup(groupName, creatorId, adminId, maxCount == 0 ? DEFAULT_MEMBER_COUNT : maxCount)) {
                 // 查出本组的信息并传给前端
                 Group group = groupDao.findGroupByGroupName(groupName);
+                GroupVo groupVo = new GroupVo(group);
+                groupVo.setAdminName(adminDao.selectAdminByUserId(Integer.parseInt(creatorId)).getAdminName());
+                groupVo.setCreatorName(userDao.selectUserWithUserId(Integer.parseInt(creatorId)).getUserName());
 
-                websocketEndPoint.publish(NO_GROUP + adminId, new TextMessage("新分组创建成功: " + groupName));
+                String message = JSONObject.toJSONString(WsResultUtil.UpdateGroup(groupVo));
+
+                websocketEndPoint.publish(NO_GROUP + adminId, new TextMessage(message));
 
                 return ResponseEntity.ok(ResultUtil.success(group));
             }

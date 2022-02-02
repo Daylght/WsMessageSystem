@@ -55,4 +55,9 @@ public interface UserDao {
      * 把指定userIds的记录的show_status批量置为0
      */
     boolean recoverUsers(int[] userIds);
+
+    /**
+     * 根据指定的userId查询学生信息
+     */
+    User selectUserWithUserId(int userId);
 }
