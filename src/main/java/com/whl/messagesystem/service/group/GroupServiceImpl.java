@@ -123,8 +123,9 @@ public class GroupServiceImpl implements GroupService {
                 groupVo.setAdminName(adminDao.selectAdminByUserId(Integer.parseInt(creatorId)).getAdminName());
                 groupVo.setCreatorName(userDao.selectUserWithUserId(Integer.parseInt(creatorId)).getUserName());
 
-                String message = JSONObject.toJSONString(WsResultUtil.UpdateGroup(groupVo));
+                String message = JSONObject.toJSONString(WsResultUtil.createGroup(groupVo));
 
+                // 向大厅广播刚创建的分组的相关信息
                 websocketEndPoint.publish(NO_GROUP + adminId, new TextMessage(message));
 
                 return ResponseEntity.ok(ResultUtil.success(group));
@@ -138,7 +139,7 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResponseEntity<Result> remove(int[] groupIds) {
+    public ResponseEntity<Result> remove(int[] groupIds, HttpSession session) {
         try {
             if (ArrayUtils.isEmpty(groupIds)) {
                 throw new ValidationException("参数为空");
@@ -146,6 +147,14 @@ public class GroupServiceImpl implements GroupService {
 
             if (groupDao.deleteGroups(groupIds)) {
                 log.info("删除成功");
+
+                SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+                String adminId = sessionInfo.getAdmin().getAdminId();
+                String message = JSONObject.toJSONString(WsResultUtil.deleteGroup(groupIds));
+
+                // 向大厅广播被删除的分组id
+                websocketEndPoint.publish(NO_GROUP + adminId, new TextMessage(message));
+
                 return ResponseEntity.ok(ResultUtil.success());
             }
 

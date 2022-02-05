@@ -9,10 +9,18 @@ import com.whl.messagesystem.model.WebsocketResult;
  */
 public class WsResultUtil {
 
-    public static WebsocketResult<Object> UpdateGroup(Object data) {
+    public static WebsocketResult<Object> createGroup(Object data) {
         WebsocketResult<Object> websocketResult = new WebsocketResult<>();
         websocketResult.setType(WsResultEnum.CREATE_GROUP.getType());
         websocketResult.setMessage(WsResultEnum.CREATE_GROUP.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
+    public static WebsocketResult<Object> deleteGroup(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.DELETE_GROUP.getType());
+        websocketResult.setMessage(WsResultEnum.DELETE_GROUP.getMessage());
         websocketResult.setData(data);
         return websocketResult;
     }

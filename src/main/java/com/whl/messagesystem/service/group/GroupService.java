@@ -16,6 +16,7 @@ public interface GroupService {
 
     /**
      * 根据groupName判断组是否存在
+     *
      * @param groupName
      * @return
      */
@@ -23,6 +24,7 @@ public interface GroupService {
 
     /**
      * 创建一个新分组
+     *
      * @param createGroupDto
      * @return
      */
@@ -30,6 +32,7 @@ public interface GroupService {
 
     /**
      * 获取所有分组的列表
+     *
      * @return
      */
     ResponseEntity<Result> getGroupsList();
@@ -40,10 +43,11 @@ public interface GroupService {
      * @param groupIds
      * @return
      */
-    ResponseEntity<Result> remove(int[] groupIds);
+    ResponseEntity<Result> remove(int[] groupIds, HttpSession session);
 
     /**
      * 修改组的信息
+     *
      * @param group
      * @return
      */
@@ -51,6 +55,7 @@ public interface GroupService {
 
     /**
      * 指定用户加入指定的组
+     *
      * @param userGroup
      * @return
      */

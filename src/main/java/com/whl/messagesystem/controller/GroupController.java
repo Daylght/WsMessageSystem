@@ -45,8 +45,8 @@ public class GroupController {
 
     @ApiOperation("删除分组(用户)(管理员)")
     @DeleteMapping("/remove")
-    public ResponseEntity<Result> remove(@RequestBody int[] groupIds) {
-        return groupService.remove(groupIds);
+    public ResponseEntity<Result> remove(@RequestBody int[] groupIds, HttpSession session) {
+        return groupService.remove(groupIds, session);
     }
 
     @ApiOperation("修改分组信息(用户)(管理员)")
