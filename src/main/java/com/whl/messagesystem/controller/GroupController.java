@@ -55,4 +55,10 @@ public class GroupController {
         return groupService.updateGroupInfo(group);
     }
 
+    @ApiOperation("获取指定组的成员列表")
+    @GetMapping("/listMembers/{groupId}")
+    public ResponseEntity<Result> listGroupMembers(@PathVariable("groupId") String groupId, HttpSession session) {
+        return groupService.listGroupMembers(groupId, session);
+    }
+
 }

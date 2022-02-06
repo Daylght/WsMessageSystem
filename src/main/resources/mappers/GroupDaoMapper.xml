@@ -80,5 +80,12 @@
         where creator_id = #{creatorId}
     </select>
 
+    <select id="selectUsersWithGroupId" resultMap="com.whl.messagesystem.dao.UserDao.userMap">
+        select u.user_id, u.user_name
+        from user u
+                 left join user_group ug on u.user_id = ug.user_id
+        where ug.group_id = #{groupId}
+    </select>
+
 
 </mapper>

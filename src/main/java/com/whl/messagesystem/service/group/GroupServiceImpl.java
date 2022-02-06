@@ -12,12 +12,14 @@ import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.CreateGroupDto;
 import com.whl.messagesystem.model.dto.SessionInfo;
 import com.whl.messagesystem.model.entity.Group;
+import com.whl.messagesystem.model.entity.User;
 import com.whl.messagesystem.model.entity.UserGroup;
 import com.whl.messagesystem.model.vo.GroupVo;
 import com.whl.messagesystem.service.message.WebsocketEndPoint;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -27,7 +29,9 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import javax.xml.bind.ValidationException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.whl.messagesystem.commons.constant.StringConstant.NO_GROUP;
 import static com.whl.messagesystem.commons.constant.StringConstant.SESSION_INFO;
@@ -203,7 +207,15 @@ public class GroupServiceImpl implements GroupService {
                 SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
                 sessionInfo.setGroup(group);
                 session.setAttribute(SESSION_INFO, sessionInfo);
+                String userName = sessionInfo.getUser().getUserName();
 
+                Map<String, Object> data = new HashMap<>();
+                data.put("userName", userName);
+                data.put("userId", userGroup.getUserId());
+                data.put("groupId", userGroup.getGroupId());
+
+                String message = JSONObject.toJSONString(WsResultUtil.joinGroup(data));
+                websocketEndPoint.publish(group.getGroupName(), new TextMessage(message));
 
                 log.info("加入分组成功");
                 return ResponseEntity.ok(ResultUtil.success());
@@ -216,4 +228,28 @@ public class GroupServiceImpl implements GroupService {
         }
     }
 
+    @Override
+    public ResponseEntity<Result> listGroupMembers(String groupId, HttpSession session) {
+        try {
+            if (StringUtils.isEmpty(groupId)) {
+                throw new NullPointerException("参数为空");
+            }
+
+            List<User> groupMembersList = groupDao.selectUsersWithGroupId(Integer.parseInt(groupId));
+
+            SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+            int creatorId = Integer.parseInt(sessionInfo.getGroup().getCreatorId());
+            User creator = userDao.selectUserWithUserId(creatorId);
+            creator.setPassword(null);
+
+            Map<String, Object> groupMembersAndCreator = new HashMap<>(groupMembersList.size() + 1);
+            groupMembersAndCreator.put("creator", creator);
+            groupMembersAndCreator.put("members", groupMembersList);
+
+            return ResponseEntity.ok(ResultUtil.success(groupMembersAndCreator));
+        } catch (Exception e) {
+            log.error("获取组员列表失败: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
 }

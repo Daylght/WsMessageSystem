@@ -7,7 +7,8 @@ package com.whl.messagesystem.commons.constant;
 public enum WsResultEnum {
 
     CREATE_GROUP(1,"新增分组"),
-    DELETE_GROUP(2,"删除分组");
+    DELETE_GROUP(2,"删除分组"),
+    JOIN_GROUP(3,"加入分组");
 
     private int type;
     private String message;

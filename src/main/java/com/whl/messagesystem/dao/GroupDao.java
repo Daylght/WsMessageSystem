@@ -1,6 +1,7 @@
 package com.whl.messagesystem.dao;
 
 import com.whl.messagesystem.model.entity.Group;
+import com.whl.messagesystem.model.entity.User;
 import com.whl.messagesystem.model.vo.GroupVo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -76,4 +77,11 @@ public interface GroupDao {
      * @return
      */
     int selectGroupCountByCreatorId(int creatorId);
+
+    /**
+     * 根据组id查询组内的成员，以list形式返回
+     * @param groupId
+     * @return
+     */
+    List<User> selectUsersWithGroupId(int groupId);
 }

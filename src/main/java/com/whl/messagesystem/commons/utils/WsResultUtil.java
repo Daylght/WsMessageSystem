@@ -25,4 +25,12 @@ public class WsResultUtil {
         return websocketResult;
     }
 
+    public static WebsocketResult<Object> joinGroup(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.JOIN_GROUP.getType());
+        websocketResult.setMessage(WsResultEnum.JOIN_GROUP.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
 }

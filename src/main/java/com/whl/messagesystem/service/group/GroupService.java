@@ -60,4 +60,11 @@ public interface GroupService {
      * @return
      */
     ResponseEntity<Result> joinGroup(UserGroup userGroup, HttpSession session);
+
+    /**
+     * 根据指定组id获取组员列表
+     * @param groupId
+     * @return
+     */
+    ResponseEntity<Result> listGroupMembers(String groupId, HttpSession session);
 }
