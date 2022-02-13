@@ -24,4 +24,11 @@ public interface AdminDao {
      * @return
      */
     Admin selectAdminByUserId(int userId);
+
+    /**
+     * 在admin表中根据管理员id查找管理员信息
+     * @param adminName
+     * @return
+     */
+    Admin selectAdminByAdminName(String adminName);
 }

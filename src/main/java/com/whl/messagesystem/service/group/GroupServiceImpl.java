@@ -74,6 +74,21 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    public ResponseEntity<Result> getGroupsListByAdminId(String adminId) {
+        try {
+            if (StringUtils.isEmpty(adminId)) {
+                throw new NullPointerException("参数为空");
+            }
+
+            List<GroupVo> groupVos = groupDao.selectAllGroupsAndCreatorsByAdminId(Integer.parseInt(adminId));
+            return ResponseEntity.ok(ResultUtil.success(groupVos));
+        } catch (Exception e) {
+            log.error("获取分组列表异常: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    @Override
     public boolean isExistGroup(String groupName) {
         try {
             if (groupDao.findGroupByGroupName(groupName) != null) {
@@ -89,7 +104,7 @@ public class GroupServiceImpl implements GroupService {
 
 
     @Override
-    public ResponseEntity<Result> createGroup(CreateGroupDto createGroupDto) {
+    public ResponseEntity<Result> createGroup(CreateGroupDto createGroupDto, HttpSession session) {
         // todo:这个方法或许要加锁，看后序情况
         try {
             if (ObjectUtils.isEmpty(createGroupDto)) {
@@ -123,6 +138,8 @@ public class GroupServiceImpl implements GroupService {
             if (groupDao.insertAGroup(groupName, creatorId, adminId, maxCount == 0 ? DEFAULT_MEMBER_COUNT : maxCount)) {
                 // 查出本组的信息并传给前端
                 Group group = groupDao.findGroupByGroupName(groupName);
+                SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+                sessionInfo.setGroup(group);
                 GroupVo groupVo = new GroupVo(group);
                 groupVo.setAdminName(adminDao.selectAdminByUserId(Integer.parseInt(creatorId)).getAdminName());
                 groupVo.setCreatorName(userDao.selectUserWithUserId(Integer.parseInt(creatorId)).getUserName());
@@ -200,7 +217,6 @@ public class GroupServiceImpl implements GroupService {
                 return ResponseEntity.ok(new Result(ResultEnum.ERROR.getStatus(), "该用户已经在分组内", null));
             }
 
-            // todo:未来这里要做websocket，通知加入分组的事件
             if (userGroupDao.insertAnUserGroup(userGroup)) {
                 Group group = groupDao.selectGroupByGroupId(Integer.parseInt(userGroup.getGroupId()));
 
@@ -213,6 +229,7 @@ public class GroupServiceImpl implements GroupService {
                 data.put("userName", userName);
                 data.put("userId", userGroup.getUserId());
                 data.put("groupId", userGroup.getGroupId());
+                data.put("groupName", group.getGroupName());
 
                 String message = JSONObject.toJSONString(WsResultUtil.joinGroup(data));
                 websocketEndPoint.publish(group.getGroupName(), new TextMessage(message));
@@ -224,6 +241,33 @@ public class GroupServiceImpl implements GroupService {
             throw new SQLException("user_group表插入记录失败");
         } catch (Exception e) {
             log.error("加入分组失败: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    @Override
+    public ResponseEntity<Result> quitGroup(int userId, HttpSession session) {
+        try {
+            if (userGroupDao.deleteAnUserGroup(userId)) {
+                SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+                String groupName = sessionInfo.getGroup().getGroupName();
+
+                Map<String, Object> data = new HashMap<>(3);
+                data.put("userName", sessionInfo.getUser().getUserName());
+                data.put("userId", userId);
+                data.put("groupId", sessionInfo.getGroup().getGroupId());
+                String message = JSONObject.toJSONString(WsResultUtil.quitGroup(data));
+
+                sessionInfo.setGroup(null);
+
+                websocketEndPoint.publish(groupName, new TextMessage(message));
+
+                return ResponseEntity.ok(ResultUtil.success());
+            }
+
+            throw new SQLException("user_group表删除关系失败");
+        } catch (Exception e) {
+            log.error("退出分组失败: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }

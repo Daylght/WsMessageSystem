@@ -27,8 +27,8 @@ public class GroupController {
 
     @ApiOperation("创建分组(用户)(管理员)")
     @PostMapping("/create")
-    public ResponseEntity<Result> createGroup(@RequestBody CreateGroupDto createGroupDto) {
-        return groupService.createGroup(createGroupDto);
+    public ResponseEntity<Result> createGroup(@RequestBody CreateGroupDto createGroupDto, HttpSession session) {
+        return groupService.createGroup(createGroupDto, session);
     }
 
     @ApiOperation("加入分组(用户)")
@@ -37,15 +37,27 @@ public class GroupController {
         return groupService.joinGroup(userGroup, session);
     }
 
+    @ApiOperation("退出分组(用户)")
+    @DeleteMapping("/quit/{userId}")
+    public ResponseEntity<Result> quitGroup(@PathVariable("userId") String userId, HttpSession session) {
+        return groupService.quitGroup(Integer.parseInt(userId), session);
+    }
+
     @ApiOperation("获取分组列表(用户)(管理员)")
     @GetMapping("/list")
     public ResponseEntity<Result> getGroupsList() {
         return groupService.getGroupsList();
     }
 
+    @ApiOperation("根据管理员id获取分组列表(用户)(管理员)")
+    @GetMapping("list/{adminId}")
+    public ResponseEntity<Result> getGroupsListByAdminId(@PathVariable("adminId") String adminId) {
+        return groupService.getGroupsListByAdminId(adminId);
+    }
+
     @ApiOperation("删除分组(用户)(管理员)")
-    @DeleteMapping("/remove")
-    public ResponseEntity<Result> remove(@RequestBody int[] groupIds, HttpSession session) {
+    @DeleteMapping("/remove/{groupIds}")
+    public ResponseEntity<Result> remove(@PathVariable("groupIds") int[] groupIds, HttpSession session) {
         return groupService.remove(groupIds, session);
     }
 

@@ -32,4 +32,13 @@ public interface SessionService {
      * 生成验证码并返回图片
      */
     void generateVerifyCode(HttpServletRequest request, HttpServletResponse response);
+
+    /**
+     * 管理员登录
+     * @param loginDto
+     * @param request
+     * @param response
+     * @return
+     */
+    ResponseEntity<Result> adminLogin(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response);
 }

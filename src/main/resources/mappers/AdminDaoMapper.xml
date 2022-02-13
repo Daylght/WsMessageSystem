@@ -22,4 +22,10 @@
         where ua.user_id = #{userId}
     </select>
 
+    <select id="selectAdminByAdminName" resultMap="adminMap">
+        select admin_id, admin_name, password
+        from admin
+        where admin_name = #{adminName}
+    </select>
+
 </mapper>

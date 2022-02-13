@@ -33,4 +33,12 @@ public class WsResultUtil {
         return websocketResult;
     }
 
+    public static WebsocketResult<Object> quitGroup(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.QUIT_GROUP.getType());
+        websocketResult.setMessage(WsResultEnum.QUIT_GROUP.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
 }

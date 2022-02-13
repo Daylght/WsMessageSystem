@@ -18,4 +18,11 @@ public interface UserGroupDao {
      * @return
      */
     int selectUserGroupCountByUserId(int userId);
+
+    /**
+     * 根据userId删除关系
+     * @param userId
+     * @return
+     */
+    boolean deleteAnUserGroup(int userId);
 }

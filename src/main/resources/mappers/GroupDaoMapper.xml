@@ -87,5 +87,21 @@
         where ug.group_id = #{groupId}
     </select>
 
+    <select id="selectGroupByCreatorId" resultMap="groupMap">
+        select group_id, group_name, max_count, admin_id, creator_id
+        from `group`
+        where creator_id = #{creatorId}
+    </select>
+
+    <select id="selectAllGroupsAndCreatorsByAdminId" resultMap="groupVoMap">
+        select group_id, group_name, max_count, `group`.admin_id, creator_id, user_name, admin_name
+        from `group`,
+             user,
+             admin
+        where `group`.creator_id = user.user_id
+          and `group`.admin_id = admin.admin_id
+          and admin.admin_id = #{adminId}
+    </select>
+
 
 </mapper>

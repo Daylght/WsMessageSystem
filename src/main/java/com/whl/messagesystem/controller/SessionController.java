@@ -44,10 +44,16 @@ public class SessionController {
         return sessionService.userLogin(loginDto, request, response);
     }
 
+    @ApiOperation("管理员登录")
+    @PostMapping("/adminLogin")
+    public ResponseEntity<Result> adminLogin(@RequestBody LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
+        return sessionService.adminLogin(loginDto, request, response);
+    }
+
     /**
      * 登出，销毁当前会话
      */
-    @ApiOperation("登出，销毁当前会话(用户)")
+    @ApiOperation("登出，销毁当前会话(用户)(管理员)")
     @DeleteMapping("/logout")
     public ResponseEntity<Result> logout(HttpSession session) {
         return sessionService.logout(session);
@@ -56,7 +62,7 @@ public class SessionController {
     /**
      * 生成验证码
      */
-    @ApiOperation("生成验证码(用户)")
+    @ApiOperation("生成验证码(用户)(管理员)")
     @GetMapping("/getVerifyCode")
     public void verifyCode(HttpServletRequest request, HttpServletResponse response) {
         sessionService.generateVerifyCode(request, response);

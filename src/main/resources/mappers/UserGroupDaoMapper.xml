@@ -9,6 +9,12 @@
         values (#{userGroup.userId}, #{userGroup.groupId})
     </insert>
 
+    <delete id="deleteAnUserGroup">
+        delete
+        from user_group
+        where user_id = #{userId}
+    </delete>
+
     <select id="selectUserGroupCountByUserId" resultType="java.lang.Integer">
         select count(*)
         from user_group

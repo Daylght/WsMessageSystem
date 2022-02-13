@@ -84,4 +84,18 @@ public interface GroupDao {
      * @return
      */
     List<User> selectUsersWithGroupId(int groupId);
+
+    /**
+     * 根据创建人id查询组
+     * @param creatorId
+     * @return
+     */
+    Group selectGroupByCreatorId(int creatorId);
+
+    /**
+     * 根据管理员id查询所有的分组以及他们的创建者
+     * @param adminId
+     * @return
+     */
+    List<GroupVo> selectAllGroupsAndCreatorsByAdminId(int adminId);
 }

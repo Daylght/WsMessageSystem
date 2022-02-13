@@ -2,6 +2,7 @@ package com.whl.messagesystem.service.session;
 
 import com.whl.messagesystem.commons.constant.LoginResultConstant;
 import com.whl.messagesystem.commons.constant.ResultEnum;
+import com.whl.messagesystem.commons.constant.RoleConstant;
 import com.whl.messagesystem.commons.utils.ResultUtil;
 import com.whl.messagesystem.commons.utils.verifyCode.IVerifyCodeGen;
 import com.whl.messagesystem.dao.AdminDao;
@@ -54,10 +55,10 @@ public class SessionServiceImpl implements SessionService {
     public ResponseEntity<Result> getSessionInfo(HttpSession session) {
         try {
             SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
-            log.info("当前用户信息: {}", sessionInfo);
+            log.info("当前用户/管理员信息: {}", sessionInfo);
 
             if (sessionInfo == null) {
-                Result result = new Result(ResultEnum.ERROR.getStatus(), "用户未登录", null);
+                Result result = new Result(ResultEnum.ERROR.getStatus(), "未登录", null);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(result);
             }
 
@@ -92,7 +93,7 @@ public class SessionServiceImpl implements SessionService {
                 /*
                   在user表中进行查找，若找到了就表示登录成功，且把用户信息放入session中
                  */
-                String userName = loginDto.getUserName();
+                String userName = loginDto.getLoginName();
                 String password = loginDto.getPassword();
 
                 User user = userDao.getActiveUserWithName(userName);
@@ -103,15 +104,26 @@ public class SessionServiceImpl implements SessionService {
                         log.info("用户名、密码校验通过");
 
                         Group group = groupDao.selectGroupByUserId(Integer.parseInt(user.getUserId()));
+
+                        /*
+                         如果在user_group表中没查询到关系，说明当前用户可能是组长，也可能没加入或创建组
+                         判断下当前用户是不是组长，若是则给group赋值
+                         */
+                        if (group == null) {
+                            group = groupDao.selectGroupByCreatorId(Integer.parseInt(user.getUserId()));
+                        }
+
                         Admin admin = adminDao.selectAdminByUserId(Integer.parseInt(user.getUserId()));
 
                         SessionInfo sessionInfo = new SessionInfo();
+                        sessionInfo.setRole(RoleConstant.USER);
                         sessionInfo.setUser(user);
                         sessionInfo.setGroup(group);
                         sessionInfo.setAdmin(admin);
                         session.setAttribute(SESSION_INFO, sessionInfo);
 
-                        return ResponseEntity.ok(ResultUtil.success());
+                        // 如果group是null，则说明当前用户不在组中；否则在组中，应该在登录后自动进入组内
+                        return ResponseEntity.ok(ResultUtil.success(group));
                     } else {
                         log.error("密码错误");
                         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Result(ResultEnum.ERROR.getStatus(), "密码错误", null));
@@ -129,6 +141,59 @@ public class SessionServiceImpl implements SessionService {
         }
     }
 
+    @Override
+    public ResponseEntity<Result> adminLogin(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
+        try {
+            HttpSession session = request.getSession();
+
+            // 没太弄懂这行的作用，也许是在登录之前确保之前的账号已经被登出了
+            session.removeAttribute(SESSION_INFO);
+
+            // 判断用户输入的验证码是否正确
+            String sessionVerifyCode = (String) session.getAttribute("VerifyCode");
+            sessionVerifyCode = sessionVerifyCode.toLowerCase();
+            if (!loginDto.getServerCode().toLowerCase().equals(sessionVerifyCode)) {
+                log.error("验证码错误");
+                Result result = new Result(LoginResultConstant.WRONG_VERIFYCODE.getCode(), LoginResultConstant.WRONG_VERIFYCODE.getMessage(), null);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+            } else {
+
+                /*
+                  在admin表中进行查找，若找到了就表示登录成功，且把管理员信息放入session中
+                 */
+                String adminName = loginDto.getLoginName();
+                String password = loginDto.getPassword();
+
+                Admin admin = adminDao.selectAdminByAdminName(adminName);
+
+                if (admin != null) {
+
+                    if (admin.getPassword().equals(password)) {
+                        log.info("管理员名、密码校验通过");
+
+                        SessionInfo sessionInfo = new SessionInfo();
+                        sessionInfo.setRole(RoleConstant.ADMIN);
+                        sessionInfo.setAdmin(admin);
+                        session.setAttribute(SESSION_INFO, sessionInfo);
+
+                        return ResponseEntity.ok(ResultUtil.success(admin.getAdminId()));
+                    } else {
+                        log.error("密码错误");
+                        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Result(ResultEnum.ERROR.getStatus(), "密码错误", null));
+                    }
+
+                } else {
+                    log.error("管理员不存在");
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new Result(ResultEnum.ERROR.getStatus(), "管理员不存在", null));
+                }
+
+            }
+        } catch (Exception e) {
+            log.error("登录异常: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
     /**
      * 登出，销毁当前会话
      */
@@ -136,7 +201,7 @@ public class SessionServiceImpl implements SessionService {
     public ResponseEntity<Result> logout(HttpSession session) {
         try {
             session.removeAttribute(SESSION_INFO);
-            log.info("当前用户登出成功");
+            log.info("当前用户/管理员登出成功");
             return ResponseEntity.ok(ResultUtil.success());
         } catch (Exception e) {
             log.error("登出异常: {}", e.getMessage());

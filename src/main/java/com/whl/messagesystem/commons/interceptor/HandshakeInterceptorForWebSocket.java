@@ -41,7 +41,6 @@ public class HandshakeInterceptorForWebSocket implements HandshakeInterceptor {
             //获取指定的请求参数
             final String groupName = String.valueOf(httpServletRequest.getParameter(GroupConstant.GROUP_NAME));
             final String adminId = String.valueOf(httpServletRequest.getParameter("adminId"));
-            log.info(adminId);
             //比赛校验是否存在
             /**
              * 下面这一块if用于处理groupName是错误的组名的情况（没有这个组）

@@ -28,7 +28,7 @@ public interface GroupService {
      * @param createGroupDto
      * @return
      */
-    ResponseEntity<Result> createGroup(CreateGroupDto createGroupDto);
+    ResponseEntity<Result> createGroup(CreateGroupDto createGroupDto, HttpSession session);
 
     /**
      * 获取所有分组的列表
@@ -40,6 +40,7 @@ public interface GroupService {
     /**
      * 根据数组中提供的groupId批量删除分组<br>
      * ps: 数组中仅有一个id也是可以的
+     *
      * @param groupIds
      * @return
      */
@@ -63,8 +64,24 @@ public interface GroupService {
 
     /**
      * 根据指定组id获取组员列表
+     *
      * @param groupId
      * @return
      */
     ResponseEntity<Result> listGroupMembers(String groupId, HttpSession session);
+
+    /**
+     * 使指定的用户退出分组
+     *
+     * @param userId
+     * @return
+     */
+    ResponseEntity<Result> quitGroup(int userId, HttpSession session);
+
+    /**
+     * 根据管理员id获取分组列表
+     * @param adminId
+     * @return
+     */
+    ResponseEntity<Result> getGroupsListByAdminId(String adminId);
 }

@@ -47,8 +47,8 @@ public class UserController {
      * 逻辑删除用户
      */
     @ApiOperation("逻辑删除用户(用户)")
-    @DeleteMapping("/logicalDeleteUser")
-    public ResponseEntity<Result> logicalDeleteUser(@RequestBody String userId) {
+    @DeleteMapping("/logicalDeleteUser/{userId}")
+    public ResponseEntity<Result> logicalDeleteUser(@PathVariable("userId") String userId) {
         return userService.logicalDeleteUser(Integer.parseInt(userId));
     }
 
@@ -56,8 +56,8 @@ public class UserController {
      * 彻底删除用户
      */
     @ApiOperation("彻底删除用户(管理员)")
-    @DeleteMapping("/completelyDeleteUser")
-    public ResponseEntity<Result> completelyDeleteUser(@RequestBody String[] userIds) {
+    @DeleteMapping("/completelyDeleteUser/{userIds}")
+    public ResponseEntity<Result> completelyDeleteUser(@PathVariable("userIds") String[] userIds) {
         return userService.completelyDeleteUser(Arrays.stream(userIds).mapToInt(Integer::parseInt).toArray());
     }
 

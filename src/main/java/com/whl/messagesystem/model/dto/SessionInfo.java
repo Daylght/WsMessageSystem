@@ -15,6 +15,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SessionInfo {
+    private String role;
     private User user;
     private Group group;
     private Admin admin;

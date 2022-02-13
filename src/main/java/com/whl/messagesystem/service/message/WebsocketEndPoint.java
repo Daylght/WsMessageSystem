@@ -148,13 +148,6 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
         return pubsubGroupName;
     }
 
-//    public String getPubsubGroupName(String groupName) {
-//        if (groupName.equals(NO_GROUP)) {
-//            String adminId =
-//        } else {
-//
-//        }
-//    }
 
 }
 
