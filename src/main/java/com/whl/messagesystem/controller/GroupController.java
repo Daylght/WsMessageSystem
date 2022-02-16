@@ -1,7 +1,7 @@
 package com.whl.messagesystem.controller;
 
 import com.whl.messagesystem.model.Result;
-import com.whl.messagesystem.model.dto.CreateGroupDto;
+import com.whl.messagesystem.model.dto.CreateGroupDTO;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.UserGroup;
 import com.whl.messagesystem.service.group.GroupService;
@@ -27,7 +27,7 @@ public class GroupController {
 
     @ApiOperation("创建分组(用户)(管理员)")
     @PostMapping("/create")
-    public ResponseEntity<Result> createGroup(@RequestBody CreateGroupDto createGroupDto, HttpSession session) {
+    public ResponseEntity<Result> createGroup(@RequestBody CreateGroupDTO createGroupDto, HttpSession session) {
         return groupService.createGroup(createGroupDto, session);
     }
 

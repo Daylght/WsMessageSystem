@@ -1,7 +1,7 @@
 package com.whl.messagesystem.controller;
 
 import com.whl.messagesystem.model.Result;
-import com.whl.messagesystem.model.dto.RegisterDto;
+import com.whl.messagesystem.model.dto.RegisterDTO;
 import com.whl.messagesystem.model.dto.UserInfo;
 import com.whl.messagesystem.service.user.UserService;
 import io.swagger.annotations.Api;
@@ -30,7 +30,7 @@ public class UserController {
      */
     @ApiOperation("注册新用户(用户)")
     @PostMapping("/register")
-    public ResponseEntity<Result> register(@RequestBody RegisterDto registerDto) {
+    public ResponseEntity<Result> register(@RequestBody RegisterDTO registerDto) {
         return userService.register(registerDto.getUserName(), registerDto.getPassword(), registerDto.getAdminId());
     }
 
@@ -68,6 +68,15 @@ public class UserController {
     @PutMapping("/recover")
     public ResponseEntity<Result> recoverUser(@RequestBody String[] userIds) {
         return userService.recoverUser(Arrays.stream(userIds).mapToInt(Integer::parseInt).toArray());
+    }
+
+    /**
+     * 根据管理员id展示用户列表
+     */
+    @ApiOperation("根据管理员id展示用户列表")
+    @PutMapping("/list/{adminId}")
+    public ResponseEntity<Result> listUsersByAdminId(@PathVariable("adminId") String adminId) {
+        return userService.listUsersByAdminId(adminId);
     }
 
 }

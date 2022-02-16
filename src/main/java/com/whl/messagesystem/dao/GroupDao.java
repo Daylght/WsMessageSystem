@@ -2,7 +2,7 @@ package com.whl.messagesystem.dao;
 
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.User;
-import com.whl.messagesystem.model.vo.GroupVo;
+import com.whl.messagesystem.model.vo.GroupVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -69,7 +69,7 @@ public interface GroupDao {
      * 查询所有的分组以及他们的创建者
      * @return
      */
-    List<GroupVo> selectAllGroupsAndCreators();
+    List<GroupVO> selectAllGroupsAndCreators();
 
     /**
      * 根据创建人id查询他创建的组的个数
@@ -97,5 +97,5 @@ public interface GroupDao {
      * @param adminId
      * @return
      */
-    List<GroupVo> selectAllGroupsAndCreatorsByAdminId(int adminId);
+    List<GroupVO> selectAllGroupsAndCreatorsByAdminId(int adminId);
 }

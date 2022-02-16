@@ -1,7 +1,7 @@
 package com.whl.messagesystem.controller;
 
 import com.whl.messagesystem.model.Result;
-import com.whl.messagesystem.model.dto.LoginDto;
+import com.whl.messagesystem.model.dto.LoginDTO;
 import com.whl.messagesystem.service.session.SessionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -40,13 +40,13 @@ public class SessionController {
      */
     @ApiOperation("用户登录(用户)")
     @PostMapping("/userLogin")
-    public ResponseEntity<Result> userLogin(@RequestBody LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Result> userLogin(@RequestBody LoginDTO loginDto, HttpServletRequest request, HttpServletResponse response) {
         return sessionService.userLogin(loginDto, request, response);
     }
 
     @ApiOperation("管理员登录")
     @PostMapping("/adminLogin")
-    public ResponseEntity<Result> adminLogin(@RequestBody LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Result> adminLogin(@RequestBody LoginDTO loginDto, HttpServletRequest request, HttpServletResponse response) {
         return sessionService.adminLogin(loginDto, request, response);
     }
 

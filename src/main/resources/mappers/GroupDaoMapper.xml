@@ -12,7 +12,7 @@
         <result column="creator_id" property="creatorId"/>
     </resultMap>
 
-    <resultMap id="groupVoMap" type="com.whl.messagesystem.model.vo.GroupVo">
+    <resultMap id="groupVoMap" type="com.whl.messagesystem.model.vo.GroupVO">
         <id column="group_id" property="groupId"/>
         <result column="group_name" property="groupName"/>
         <result column="max_count" property="maxCount"/>

@@ -9,12 +9,12 @@ import com.whl.messagesystem.dao.GroupDao;
 import com.whl.messagesystem.dao.UserDao;
 import com.whl.messagesystem.dao.UserGroupDao;
 import com.whl.messagesystem.model.Result;
-import com.whl.messagesystem.model.dto.CreateGroupDto;
+import com.whl.messagesystem.model.dto.CreateGroupDTO;
 import com.whl.messagesystem.model.dto.SessionInfo;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.User;
 import com.whl.messagesystem.model.entity.UserGroup;
-import com.whl.messagesystem.model.vo.GroupVo;
+import com.whl.messagesystem.model.vo.GroupVO;
 import com.whl.messagesystem.service.message.WebsocketEndPoint;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
@@ -65,7 +65,7 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public ResponseEntity<Result> getGroupsList() {
         try {
-            List<GroupVo> groupVos = groupDao.selectAllGroupsAndCreators();
+            List<GroupVO> groupVos = groupDao.selectAllGroupsAndCreators();
             return ResponseEntity.ok(ResultUtil.success(groupVos));
         } catch (Exception e) {
             log.error("获取分组列表异常: {}", e.getMessage());
@@ -80,8 +80,8 @@ public class GroupServiceImpl implements GroupService {
                 throw new NullPointerException("参数为空");
             }
 
-            List<GroupVo> groupVos = groupDao.selectAllGroupsAndCreatorsByAdminId(Integer.parseInt(adminId));
-            return ResponseEntity.ok(ResultUtil.success(groupVos));
+            List<GroupVO> groupVOs = groupDao.selectAllGroupsAndCreatorsByAdminId(Integer.parseInt(adminId));
+            return ResponseEntity.ok(ResultUtil.success(groupVOs));
         } catch (Exception e) {
             log.error("获取分组列表异常: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
@@ -104,7 +104,7 @@ public class GroupServiceImpl implements GroupService {
 
 
     @Override
-    public ResponseEntity<Result> createGroup(CreateGroupDto createGroupDto, HttpSession session) {
+    public ResponseEntity<Result> createGroup(CreateGroupDTO createGroupDto, HttpSession session) {
         // todo:这个方法或许要加锁，看后序情况
         try {
             if (ObjectUtils.isEmpty(createGroupDto)) {
@@ -140,7 +140,7 @@ public class GroupServiceImpl implements GroupService {
                 Group group = groupDao.findGroupByGroupName(groupName);
                 SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
                 sessionInfo.setGroup(group);
-                GroupVo groupVo = new GroupVo(group);
+                GroupVO groupVo = new GroupVO(group);
                 groupVo.setAdminName(adminDao.selectAdminByUserId(Integer.parseInt(creatorId)).getAdminName());
                 groupVo.setCreatorName(userDao.selectUserWithUserId(Integer.parseInt(creatorId)).getUserName());
 

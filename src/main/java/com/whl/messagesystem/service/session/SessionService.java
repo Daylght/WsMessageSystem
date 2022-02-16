@@ -1,7 +1,7 @@
 package com.whl.messagesystem.service.session;
 
 import com.whl.messagesystem.model.Result;
-import com.whl.messagesystem.model.dto.LoginDto;
+import com.whl.messagesystem.model.dto.LoginDTO;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
@@ -21,7 +21,7 @@ public interface SessionService {
     /**
      * 用户登录
      */
-    ResponseEntity<Result> userLogin(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response);
+    ResponseEntity<Result> userLogin(LoginDTO loginDto, HttpServletRequest request, HttpServletResponse response);
 
     /**
      * 登出，销毁当前会话
@@ -40,5 +40,5 @@ public interface SessionService {
      * @param response
      * @return
      */
-    ResponseEntity<Result> adminLogin(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response);
+    ResponseEntity<Result> adminLogin(LoginDTO loginDto, HttpServletRequest request, HttpServletResponse response);
 }

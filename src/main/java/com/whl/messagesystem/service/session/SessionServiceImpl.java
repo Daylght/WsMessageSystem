@@ -10,7 +10,7 @@ import com.whl.messagesystem.dao.GroupDao;
 import com.whl.messagesystem.dao.UserDao;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.VerifyCode;
-import com.whl.messagesystem.model.dto.LoginDto;
+import com.whl.messagesystem.model.dto.LoginDTO;
 import com.whl.messagesystem.model.dto.SessionInfo;
 import com.whl.messagesystem.model.entity.Admin;
 import com.whl.messagesystem.model.entity.Group;
@@ -74,7 +74,7 @@ public class SessionServiceImpl implements SessionService {
      * 需要注意，这个方法只会查询出未被逻辑删除的用户，即是说show_status为1的是无法登录成功的
      */
     @Override
-    public ResponseEntity<Result> userLogin(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Result> userLogin(LoginDTO loginDto, HttpServletRequest request, HttpServletResponse response) {
         try {
             HttpSession session = request.getSession();
 
@@ -142,7 +142,7 @@ public class SessionServiceImpl implements SessionService {
     }
 
     @Override
-    public ResponseEntity<Result> adminLogin(LoginDto loginDto, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<Result> adminLogin(LoginDTO loginDto, HttpServletRequest request, HttpServletResponse response) {
         try {
             HttpSession session = request.getSession();
 

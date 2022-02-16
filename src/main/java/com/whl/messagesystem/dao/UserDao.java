@@ -4,6 +4,8 @@ import com.whl.messagesystem.model.entity.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * @author whl
  * @date 2021/12/7 23:14
@@ -60,4 +62,11 @@ public interface UserDao {
      * 根据指定的userId查询学生信息
      */
     User selectUserWithUserId(int userId);
+
+    /**
+     * 在user表中根据管理员id查询用户列表,以list形式返回
+     * @param adminId
+     * @return
+     */
+    List<User> selectUsersWithAdminId(int adminId);
 }

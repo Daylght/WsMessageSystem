@@ -1,7 +1,7 @@
 package com.whl.messagesystem.service.group;
 
 import com.whl.messagesystem.model.Result;
-import com.whl.messagesystem.model.dto.CreateGroupDto;
+import com.whl.messagesystem.model.dto.CreateGroupDTO;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.UserGroup;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +28,7 @@ public interface GroupService {
      * @param createGroupDto
      * @return
      */
-    ResponseEntity<Result> createGroup(CreateGroupDto createGroupDto, HttpSession session);
+    ResponseEntity<Result> createGroup(CreateGroupDTO createGroupDto, HttpSession session);
 
     /**
      * 获取所有分组的列表

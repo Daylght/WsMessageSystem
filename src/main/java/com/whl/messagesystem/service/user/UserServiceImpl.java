@@ -20,6 +20,7 @@ import javax.servlet.http.HttpSession;
 import javax.xml.bind.ValidationException;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.List;
 
 import static com.whl.messagesystem.commons.constant.StringConstant.SESSION_INFO;
 
@@ -167,6 +168,21 @@ public class UserServiceImpl implements UserService {
             throw new SQLException("user表恢复用户失败");
         } catch (Exception e) {
             log.error("恢复用户失败: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    @Override
+    public ResponseEntity<Result> listUsersByAdminId(String adminId) {
+        try {
+            if (StringUtils.isBlank(adminId)) {
+                throw new NullPointerException("参数为空");
+            }
+
+            List<User> users = userDao.selectUsersWithAdminId(Integer.parseInt(adminId));
+            return ResponseEntity.ok(ResultUtil.success(users));
+        } catch (Exception e) {
+            log.error("查询用户列表失败: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }

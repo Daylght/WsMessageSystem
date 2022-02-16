@@ -1,10 +1,9 @@
 package com.whl.messagesystem.model.entity;
 
-import com.whl.messagesystem.model.dto.UserRegisterDto;
-import com.whl.messagesystem.model.dto.UserUpdateDto;
+import com.whl.messagesystem.model.dto.UserRegisterDTO;
+import com.whl.messagesystem.model.dto.UserUpdateDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 /**
  * @author whl
@@ -27,13 +26,13 @@ public class User {
     private String password;
     private int showStatus;
 
-    public User(UserRegisterDto userRegisterDto) {
+    public User(UserRegisterDTO userRegisterDto) {
         userName = userRegisterDto.getUserName();
         password = userRegisterDto.getPassword();
         showStatus = 0;
     }
 
-    public User(UserUpdateDto userUpdateDto) {
+    public User(UserUpdateDTO userUpdateDto) {
         userId = userUpdateDto.getUserId();
         userName = userUpdateDto.getUserName();
         password = userUpdateDto.getPassword();

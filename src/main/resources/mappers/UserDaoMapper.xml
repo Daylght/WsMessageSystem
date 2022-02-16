@@ -78,4 +78,11 @@
         from user
         where user_id = #{userId}
     </select>
+
+    <select id="selectUsersWithAdminId" resultMap="userMap">
+        select u.user_id, u.user_name, u.password, u.show_status
+        from user as u
+                 left join user_admin as ua on u.user_id = ua.user_id
+        where ua.admin_id = #{adminId}
+    </select>
 </mapper>

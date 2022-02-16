@@ -34,4 +34,13 @@ public interface UserService {
      * 恢复被逻辑删除的用户
      */
     ResponseEntity<Result> recoverUser(int[] userIds);
+
+    /**
+     * 根据管理员id展示用户列表
+     * @param adminId
+     * 管理员id
+     * @return
+     * 当前管理员所属的全部用户的列表
+     */
+    ResponseEntity<Result> listUsersByAdminId(String adminId);
 }

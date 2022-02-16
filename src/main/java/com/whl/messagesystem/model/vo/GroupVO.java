@@ -12,16 +12,16 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class GroupVo {
+public class GroupVO {
     private String groupId;
     private String groupName;
-    private int maxCount;
+    private Integer maxCount;
     private String adminId;
     private String adminName;
     private String creatorId;
     private String creatorName;
 
-    public GroupVo(Group group) {
+    public GroupVO(Group group) {
         this.groupId = group.getGroupId();
         this.groupName = group.getGroupName();
         this.maxCount = group.getMaxCount();
