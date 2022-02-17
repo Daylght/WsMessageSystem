@@ -6,20 +6,13 @@ import lombok.NoArgsConstructor;
 
 /**
  * @author whl
- * @date 2021/12/7 17:07
+ * @date 2022/1/16 22:39
  */
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserRegisterDTO {
-    /**
-     * userName: 用户名
-     * password: 密码
-     * email: 电子邮箱
-     * role: 0表示用户，1表示管理员
-     */
     private String userName;
     private String password;
-    private String email;
-    private String role;
+    private String adminId;
 }

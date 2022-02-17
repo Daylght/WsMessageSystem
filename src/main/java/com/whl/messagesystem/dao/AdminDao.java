@@ -31,4 +31,25 @@ public interface AdminDao {
      * @return
      */
     Admin selectAdminByAdminName(String adminName);
+
+    /**
+     * 在admin表中根据管理员名查询对应的管理员数量
+     * @param adminName
+     * @return
+     */
+    int getAdminCountByAdminName(String adminName);
+
+    /**
+     * 在admin表中插入一条记录
+     * @param admin
+     * @return
+     */
+    boolean insertAnAdmin(Admin admin);
+
+    /**
+     * 在admin表中根据id删除一条记录
+     * @param adminId
+     * @return
+     */
+    boolean deleteAdminByAdminId(int adminId);
 }

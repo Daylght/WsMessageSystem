@@ -1,7 +1,5 @@
 package com.whl.messagesystem.model.entity;
 
-import com.whl.messagesystem.model.dto.UserRegisterDTO;
-import com.whl.messagesystem.model.dto.UserUpdateDTO;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -26,15 +24,4 @@ public class User {
     private String password;
     private int showStatus;
 
-    public User(UserRegisterDTO userRegisterDto) {
-        userName = userRegisterDto.getUserName();
-        password = userRegisterDto.getPassword();
-        showStatus = 0;
-    }
-
-    public User(UserUpdateDTO userUpdateDto) {
-        userId = userUpdateDto.getUserId();
-        userName = userUpdateDto.getUserName();
-        password = userUpdateDto.getPassword();
-    }
 }

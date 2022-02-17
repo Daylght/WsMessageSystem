@@ -44,7 +44,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<Result> register(String userName, String password, String adminId) {
         try {
-            if (StringUtils.isAnyBlank(userName, password, adminId)) {
+            if (StringUtils.isAnyEmpty(userName, password, adminId)) {
                 throw new ValidationException("参数为空");
             }
 
@@ -80,7 +80,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<Result> updateUserNameAndPassword(String userId, String userName, String password, HttpSession session) {
         try {
-            if (StringUtils.isAnyBlank(userId, userName, password)) {
+            if (StringUtils.isAnyEmpty(userId, userName, password)) {
                 throw new ValidationException("参数为空");
             }
 
@@ -175,7 +175,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public ResponseEntity<Result> listUsersByAdminId(String adminId) {
         try {
-            if (StringUtils.isBlank(adminId)) {
+            if (StringUtils.isEmpty(adminId)) {
                 throw new NullPointerException("参数为空");
             }
 

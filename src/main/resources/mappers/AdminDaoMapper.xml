@@ -10,6 +10,15 @@
         <result column="password" property="password"/>
     </resultMap>
 
+    <insert id="insertAnAdmin">
+        insert into admin (admin_name, password)
+        VALUES (#{adminName}, #{password})
+    </insert>
+
+    <delete id="deleteAdminByAdminId">
+        delete from admin where admin_id = #{adminId}
+    </delete>
+
     <select id="selectAllAdminsWithoutPassword" resultMap="adminMap">
         select admin_id, admin_name
         from admin
@@ -24,6 +33,12 @@
 
     <select id="selectAdminByAdminName" resultMap="adminMap">
         select admin_id, admin_name, password
+        from admin
+        where admin_name = #{adminName}
+    </select>
+
+    <select id="getAdminCountByAdminName" resultType="java.lang.Integer">
+        select count(*)
         from admin
         where admin_name = #{adminName}
     </select>

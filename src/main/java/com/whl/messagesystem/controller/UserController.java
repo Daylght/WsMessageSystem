@@ -1,7 +1,7 @@
 package com.whl.messagesystem.controller;
 
 import com.whl.messagesystem.model.Result;
-import com.whl.messagesystem.model.dto.RegisterDTO;
+import com.whl.messagesystem.model.dto.UserRegisterDTO;
 import com.whl.messagesystem.model.dto.UserInfo;
 import com.whl.messagesystem.service.user.UserService;
 import io.swagger.annotations.Api;
@@ -30,8 +30,8 @@ public class UserController {
      */
     @ApiOperation("注册新用户(用户)")
     @PostMapping("/register")
-    public ResponseEntity<Result> register(@RequestBody RegisterDTO registerDto) {
-        return userService.register(registerDto.getUserName(), registerDto.getPassword(), registerDto.getAdminId());
+    public ResponseEntity<Result> register(@RequestBody UserRegisterDTO userRegisterDto) {
+        return userService.register(userRegisterDto.getUserName(), userRegisterDto.getPassword(), userRegisterDto.getAdminId());
     }
 
     /**

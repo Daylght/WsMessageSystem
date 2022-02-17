@@ -1,7 +1,10 @@
 package com.whl.messagesystem.service.admin;
 
 import com.whl.messagesystem.model.Result;
+import com.whl.messagesystem.model.dto.AdminRegisterDTO;
 import org.springframework.http.ResponseEntity;
+
+import javax.servlet.http.HttpSession;
 
 /**
  * @author whl
@@ -14,4 +17,18 @@ public interface AdminService {
      */
     ResponseEntity<Result> getAdminList();
 
+    /**
+     * 注册新管理员
+     * @param adminRegisterDTO
+     * @return
+     */
+    ResponseEntity<Result> register(AdminRegisterDTO adminRegisterDTO);
+
+    /**
+     * 注销管理员账号
+     * @param adminId
+     * @param session
+     * @return
+     */
+    ResponseEntity<Result> deleteAdmin(String adminId, HttpSession session);
 }
