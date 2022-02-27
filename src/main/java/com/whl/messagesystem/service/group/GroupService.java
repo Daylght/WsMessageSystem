@@ -2,6 +2,7 @@ package com.whl.messagesystem.service.group;
 
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.CreateGroupDTO;
+import com.whl.messagesystem.model.dto.CreatePublicGroupDTO;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.UserGroup;
 import org.springframework.http.ResponseEntity;
@@ -84,4 +85,11 @@ public interface GroupService {
      * @return
      */
     ResponseEntity<Result> getGroupsListByAdminId(String adminId);
+
+    /**
+     * 创建外部分组，供外部进行消息实时互通使用
+     * @param createPublicGroupDTO
+     * @return
+     */
+    ResponseEntity<Result> createPublicGroup(CreatePublicGroupDTO createPublicGroupDTO);
 }

@@ -2,6 +2,7 @@ package com.whl.messagesystem.controller;
 
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.CreateGroupDTO;
+import com.whl.messagesystem.model.dto.CreatePublicGroupDTO;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.UserGroup;
 import com.whl.messagesystem.service.group.GroupService;
@@ -25,10 +26,16 @@ public class GroupController {
     @Resource
     private GroupService groupService;
 
-    @ApiOperation("创建分组(用户)(管理员)")
+    @ApiOperation("创建内部分组(用户)(管理员)")
     @PostMapping("/create")
     public ResponseEntity<Result> createGroup(@RequestBody CreateGroupDTO createGroupDto, HttpSession session) {
         return groupService.createGroup(createGroupDto, session);
+    }
+
+    @ApiOperation("创建外部分组(管理员)(外部调用)")
+    @PostMapping("/public/create")
+    public ResponseEntity<Result> createPublicGroup(@RequestBody CreatePublicGroupDTO createPublicGroupDTO) {
+        return groupService.createPublicGroup(createPublicGroupDTO);
     }
 
     @ApiOperation("加入分组(用户)")

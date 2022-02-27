@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.whl.messagesystem.dao.PublicGroupDao">
+
+    <resultMap id="publicGroupMap" type="com.whl.messagesystem.model.entity.PublicGroup">
+        <id property="groupId" column="group_id"/>
+        <result property="groupName" column="group_name"/>
+        <result property="maxCount" column="max_count"/>
+        <result property="adminCreated" column="is_admin_created"/>
+        <result property="adminId" column="admin_id"/>
+    </resultMap>
+
+    <insert id="insertPublicGroup">
+        insert into public_group (group_name, max_count, is_admin_created, admin_id)
+        VALUES (#{publicGroup.groupName}, #{publicGroup.maxCount}, #{publicGroup.adminCreated}, #{publicGroup.adminId})
+    </insert>
+
+    <select id="selectPublicGroupCountByName" resultType="java.lang.Integer">
+        select count(*)
+        from public_group
+        where group_name = #{groupName}
+    </select>
+
+    <select id="selectPublicGroupByName" resultMap="publicGroupMap">
+        select group_id, group_name, max_count, is_admin_created, admin_id
+        from public_group
+        where group_name = #{groupName}
+    </select>
+</mapper>

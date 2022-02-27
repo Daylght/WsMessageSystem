@@ -84,12 +84,12 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
 
 
     @Override
-    public void publish(String pubsubGroupName, WebSocketMessage<?> message) {
+    public void publish(String channel, WebSocketMessage<?> message) {
         //判断这个比赛是否存在
-        if (webSocketSessionsMap.get(pubsubGroupName) != null) {
+        if (webSocketSessionsMap.get(channel) != null) {
             //这里表示在比赛广播消息的时候是没办法同时增加会话进来的
-            synchronized (webSocketSessionsMap.get(pubsubGroupName)) {
-                final Iterator<WebSocketSession> iterator = webSocketSessionsMap.get(pubsubGroupName).iterator();
+            synchronized (webSocketSessionsMap.get(channel)) {
+                final Iterator<WebSocketSession> iterator = webSocketSessionsMap.get(channel).iterator();
                 //迭代发送消息
                 while (iterator.hasNext()) {
                     final WebSocketSession webSocketSession = iterator.next();
@@ -99,14 +99,14 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
                             //向该回话发送消息
                             webSocketSession.sendMessage(message);
                         } catch (IOException e) {
-                            log.warn(pubsubGroupName + "有一个websocket会话连接断开" + e.getMessage());
+                            log.warn(channel + "有一个websocket会话连接断开" + e.getMessage());
                             //移除这个出现异常的会话
                             iterator.remove();
                         }
                     } else {
                         //移除这个已经关闭的会话
                         iterator.remove();
-                        log.warn(pubsubGroupName + "移除一个已经断开了连接的websocket");
+                        log.warn(channel + "移除一个已经断开了连接的websocket");
                     }
                 }
             }
@@ -114,8 +114,8 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
     }
 
     @Override
-    public void deleteGroup(String pubsubGroupName, HttpSession session) {
-        List<WebSocketSession> webSocketSessionList = webSocketSessionsMap.get(pubsubGroupName);
+    public void deleteGroup(String channel, HttpSession session) {
+        List<WebSocketSession> webSocketSessionList = webSocketSessionsMap.get(channel);
         for (WebSocketSession webSocketSession : webSocketSessionList) {
             try {
                 if (webSocketSession.isOpen()) {

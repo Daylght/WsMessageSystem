@@ -4,14 +4,13 @@ import com.alibaba.fastjson.JSONObject;
 import com.whl.messagesystem.commons.constant.ResultEnum;
 import com.whl.messagesystem.commons.utils.ResultUtil;
 import com.whl.messagesystem.commons.utils.WsResultUtil;
-import com.whl.messagesystem.dao.AdminDao;
-import com.whl.messagesystem.dao.GroupDao;
-import com.whl.messagesystem.dao.UserDao;
-import com.whl.messagesystem.dao.UserGroupDao;
+import com.whl.messagesystem.dao.*;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.CreateGroupDTO;
+import com.whl.messagesystem.model.dto.CreatePublicGroupDTO;
 import com.whl.messagesystem.model.dto.SessionInfo;
 import com.whl.messagesystem.model.entity.Group;
+import com.whl.messagesystem.model.entity.PublicGroup;
 import com.whl.messagesystem.model.entity.User;
 import com.whl.messagesystem.model.entity.UserGroup;
 import com.whl.messagesystem.model.vo.GroupVO;
@@ -48,6 +47,9 @@ public class GroupServiceImpl implements GroupService {
 
     @Resource
     GroupDao groupDao;
+
+    @Resource
+    PublicGroupDao publicGroupDao;
 
     @Resource
     UserGroupDao userGroupDao;
@@ -105,10 +107,9 @@ public class GroupServiceImpl implements GroupService {
 
     @Override
     public ResponseEntity<Result> createGroup(CreateGroupDTO createGroupDto, HttpSession session) {
-        // todo:这个方法或许要加锁，看后序情况
         try {
             if (ObjectUtils.isEmpty(createGroupDto)) {
-                throw new ValidationException("参数为空");
+                throw new NullPointerException("参数为空");
             }
 
             String groupName = createGroupDto.getGroupName();
@@ -294,6 +295,53 @@ public class GroupServiceImpl implements GroupService {
         } catch (Exception e) {
             log.error("获取组员列表失败: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    @Override
+    public ResponseEntity<Result> createPublicGroup(CreatePublicGroupDTO createPublicGroupDTO) {
+        try {
+            if (ObjectUtils.isEmpty(createPublicGroupDTO)) {
+                throw new NullPointerException("参数为空");
+            }
+
+            String groupName = createPublicGroupDTO.getGroupName();
+            Integer maxCount = createPublicGroupDTO.getMaxCount();
+            String adminId = createPublicGroupDTO.getAdminId() == null ? null : createPublicGroupDTO.getAdminId();
+
+            if (isExistPublicGroup(groupName)) {
+                log.warn("该组名已被使用");
+                return ResponseEntity.ok(new Result(ResultEnum.ERROR.getStatus(), "该组名已被使用!", null));
+            }
+
+            PublicGroup publicGroup = new PublicGroup();
+            publicGroup.setGroupName(groupName);
+            publicGroup.setMaxCount(maxCount == 0 ? DEFAULT_MEMBER_COUNT : maxCount);
+            publicGroup.setAdminCreated(adminId == null ? false : true);
+            publicGroup.setAdminId(adminId);
+
+            if (publicGroupDao.insertPublicGroup(publicGroup)) {
+                publicGroup = publicGroupDao.selectPublicGroupByName(groupName);
+                return ResponseEntity.ok(ResultUtil.success(publicGroup));
+            }
+
+            throw new SQLException("public_group表插入记录失败");
+        } catch (Exception e) {
+            log.error("创建公共分组失败");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    private boolean isExistPublicGroup(String groupName) {
+        try {
+            if (publicGroupDao.selectPublicGroupCountByName(groupName) == 0) {
+                return false;
+            }
+
+            return true;
+        } catch (Exception e) {
+            log.error("查找该公共组是否存在失败: {}", e.getMessage());
+            return false;
         }
     }
 }
