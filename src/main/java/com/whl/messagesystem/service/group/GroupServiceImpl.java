@@ -1,6 +1,9 @@
 package com.whl.messagesystem.service.group;
 
 import com.alibaba.fastjson.JSONObject;
+import com.whl.messagesystem.commons.channel.Channel;
+import com.whl.messagesystem.commons.channel.group.PrivateGroupMessageChannel;
+import com.whl.messagesystem.commons.channel.user.GroupHallListChannel;
 import com.whl.messagesystem.commons.constant.ResultEnum;
 import com.whl.messagesystem.commons.utils.ResultUtil;
 import com.whl.messagesystem.commons.utils.WsResultUtil;
@@ -147,8 +150,10 @@ public class GroupServiceImpl implements GroupService {
 
                 String message = JSONObject.toJSONString(WsResultUtil.createGroup(groupVo));
 
+                Channel channel = new GroupHallListChannel(adminId);
+
                 // 向大厅广播刚创建的分组的相关信息
-                websocketEndPoint.publish(NO_GROUP + adminId, new TextMessage(message));
+                websocketEndPoint.publish(channel.getChannelName(), new TextMessage(message));
 
                 return ResponseEntity.ok(ResultUtil.success(group));
             }
@@ -174,8 +179,10 @@ public class GroupServiceImpl implements GroupService {
                 String adminId = sessionInfo.getAdmin().getAdminId();
                 String message = JSONObject.toJSONString(WsResultUtil.deleteGroup(groupIds));
 
+                Channel channel = new GroupHallListChannel(adminId);
+
                 // 向大厅广播被删除的分组id
-                websocketEndPoint.publish(NO_GROUP + adminId, new TextMessage(message));
+                websocketEndPoint.publish(channel.getChannelName(), new TextMessage(message));
 
                 return ResponseEntity.ok(ResultUtil.success());
             }
@@ -233,7 +240,10 @@ public class GroupServiceImpl implements GroupService {
                 data.put("groupName", group.getGroupName());
 
                 String message = JSONObject.toJSONString(WsResultUtil.joinGroup(data));
-                websocketEndPoint.publish(group.getGroupName(), new TextMessage(message));
+
+                Channel channel = new PrivateGroupMessageChannel(group.getGroupName());
+
+                websocketEndPoint.publish(channel.getChannelName(), new TextMessage(message));
 
                 log.info("加入分组成功");
                 return ResponseEntity.ok(ResultUtil.success());
@@ -261,7 +271,9 @@ public class GroupServiceImpl implements GroupService {
 
                 sessionInfo.setGroup(null);
 
-                websocketEndPoint.publish(groupName, new TextMessage(message));
+                Channel channel = new PrivateGroupMessageChannel(groupName);
+
+                websocketEndPoint.publish(channel.getChannelName(), new TextMessage(message));
 
                 return ResponseEntity.ok(ResultUtil.success());
             }

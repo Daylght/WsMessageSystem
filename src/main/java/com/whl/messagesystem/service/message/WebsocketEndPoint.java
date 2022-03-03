@@ -8,8 +8,6 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import static com.whl.messagesystem.commons.constant.StringConstant.*;
-
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.Iterator;
@@ -50,7 +48,7 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
         super.afterConnectionClosed(session, status);
         log.info("afterConnectionClosed");
         //获取链接
-        String pubsubGroupName = getPubsubGroupName(session);
+        String pubsubGroupName = getChannelName(session);
         webSocketSessionsMap.get(pubsubGroupName).remove(session);
         log.info("从{}小组中移除当前用户的websocket会话", pubsubGroupName);
     }
@@ -59,23 +57,23 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         super.afterConnectionEstablished(session);
 
-        String pubsubGroupName = getPubsubGroupName(session);
+        String channelName = getChannelName(session);
 
-        if (webSocketSessionsMap.get(pubsubGroupName) == null) {
-            log.warn("{}小组的websocket尚未初始化，现在进行初始化", pubsubGroupName);
+        if (webSocketSessionsMap.get(channelName) == null) {
+            log.warn("{}的websocket尚未初始化，现在进行初始化", channelName);
             //多个比赛的集合初始化是同步的
             synchronized (this) {
-                if (webSocketSessionsMap.get(pubsubGroupName) == null) {
+                if (webSocketSessionsMap.get(channelName) == null) {
                     List<WebSocketSession> webSocketSessionList = new CopyOnWriteArrayList<>();
                     webSocketSessionList.add(session);
-                    webSocketSessionsMap.put(pubsubGroupName, (CopyOnWriteArrayList<WebSocketSession>) webSocketSessionList);
+                    webSocketSessionsMap.put(channelName, (CopyOnWriteArrayList<WebSocketSession>) webSocketSessionList);
                 }
             }
         } else {
             //对集合的操作也是同步的
-            log.info("{}小组的websocket已被初始化，把当前用户的会话加入该小组的websocket", pubsubGroupName);
-            synchronized (webSocketSessionsMap.get(pubsubGroupName)) {
-                webSocketSessionsMap.get(pubsubGroupName).add(session);
+            log.info("{}的websocket已被初始化，把当前用户的会话加入该小组的websocket", channelName);
+            synchronized (webSocketSessionsMap.get(channelName)) {
+                webSocketSessionsMap.get(channelName).add(session);
             }
         }
         log.info("afterConnectionEstablished ------ 连接已建立");
@@ -84,12 +82,12 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
 
 
     @Override
-    public void publish(String channel, WebSocketMessage<?> message) {
+    public void publish(String channelName, WebSocketMessage<?> message) {
         //判断这个比赛是否存在
-        if (webSocketSessionsMap.get(channel) != null) {
+        if (webSocketSessionsMap.get(channelName) != null) {
             //这里表示在比赛广播消息的时候是没办法同时增加会话进来的
-            synchronized (webSocketSessionsMap.get(channel)) {
-                final Iterator<WebSocketSession> iterator = webSocketSessionsMap.get(channel).iterator();
+            synchronized (webSocketSessionsMap.get(channelName)) {
+                final Iterator<WebSocketSession> iterator = webSocketSessionsMap.get(channelName).iterator();
                 //迭代发送消息
                 while (iterator.hasNext()) {
                     final WebSocketSession webSocketSession = iterator.next();
@@ -99,14 +97,14 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
                             //向该回话发送消息
                             webSocketSession.sendMessage(message);
                         } catch (IOException e) {
-                            log.warn(channel + "有一个websocket会话连接断开" + e.getMessage());
+                            log.warn(channelName + "有一个websocket会话连接断开" + e.getMessage());
                             //移除这个出现异常的会话
                             iterator.remove();
                         }
                     } else {
                         //移除这个已经关闭的会话
                         iterator.remove();
-                        log.warn(channel + "移除一个已经断开了连接的websocket");
+                        log.warn(channelName + "移除一个已经断开了连接的websocket");
                     }
                 }
             }
@@ -114,8 +112,8 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
     }
 
     @Override
-    public void deleteGroup(String channel, HttpSession session) {
-        List<WebSocketSession> webSocketSessionList = webSocketSessionsMap.get(channel);
+    public void deleteGroup(String channelName, HttpSession session) {
+        List<WebSocketSession> webSocketSessionList = webSocketSessionsMap.get(channelName);
         for (WebSocketSession webSocketSession : webSocketSessionList) {
             try {
                 if (webSocketSession.isOpen()) {
@@ -134,18 +132,8 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
      * @param session
      * @return
      */
-    private String getPubsubGroupName(WebSocketSession session) {
-        String pubsubGroupName;
-        final String groupName = (String) session.getAttributes().get("groupName");
-        final String adminId = (String) session.getAttributes().get("adminId");
-
-        if (NO_GROUP.equals(groupName)) {
-            pubsubGroupName = groupName + adminId;
-        } else {
-            pubsubGroupName = groupName;
-        }
-
-        return pubsubGroupName;
+    private String getChannelName(WebSocketSession session) {
+        return (String) session.getAttributes().get("channelName");
     }
 
 
