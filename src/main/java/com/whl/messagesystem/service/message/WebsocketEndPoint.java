@@ -1,5 +1,6 @@
 package com.whl.messagesystem.service.message;
 
+import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -9,6 +10,9 @@ import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
 import javax.servlet.http.HttpSession;
+import javax.websocket.OnMessage;
+import javax.websocket.Session;
+import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
@@ -25,10 +29,9 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public class WebsocketEndPoint extends TextWebSocketHandler implements MessageService {
 
     /**
-     * pubsubGroupName -> List<WebSocketSession> <br>
-     * pubsubGroupName 是专门用于广播与订阅的组名，和小组名不同 <br>
-     * 在组内广播时，pubsubGroupName 和 groupName 是一致的 <br>
-     * 在大厅广播时，pubsubGroupName 为 "NoGroup" 和 adminId 拼接后的字符串
+     * channelName -> List<WebSocketSession> <br>
+     * channelName是专门用于广播与订阅的组名，和小组名不同 <br>
+     * 具体的channelName是根据Channel接口的不同实现来决定的，通常来说每个场景都有自己独立的Channel实现
      */
     protected final Map<String, CopyOnWriteArrayList<WebSocketSession>> webSocketSessionsMap = new ConcurrentHashMap<>();
 
@@ -41,6 +44,21 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
     @Override
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
         super.handleMessage(session, message);
+
+        // 拿到前端要广播的json数据
+        String payload = (String) message.getPayload();
+        String channelName = getChannelName(session);
+
+        // 拿到该分组的所有websocket连接并进行广播
+        CopyOnWriteArrayList<WebSocketSession> webSocketSessions = webSocketSessionsMap.get(channelName);
+        webSocketSessions.forEach((webSocketSession) -> {
+            try {
+                webSocketSession.sendMessage(new TextMessage(payload));
+            } catch (IOException e) {
+                webSocketSessions.remove(webSocketSession);
+                log.warn("webSocket出现异常并断开，频道名: {}，异常信息: {}", channelName, e.getMessage());
+            }
+        });
     }
 
     @Override
@@ -64,9 +82,9 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
             //多个比赛的集合初始化是同步的
             synchronized (this) {
                 if (webSocketSessionsMap.get(channelName) == null) {
-                    List<WebSocketSession> webSocketSessionList = new CopyOnWriteArrayList<>();
+                    CopyOnWriteArrayList<WebSocketSession> webSocketSessionList = new CopyOnWriteArrayList<>();
                     webSocketSessionList.add(session);
-                    webSocketSessionsMap.put(channelName, (CopyOnWriteArrayList<WebSocketSession>) webSocketSessionList);
+                    webSocketSessionsMap.put(channelName, webSocketSessionList);
                 }
             }
         } else {
@@ -83,30 +101,24 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
 
     @Override
     public void publish(String channelName, WebSocketMessage<?> message) {
-        //判断这个比赛是否存在
+        //判断这个频道是否存在
         if (webSocketSessionsMap.get(channelName) != null) {
-            //这里表示在比赛广播消息的时候是没办法同时增加会话进来的
+            //这里表示在频道广播消息的时候是没办法同时增加会话进来的
             synchronized (webSocketSessionsMap.get(channelName)) {
-                final Iterator<WebSocketSession> iterator = webSocketSessionsMap.get(channelName).iterator();
-                //迭代发送消息
-                while (iterator.hasNext()) {
-                    final WebSocketSession webSocketSession = iterator.next();
-                    //判断该会话是否还是开启的
+                CopyOnWriteArrayList<WebSocketSession> webSocketSessions = webSocketSessionsMap.get(channelName);
+                webSocketSessions.forEach((webSocketSession) -> {
                     if (webSocketSession.isOpen()) {
                         try {
-                            //向该回话发送消息
                             webSocketSession.sendMessage(message);
                         } catch (IOException e) {
-                            log.warn(channelName + "有一个websocket会话连接断开" + e.getMessage());
-                            //移除这个出现异常的会话
-                            iterator.remove();
+                            log.warn("webSocket出现异常并断开，频道名: {}，异常信息: {}", channelName, e.getMessage());
+                            webSocketSessions.remove(webSocketSession);
                         }
                     } else {
-                        //移除这个已经关闭的会话
-                        iterator.remove();
-                        log.warn(channelName + "移除一个已经断开了连接的websocket");
+                        webSocketSessions.remove(webSocketSession);
+                        log.warn("移除一个已经断开了连接的websocket: {}", channelName);
                     }
-                }
+                });
             }
         }
     }
@@ -127,7 +139,7 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
     }
 
     /**
-     * 根据 WebSocketSession 中的 groupName 和 adminId 生成用于广播订阅用的 pubsubGroupName
+     * 从WebSocketSession中获取当前会话的channelName
      *
      * @param session
      * @return
@@ -135,7 +147,6 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
     private String getChannelName(WebSocketSession session) {
         return (String) session.getAttributes().get("channelName");
     }
-
 
 }
 

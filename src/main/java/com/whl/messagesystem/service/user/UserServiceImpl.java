@@ -45,7 +45,7 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<Result> register(String userName, String password, String adminId) {
         try {
             if (StringUtils.isAnyEmpty(userName, password, adminId)) {
-                throw new ValidationException("参数为空");
+                throw new NullPointerException("参数为空");
             }
 
             User user = new User();
@@ -81,7 +81,7 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<Result> updateUserNameAndPassword(String userId, String userName, String password, HttpSession session) {
         try {
             if (StringUtils.isAnyEmpty(userId, userName, password)) {
-                throw new ValidationException("参数为空");
+                throw new NullPointerException("参数为空");
             }
 
             User user = new User();
@@ -114,7 +114,7 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<Result> logicalDeleteUser(int userId) {
         try {
             if (userId == 0) {
-                throw new ValidationException("参数为空");
+                throw new NullPointerException("参数为空");
             }
 
             log.info("逻辑删除的用户id为: {}", userId);
@@ -138,7 +138,7 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<Result> completelyDeleteUser(int[] userIds) {
         try {
             if (ArrayUtils.isEmpty(userIds)) {
-                throw new ValidationException("参数为空");
+                throw new NullPointerException("参数为空");
             }
 
             log.info("永久删除的用户id为: {}", Arrays.toString(userIds));
@@ -157,7 +157,7 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<Result> recoverUser(int[] userIds) {
         try {
             if (ArrayUtils.isEmpty(userIds)) {
-                throw new ValidationException("参数为空");
+                throw new NullPointerException("参数为空");
             }
 
             log.info("恢复的用户id为: {}", Arrays.toString(userIds));

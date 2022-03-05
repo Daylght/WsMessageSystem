@@ -18,7 +18,6 @@ public class PrivateGroupMessageChannel implements Channel {
 
     @Override
     public String getChannelName() {
-        StringBuilder name = new StringBuilder(scene);
-        return name.append("#").append(groupName).toString();
+        return scene + "#" + groupName;
     }
 }
