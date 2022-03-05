@@ -1,6 +1,5 @@
 package com.whl.messagesystem.service.message;
 
-import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -9,12 +8,7 @@ import org.springframework.web.socket.WebSocketMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 
-import javax.servlet.http.HttpSession;
-import javax.websocket.OnMessage;
-import javax.websocket.Session;
-import javax.websocket.server.ServerEndpoint;
 import java.io.IOException;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -26,7 +20,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @Slf4j
 @Component
-public class WebsocketEndPoint extends TextWebSocketHandler implements MessageService {
+public class MessageServiceImpl extends TextWebSocketHandler implements MessageService {
 
     /**
      * channelName -> List<WebSocketSession> <br>
@@ -45,20 +39,9 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
         super.handleMessage(session, message);
 
-        // 拿到前端要广播的json数据
-        String payload = (String) message.getPayload();
+        // 获取当前连接的频道名并进行广播
         String channelName = getChannelName(session);
-
-        // 拿到该分组的所有websocket连接并进行广播
-        CopyOnWriteArrayList<WebSocketSession> webSocketSessions = webSocketSessionsMap.get(channelName);
-        webSocketSessions.forEach((webSocketSession) -> {
-            try {
-                webSocketSession.sendMessage(new TextMessage(payload));
-            } catch (IOException e) {
-                webSocketSessions.remove(webSocketSession);
-                log.warn("webSocket出现异常并断开，频道名: {}，异常信息: {}", channelName, e.getMessage());
-            }
-        });
+        publish(channelName, message);
     }
 
     @Override
@@ -124,18 +107,18 @@ public class WebsocketEndPoint extends TextWebSocketHandler implements MessageSe
     }
 
     @Override
-    public void deleteGroup(String channelName, HttpSession session) {
+    public void deleteChannel(String channelName) {
         List<WebSocketSession> webSocketSessionList = webSocketSessionsMap.get(channelName);
-        for (WebSocketSession webSocketSession : webSocketSessionList) {
+        webSocketSessionList.forEach(webSocketSession -> {
             try {
                 if (webSocketSession.isOpen()) {
                     webSocketSession.close();
                     log.info("WebSocketSessionId={}已断开", webSocketSession.getId());
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                log.error("删除websocket频道异常: {}", e.getMessage());
             }
-        }
+        });
     }
 
     /**

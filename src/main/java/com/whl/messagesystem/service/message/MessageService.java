@@ -10,8 +10,17 @@ import javax.servlet.http.HttpSession;
  */
 public interface MessageService {
 
-    void publish(String groupName, WebSocketMessage<?> message);
+    /**
+     * 在指定的频道中广播消息
+     * @param channelName
+     * @param message
+     */
+    void publish(String channelName, WebSocketMessage<?> message);
 
-    void deleteGroup(String groupName, HttpSession session);
+    /**
+     * 删除指定的频道，并关闭此频道中的所有连接
+     * @param channelName
+     */
+    void deleteChannel(String channelName);
 
 }

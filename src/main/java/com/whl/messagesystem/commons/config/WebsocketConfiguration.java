@@ -1,14 +1,11 @@
 package com.whl.messagesystem.commons.config;
 
 import com.whl.messagesystem.commons.interceptor.HandshakeInterceptorForWebSocket;
-import com.whl.messagesystem.service.message.WebsocketEndPoint;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
+import com.whl.messagesystem.service.message.MessageServiceImpl;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
 import javax.annotation.Resource;
 
@@ -21,7 +18,7 @@ import javax.annotation.Resource;
 public class WebsocketConfiguration implements WebSocketConfigurer {
 
     @Resource
-    private WebsocketEndPoint websocketEndPoint;
+    private MessageServiceImpl messageServiceImpl;
 
     @Resource
     private HandshakeInterceptorForWebSocket handshakeInterceptorForWebSocket;
@@ -30,7 +27,7 @@ public class WebsocketConfiguration implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry){
         //websocket地址 -> ws://localhost:8888/websocket?groupName=Xxx&adminId=Xxx
-        registry.addHandler(websocketEndPoint,"/websocket")
+        registry.addHandler(messageServiceImpl,"/websocket")
                 .addInterceptors(handshakeInterceptorForWebSocket)
                 .setAllowedOrigins("*");
     }
