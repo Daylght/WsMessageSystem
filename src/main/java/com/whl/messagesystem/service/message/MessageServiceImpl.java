@@ -39,9 +39,9 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
     public void handleMessage(WebSocketSession session, WebSocketMessage<?> message) throws Exception {
         super.handleMessage(session, message);
 
-        // 获取当前连接的频道名并进行广播
+        String payload = (String) message.getPayload();
         String channelName = getChannelName(session);
-        publish(channelName, message);
+        passWebsocketPayload(channelName, payload);
     }
 
     @Override
@@ -89,7 +89,7 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
             //这里表示在频道广播消息的时候是没办法同时增加会话进来的
             synchronized (webSocketSessionsMap.get(channelName)) {
                 CopyOnWriteArrayList<WebSocketSession> webSocketSessions = webSocketSessionsMap.get(channelName);
-                webSocketSessions.forEach((webSocketSession) -> {
+                webSocketSessions.forEach(webSocketSession -> {
                     if (webSocketSession.isOpen()) {
                         try {
                             webSocketSession.sendMessage(message);
@@ -129,6 +129,18 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
      */
     private String getChannelName(WebSocketSession session) {
         return (String) session.getAttributes().get("channelName");
+    }
+
+    private void passWebsocketPayload(String channelName, String payload) {
+        CopyOnWriteArrayList<WebSocketSession> webSocketSessions = webSocketSessionsMap.get(channelName);
+        webSocketSessions.forEach(webSocketSession -> {
+            try {
+                webSocketSession.sendMessage(new TextMessage(payload));
+            } catch (IOException e) {
+                webSocketSessions.remove(webSocketSession);
+                log.warn("webSocket出现异常并断开，频道名: {}，异常信息: {}", channelName, e.getMessage());
+            }
+        });
     }
 
 }

@@ -50,6 +50,12 @@ public class GroupController {
         return groupService.quitGroup(Integer.parseInt(userId), session);
     }
 
+    @ApiOperation("踢出分组")
+    @DeleteMapping("/kick/{userId}")
+    public ResponseEntity<Result> kickGroupMember(@PathVariable("userId") String userId) {
+        return groupService.kickGroupMember(userId);
+    }
+
     @ApiOperation("获取分组列表(用户)(管理员)")
     @GetMapping("/list")
     public ResponseEntity<Result> getGroupsList() {
@@ -74,7 +80,7 @@ public class GroupController {
         return groupService.updateGroupInfo(group);
     }
 
-    @ApiOperation("获取指定组的成员列表")
+    @ApiOperation("获取指定组的成员列表(用户)(管理员)")
     @GetMapping("/listMembers/{groupId}")
     public ResponseEntity<Result> listGroupMembers(@PathVariable("groupId") String groupId, HttpSession session) {
         return groupService.listGroupMembers(groupId, session);

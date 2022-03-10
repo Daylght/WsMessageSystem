@@ -1,5 +1,6 @@
 package com.whl.messagesystem.service.group;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.whl.messagesystem.commons.channel.Channel;
 import com.whl.messagesystem.commons.channel.group.PrivateGroupMessageChannel;
@@ -197,7 +198,7 @@ public class GroupServiceImpl implements GroupService {
     public ResponseEntity<Result> updateGroupInfo(Group group) {
         try {
             if (ObjectUtils.isEmpty(group)) {
-                throw new ValidationException("参数为空");
+                throw new NullPointerException("参数为空");
             }
 
             if (groupDao.updateGroup(group) > 0) {
@@ -328,7 +329,7 @@ public class GroupServiceImpl implements GroupService {
             PublicGroup publicGroup = new PublicGroup();
             publicGroup.setGroupName(groupName);
             publicGroup.setMaxCount(maxCount == 0 ? DEFAULT_MEMBER_COUNT : maxCount);
-            publicGroup.setAdminCreated(adminId == null ? false : true);
+            publicGroup.setAdminCreated(adminId != null);
             publicGroup.setAdminId(adminId);
 
             if (publicGroupDao.insertPublicGroup(publicGroup)) {
@@ -353,6 +354,31 @@ public class GroupServiceImpl implements GroupService {
         } catch (Exception e) {
             log.error("查找该公共组是否存在失败: {}", e.getMessage());
             return false;
+        }
+    }
+
+    @Override
+    public ResponseEntity<Result> kickGroupMember(String userId) {
+        try {
+            if (StringUtils.isEmpty(userId)) {
+                throw new NullPointerException("参数为空");
+            }
+
+            String groupName = groupDao.selectGroupByUserId(Integer.parseInt(userId)).getGroupName();
+
+            if (userGroupDao.deleteAnUserGroup(Integer.parseInt(userId))) {
+                Channel channel = new PrivateGroupMessageChannel(groupName);
+                String message = JSONObject.toJSONString(WsResultUtil.kickMember(userId));
+                messageServiceImpl.publish(channel.getChannelName(), new TextMessage(message));
+
+                log.info("踢出成功");
+                return ResponseEntity.ok(ResultUtil.success());
+            }
+
+            throw new SQLException("user_group表删除记录失败");
+        } catch (Exception e) {
+            log.error("踢出用户失败");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
 }

@@ -2,6 +2,7 @@ package com.whl.messagesystem.controller;
 
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.LoginDTO;
+import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.service.session.SessionService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -44,7 +45,7 @@ public class SessionController {
         return sessionService.userLogin(loginDto, request, response);
     }
 
-    @ApiOperation("管理员登录")
+    @ApiOperation("管理员登录(管理员)")
     @PostMapping("/adminLogin")
     public ResponseEntity<Result> adminLogin(@RequestBody LoginDTO loginDto, HttpServletRequest request, HttpServletResponse response) {
         return sessionService.adminLogin(loginDto, request, response);
@@ -66,6 +67,15 @@ public class SessionController {
     @GetMapping("/getVerifyCode")
     public void verifyCode(HttpServletRequest request, HttpServletResponse response) {
         sessionService.generateVerifyCode(request, response);
+    }
+
+    /**
+     * 更新sessionInfo中的分组信息
+     */
+    @ApiOperation("移除sessionInfo中的分组信息(用户)")
+    @DeleteMapping("/group")
+    public ResponseEntity<Result> removeGroupInfoFromSession(HttpSession session) {
+        return sessionService.removeGroupInfoFromSession(session);
     }
 
 }

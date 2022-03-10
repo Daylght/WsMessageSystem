@@ -16,6 +16,7 @@ import com.whl.messagesystem.model.entity.Admin;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.User;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -235,4 +236,17 @@ public class SessionServiceImpl implements SessionService {
             log.error("生成验证码失败: {}", e.getMessage());
         }
     }
+
+    @Override
+    public ResponseEntity<Result> removeGroupInfoFromSession(HttpSession session) {
+        try {
+            SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+            sessionInfo.setGroup(null);
+            return ResponseEntity.ok(ResultUtil.success(sessionInfo));
+        } catch (Exception e) {
+            log.error("从sessionInfo中移除分组信息异常: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
 }

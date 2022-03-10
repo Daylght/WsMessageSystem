@@ -92,4 +92,11 @@ public interface GroupService {
      * @return
      */
     ResponseEntity<Result> createPublicGroup(CreatePublicGroupDTO createPublicGroupDTO);
+
+    /**
+     * 根据用户id踢出组员
+     * @param userId
+     * @return
+     */
+    ResponseEntity<Result> kickGroupMember(String userId);
 }

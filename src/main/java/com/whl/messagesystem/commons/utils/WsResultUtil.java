@@ -41,4 +41,12 @@ public class WsResultUtil {
         return websocketResult;
     }
 
+    public static WebsocketResult<Object> kickMember(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.KICK_MEMBER.getType());
+        websocketResult.setMessage(WsResultEnum.KICK_MEMBER.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
 }

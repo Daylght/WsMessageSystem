@@ -46,7 +46,7 @@ public class UserController {
     /**
      * 逻辑删除用户
      */
-    @ApiOperation("逻辑删除用户(用户)")
+    @ApiOperation("逻辑删除用户(用户)(管理员)")
     @DeleteMapping("/logicalDeleteUser/{userId}")
     public ResponseEntity<Result> logicalDeleteUser(@PathVariable("userId") String userId) {
         return userService.logicalDeleteUser(Integer.parseInt(userId));
@@ -73,7 +73,7 @@ public class UserController {
     /**
      * 根据管理员id展示用户列表
      */
-    @ApiOperation("根据管理员id展示用户列表")
+    @ApiOperation("根据管理员id展示用户列表(管理员)")
     @PutMapping("/list/{adminId}")
     public ResponseEntity<Result> listUsersByAdminId(@PathVariable("adminId") String adminId) {
         return userService.listUsersByAdminId(adminId);

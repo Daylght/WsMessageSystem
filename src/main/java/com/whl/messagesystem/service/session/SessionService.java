@@ -2,6 +2,7 @@ package com.whl.messagesystem.service.session;
 
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.LoginDTO;
+import com.whl.messagesystem.model.entity.Group;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpServletRequest;
@@ -41,4 +42,11 @@ public interface SessionService {
      * @return
      */
     ResponseEntity<Result> adminLogin(LoginDTO loginDto, HttpServletRequest request, HttpServletResponse response);
+
+    /**
+     * 移除sessionInfo中的分组信息
+     * @param session
+     * @return
+     */
+    ResponseEntity<Result> removeGroupInfoFromSession(HttpSession session);
 }
