@@ -38,6 +38,12 @@ public class GroupController {
         return groupService.createPublicGroup(createPublicGroupDTO);
     }
 
+    @ApiOperation("根据管理员id获取他创建的公共分组列表(管理员)")
+    @GetMapping("/public/{adminId}")
+    public ResponseEntity<Result> listPublicGroupsCreatedByAdmin(@PathVariable("adminId") String adminId) {
+        return groupService.listPublicGroupsCreatedByAdmin(adminId);
+    }
+
     @ApiOperation("加入分组(用户)")
     @PostMapping("/join")
     public ResponseEntity<Result> joinGroup(@RequestBody UserGroup userGroup, HttpSession session) {
@@ -50,7 +56,7 @@ public class GroupController {
         return groupService.quitGroup(Integer.parseInt(userId), session);
     }
 
-    @ApiOperation("踢出分组")
+    @ApiOperation("踢出分组内的成员")
     @DeleteMapping("/kick/{userId}")
     public ResponseEntity<Result> kickGroupMember(@PathVariable("userId") String userId) {
         return groupService.kickGroupMember(userId);
@@ -85,5 +91,13 @@ public class GroupController {
     public ResponseEntity<Result> listGroupMembers(@PathVariable("groupId") String groupId, HttpSession session) {
         return groupService.listGroupMembers(groupId, session);
     }
+
+    @ApiOperation("获取外部创建的公共分组列表(管理员)")
+    @GetMapping("/public")
+    public ResponseEntity<Result> listPublicGroupsCreatedByOutside() {
+        return groupService.listPublicGroupsCreatedByOutside();
+    }
+
+    //todo: 完成解散分组的接口
 
 }

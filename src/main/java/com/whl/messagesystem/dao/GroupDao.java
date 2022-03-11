@@ -1,6 +1,7 @@
 package com.whl.messagesystem.dao;
 
 import com.whl.messagesystem.model.entity.Group;
+import com.whl.messagesystem.model.entity.PublicGroup;
 import com.whl.messagesystem.model.entity.User;
 import com.whl.messagesystem.model.vo.GroupVO;
 import org.apache.ibatis.annotations.Mapper;

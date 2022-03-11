@@ -3,6 +3,8 @@ package com.whl.messagesystem.dao;
 import com.whl.messagesystem.model.entity.PublicGroup;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * @author whl
  * @date 2022/2/27 17:53
@@ -29,4 +31,17 @@ public interface PublicGroupDao {
      * @return
      */
     PublicGroup selectPublicGroupByName(String groupName);
+
+    /**
+     * 根据管理员id查询他创建的公共分组列表
+     * @param adminId
+     * @return
+     */
+    List<PublicGroup> selectPublicGroupsWithAdminId(int adminId);
+
+    /**
+     * 获取由外部调用创建的公共分组列表
+     * @return
+     */
+    List<PublicGroup> selectPublicGroupsCreatedByOutside();
 }

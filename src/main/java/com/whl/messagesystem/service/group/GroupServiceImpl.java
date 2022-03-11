@@ -1,6 +1,5 @@
 package com.whl.messagesystem.service.group;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.whl.messagesystem.commons.channel.Channel;
 import com.whl.messagesystem.commons.channel.group.PrivateGroupMessageChannel;
@@ -378,6 +377,32 @@ public class GroupServiceImpl implements GroupService {
             throw new SQLException("user_group表删除记录失败");
         } catch (Exception e) {
             log.error("踢出用户失败");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    @Override
+    public ResponseEntity<Result> listPublicGroupsCreatedByAdmin(String adminId) {
+        try {
+            if (StringUtils.isEmpty(adminId) || "0".equals(adminId)) {
+                throw new NullPointerException("参数为空");
+            }
+
+            List<PublicGroup> publicGroups = publicGroupDao.selectPublicGroupsWithAdminId(Integer.parseInt(adminId));
+            return ResponseEntity.ok(ResultUtil.success(publicGroups));
+        } catch (Exception e) {
+            log.error("获取管理员创建的公共分组列表失败，管理员id: {}，异常信息: {}", adminId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    @Override
+    public ResponseEntity<Result> listPublicGroupsCreatedByOutside() {
+        try {
+            List<PublicGroup> publicGroups = publicGroupDao.selectPublicGroupsCreatedByOutside();
+            return ResponseEntity.ok(ResultUtil.success(publicGroups));
+        } catch (Exception e) {
+            log.error("获取管理员创建的公共分组列表失败，异常信息: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }

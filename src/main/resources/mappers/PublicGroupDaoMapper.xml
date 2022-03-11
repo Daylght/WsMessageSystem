@@ -28,4 +28,17 @@
         from public_group
         where group_name = #{groupName}
     </select>
+
+    <select id="selectPublicGroupsWithAdminId" resultMap="publicGroupMap">
+        select group_id, group_name, max_count, is_admin_created, admin_id
+        from public_group
+        where admin_id = #{adminId}
+    </select>
+
+    <select id="selectPublicGroupsCreatedByOutside"
+            resultMap="publicGroupMap">
+        select group_id, group_name, max_count, is_admin_created, admin_id
+        from public_group
+        where is_admin_created = 0
+    </select>
 </mapper>

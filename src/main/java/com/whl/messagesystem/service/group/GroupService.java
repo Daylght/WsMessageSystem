@@ -99,4 +99,17 @@ public interface GroupService {
      * @return
      */
     ResponseEntity<Result> kickGroupMember(String userId);
+
+    /**
+     * 根据指定的管理员id，获取这个管理员创建的公共分组列表
+     * @param adminId
+     * @return
+     */
+    ResponseEntity<Result> listPublicGroupsCreatedByAdmin(String adminId);
+
+    /**
+     * 获取以外部调用形式创建的公共分组列表
+     * @return
+     */
+    ResponseEntity<Result> listPublicGroupsCreatedByOutside();
 }
