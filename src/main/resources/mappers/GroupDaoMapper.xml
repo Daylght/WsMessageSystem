@@ -41,6 +41,12 @@
         </foreach>
     </delete>
 
+    <delete id="deleteGroupByGroupId">
+        delete
+        from `group`
+        where group_id = #{groupId}
+    </delete>
+
     <select id="findGroupByGroupName" resultMap="groupMap">
         select group_id, group_name, max_count, admin_id, creator_id
         from `group`

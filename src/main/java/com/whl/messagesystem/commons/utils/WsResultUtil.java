@@ -25,6 +25,14 @@ public class WsResultUtil {
         return websocketResult;
     }
 
+    public static WebsocketResult<Object> dissmissGroup(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.DISSMISS_GROUP.getType());
+        websocketResult.setMessage(WsResultEnum.DISSMISS_GROUP.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
     public static WebsocketResult<Object> joinGroup(Object data) {
         WebsocketResult<Object> websocketResult = new WebsocketResult<>();
         websocketResult.setType(WsResultEnum.JOIN_GROUP.getType());

@@ -98,6 +98,10 @@ public class GroupController {
         return groupService.listPublicGroupsCreatedByOutside();
     }
 
-    //todo: 完成解散分组的接口
+    @ApiOperation("解散分组(用户)")
+    @DeleteMapping("/dismiss/{groupId}")
+    public ResponseEntity<Result> dismissGroup(@PathVariable("groupId") String groupId, HttpSession session) {
+        return groupService.dismissGroup(groupId, session);
+    }
 
 }

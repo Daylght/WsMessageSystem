@@ -112,4 +112,12 @@ public interface GroupService {
      * @return
      */
     ResponseEntity<Result> listPublicGroupsCreatedByOutside();
+
+    /**
+     * 根据传入的组id解散分组
+     * @param groupId
+     * @param session
+     * @return
+     */
+    ResponseEntity<Result> dismissGroup(String groupId, HttpSession session);
 }

@@ -99,4 +99,11 @@ public interface GroupDao {
      * @return
      */
     List<GroupVO> selectAllGroupsAndCreatorsByAdminId(int adminId);
+
+    /**
+     * 根据组id删除这个分组
+     * @param groupId
+     * @return
+     */
+    boolean deleteGroupByGroupId(int groupId);
 }

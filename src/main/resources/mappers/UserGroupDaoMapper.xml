@@ -9,10 +9,16 @@
         values (#{userGroup.userId}, #{userGroup.groupId})
     </insert>
 
-    <delete id="deleteAnUserGroup">
+    <delete id="deleteAnUserGroupByUserId">
         delete
         from user_group
         where user_id = #{userId}
+    </delete>
+
+    <delete id="deleteUserGroupsByGroupId">
+        delete
+        from user_group
+        where group_id = #{groupId}
     </delete>
 
     <select id="selectUserGroupCountByUserId" resultType="java.lang.Integer">

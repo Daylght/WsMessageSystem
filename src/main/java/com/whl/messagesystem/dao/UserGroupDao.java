@@ -24,5 +24,12 @@ public interface UserGroupDao {
      * @param userId
      * @return
      */
-    boolean deleteAnUserGroup(int userId);
+    boolean deleteAnUserGroupByUserId(int userId);
+
+    /**
+     * 根据groupId删除这个组所有的成员关系
+     * @param groupId
+     * @return
+     */
+    boolean deleteUserGroupsByGroupId(int groupId);
 }

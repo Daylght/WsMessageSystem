@@ -258,7 +258,7 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public ResponseEntity<Result> quitGroup(int userId, HttpSession session) {
         try {
-            if (userGroupDao.deleteAnUserGroup(userId)) {
+            if (userGroupDao.deleteAnUserGroupByUserId(userId)) {
                 SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
                 String groupName = sessionInfo.getGroup().getGroupName();
 
@@ -365,7 +365,7 @@ public class GroupServiceImpl implements GroupService {
 
             String groupName = groupDao.selectGroupByUserId(Integer.parseInt(userId)).getGroupName();
 
-            if (userGroupDao.deleteAnUserGroup(Integer.parseInt(userId))) {
+            if (userGroupDao.deleteAnUserGroupByUserId(Integer.parseInt(userId))) {
                 Channel channel = new PrivateGroupMessageChannel(groupName);
                 String message = JSONObject.toJSONString(WsResultUtil.kickMember(userId));
                 messageServiceImpl.publish(channel.getChannelName(), new TextMessage(message));
@@ -403,6 +403,38 @@ public class GroupServiceImpl implements GroupService {
             return ResponseEntity.ok(ResultUtil.success(publicGroups));
         } catch (Exception e) {
             log.error("获取管理员创建的公共分组列表失败，异常信息: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    @Override
+    public ResponseEntity<Result> dismissGroup(String groupId, HttpSession session) {
+        try {
+            if (StringUtils.isEmpty(groupId)) {
+                throw new NullPointerException("参数为空");
+            }
+
+            if (userGroupDao.deleteUserGroupsByGroupId(Integer.parseInt(groupId)) && groupDao.deleteGroupByGroupId(Integer.parseInt(groupId))) {
+                SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+                String groupName = sessionInfo.getGroup().getGroupName();
+                String adminId = sessionInfo.getAdmin().getAdminId();
+                sessionInfo.setGroup(null);
+
+                String deleteGroupMessage = JSONObject.toJSONString(WsResultUtil.dissmissGroup(groupId));
+                TextMessage textMessage = new TextMessage(deleteGroupMessage);
+
+                Channel privateGroupMessageChannel = new PrivateGroupMessageChannel(groupName);
+                messageServiceImpl.publish(privateGroupMessageChannel.getChannelName(), textMessage);
+
+                Channel groupHallListChannel = new GroupHallListChannel(adminId);
+                messageServiceImpl.publish(groupHallListChannel.getChannelName(), textMessage);
+
+                return ResponseEntity.ok(ResultUtil.success());
+            }
+
+            throw new SQLException("user_group表删除关系失败 || group表删除记录失败");
+        } catch (Exception e) {
+            log.error("解散分组失败，组id: {}，异常信息: {}", groupId, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
