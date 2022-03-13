@@ -11,7 +11,8 @@ public enum WsResultEnum {
     JOIN_GROUP(3, "加入分组"),
     QUIT_GROUP(4, "退出分组"),
     KICK_MEMBER(5, "踢出分组"),
-    DISSMISS_GROUP(6,"解散分组");
+    DISMISS_GROUP(6, "解散分组"),
+    CREATE_PUBLIC_GROUP(7, "新增公共分组");
 
     private int type;
     private String message;

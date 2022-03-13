@@ -32,7 +32,7 @@ public class GroupController {
         return groupService.createGroup(createGroupDto, session);
     }
 
-    @ApiOperation("创建外部分组(管理员)(外部调用)")
+    @ApiOperation("创建公共分组(管理员)")
     @PostMapping("/public/create")
     public ResponseEntity<Result> createPublicGroup(@RequestBody CreatePublicGroupDTO createPublicGroupDTO) {
         return groupService.createPublicGroup(createPublicGroupDTO);

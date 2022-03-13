@@ -10,6 +10,12 @@ import org.apache.ibatis.annotations.Param;
  */
 @Mapper
 public interface UserGroupDao {
+
+    /**
+     * 在user_gorup表中插入一条关系
+     * @param userGroup
+     * @return
+     */
     boolean insertAnUserGroup(@Param("userGroup") UserGroup userGroup);
 
     /**
@@ -31,5 +37,5 @@ public interface UserGroupDao {
      * @param groupId
      * @return
      */
-    boolean deleteUserGroupsByGroupId(int groupId);
+    int deleteUserGroupsByGroupId(int groupId);
 }

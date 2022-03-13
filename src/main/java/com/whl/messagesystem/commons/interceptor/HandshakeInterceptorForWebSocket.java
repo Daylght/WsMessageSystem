@@ -2,6 +2,7 @@ package com.whl.messagesystem.commons.interceptor;
 
 import com.whl.messagesystem.commons.channel.Channel;
 import com.whl.messagesystem.commons.channel.group.PrivateGroupMessageChannel;
+import com.whl.messagesystem.commons.channel.management.group.PublicGroupCreatedByAdminListChannel;
 import com.whl.messagesystem.commons.channel.user.GroupHallListChannel;
 import com.whl.messagesystem.commons.constant.GroupConstant;
 import com.whl.messagesystem.commons.utils.ResultUtil;
@@ -45,20 +46,19 @@ public class HandshakeInterceptorForWebSocket implements HandshakeInterceptor {
 
             Channel channel = null;
 
-            // todo: 和hxy商量管理员端的页面，确定要使用websocket的场景，给出相应的channel实现
             switch (scene) {
                 case "groupHallList": {
                     channel = new GroupHallListChannel(adminId);
                     break;
                 }
                 case "privateGroupMessage": {
-                    /**
-                     * 下面这一块if用于处理groupName是错误的组名的情况（没有这个组）
+                     /*
+                      下面这一块if用于处理groupName是错误的组名的情况（没有这个组）
                      */
                     if (!groupService.isExistGroup(groupName) && groupName != null) {
                         //获取响应对象
                         final HttpServletResponse servletResponse = ((ServletServerHttpResponse) serverHttpResponse).getServletResponse();
-                        final Result responseMessage = ResultUtil.error("比赛分组不存在");
+                        final Result<Object> responseMessage = ResultUtil.error("比赛分组不存在");
                         //设置必要响应头并进行数据响应
                         servletResponse.setContentType("application/json;charset=UTF-8");
                         servletResponse.getWriter().print(responseMessage);
@@ -69,10 +69,15 @@ public class HandshakeInterceptorForWebSocket implements HandshakeInterceptor {
                     channel = new PrivateGroupMessageChannel(groupName);
                     break;
                 }
+                case "publicGroupCreatedByAdminList": {
+                    channel = new PublicGroupCreatedByAdminListChannel(adminId);
+                    break;
+                }
                 default: {
                 }
             }
 
+            assert channel != null;
             String channelName = channel.getChannelName();
             map.put("channelName", channelName);
 

@@ -8,7 +8,7 @@ import com.whl.messagesystem.commons.channel.Channel;
  */
 public class GroupHallListChannel implements Channel {
 
-    private static final String scene = "groupHallList";
+    private static final String SCENE = "groupHallList";
 
     private String adminId = null;
 
@@ -18,7 +18,6 @@ public class GroupHallListChannel implements Channel {
 
     @Override
     public String getChannelName() {
-        StringBuilder name = new StringBuilder(scene);
-        return name.append("#").append(adminId).toString();
+        return SCENE + "#" + adminId;
     }
 }

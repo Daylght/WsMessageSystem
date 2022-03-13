@@ -47,11 +47,10 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         super.afterConnectionClosed(session, status);
-        log.info("afterConnectionClosed");
         //获取链接
-        String pubsubGroupName = getChannelName(session);
-        webSocketSessionsMap.get(pubsubGroupName).remove(session);
-        log.info("从{}小组中移除当前用户的websocket会话", pubsubGroupName);
+        String channelName = getChannelName(session);
+        webSocketSessionsMap.get(channelName).remove(session);
+        log.info("从{}频道中移除当前用户的websocket会话", channelName);
     }
 
     @Override

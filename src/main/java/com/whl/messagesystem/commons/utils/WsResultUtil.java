@@ -17,6 +17,14 @@ public class WsResultUtil {
         return websocketResult;
     }
 
+    public static WebsocketResult<Object> createPublicGroup(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.CREATE_PUBLIC_GROUP.getType());
+        websocketResult.setMessage(WsResultEnum.CREATE_PUBLIC_GROUP.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
     public static WebsocketResult<Object> deleteGroup(Object data) {
         WebsocketResult<Object> websocketResult = new WebsocketResult<>();
         websocketResult.setType(WsResultEnum.DELETE_GROUP.getType());
@@ -25,10 +33,10 @@ public class WsResultUtil {
         return websocketResult;
     }
 
-    public static WebsocketResult<Object> dissmissGroup(Object data) {
+    public static WebsocketResult<Object> dismissGroup(Object data) {
         WebsocketResult<Object> websocketResult = new WebsocketResult<>();
-        websocketResult.setType(WsResultEnum.DISSMISS_GROUP.getType());
-        websocketResult.setMessage(WsResultEnum.DISSMISS_GROUP.getMessage());
+        websocketResult.setType(WsResultEnum.DISMISS_GROUP.getType());
+        websocketResult.setMessage(WsResultEnum.DISMISS_GROUP.getMessage());
         websocketResult.setData(data);
         return websocketResult;
     }

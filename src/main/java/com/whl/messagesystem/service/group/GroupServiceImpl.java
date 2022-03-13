@@ -3,6 +3,7 @@ package com.whl.messagesystem.service.group;
 import com.alibaba.fastjson.JSONObject;
 import com.whl.messagesystem.commons.channel.Channel;
 import com.whl.messagesystem.commons.channel.group.PrivateGroupMessageChannel;
+import com.whl.messagesystem.commons.channel.management.group.PublicGroupCreatedByAdminListChannel;
 import com.whl.messagesystem.commons.channel.user.GroupHallListChannel;
 import com.whl.messagesystem.commons.constant.ResultEnum;
 import com.whl.messagesystem.commons.utils.ResultUtil;
@@ -318,27 +319,36 @@ public class GroupServiceImpl implements GroupService {
 
             String groupName = createPublicGroupDTO.getGroupName();
             Integer maxCount = createPublicGroupDTO.getMaxCount();
-            String adminId = createPublicGroupDTO.getAdminId() == null ? null : createPublicGroupDTO.getAdminId();
+            String adminId = createPublicGroupDTO.getAdminId();
 
             if (isExistPublicGroup(groupName)) {
                 log.warn("该组名已被使用");
-                return ResponseEntity.ok(new Result(ResultEnum.ERROR.getStatus(), "该组名已被使用!", null));
+                return ResponseEntity.ok(new Result<>(ResultEnum.ERROR.getStatus(), "该组名已被使用!", null));
             }
 
             PublicGroup publicGroup = new PublicGroup();
             publicGroup.setGroupName(groupName);
             publicGroup.setMaxCount(maxCount == 0 ? DEFAULT_MEMBER_COUNT : maxCount);
-            publicGroup.setAdminCreated(adminId != null);
+            publicGroup.setAdminCreated(true);
             publicGroup.setAdminId(adminId);
 
             if (publicGroupDao.insertPublicGroup(publicGroup)) {
                 publicGroup = publicGroupDao.selectPublicGroupByName(groupName);
-                return ResponseEntity.ok(ResultUtil.success(publicGroup));
+                PublicGroupCreatedByAdminListChannel channel = new PublicGroupCreatedByAdminListChannel(adminId);
+
+                Map<String, Object> map = new HashMap<>(2);
+                map.put("publicGroup", publicGroup);
+                map.put("link", channel.getChannelLink());
+                log.info("ws地址为: {}", channel.getChannelLink());
+                String message = JSONObject.toJSONString(WsResultUtil.createPublicGroup(map));
+
+                messageServiceImpl.publish(channel.getChannelName(), new TextMessage(message));
+                return ResponseEntity.ok(ResultUtil.success(message));
             }
 
             throw new SQLException("public_group表插入记录失败");
         } catch (Exception e) {
-            log.error("创建公共分组失败");
+            log.error("创建公共分组失败: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
@@ -414,13 +424,16 @@ public class GroupServiceImpl implements GroupService {
                 throw new NullPointerException("参数为空");
             }
 
-            if (userGroupDao.deleteUserGroupsByGroupId(Integer.parseInt(groupId)) && groupDao.deleteGroupByGroupId(Integer.parseInt(groupId))) {
+            if (userGroupDao.deleteUserGroupsByGroupId(Integer.parseInt(groupId)) >= 0 && groupDao.deleteGroupByGroupId(Integer.parseInt(groupId))) {
                 SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
                 String groupName = sessionInfo.getGroup().getGroupName();
                 String adminId = sessionInfo.getAdmin().getAdminId();
                 sessionInfo.setGroup(null);
 
-                String deleteGroupMessage = JSONObject.toJSONString(WsResultUtil.dissmissGroup(groupId));
+                Map<String, Object> map = new HashMap<>(2);
+                map.put("creatorId", sessionInfo.getUser().getUserId());
+                map.put("groupId", groupId);
+                String deleteGroupMessage = JSONObject.toJSONString(WsResultUtil.dismissGroup(map));
                 TextMessage textMessage = new TextMessage(deleteGroupMessage);
 
                 Channel privateGroupMessageChannel = new PrivateGroupMessageChannel(groupName);

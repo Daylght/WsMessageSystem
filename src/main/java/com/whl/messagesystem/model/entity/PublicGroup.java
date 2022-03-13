@@ -1,6 +1,6 @@
 package com.whl.messagesystem.model.entity;
 
-import lombok.Data;
+import lombok.*;
 
 /**
  * @author whl
