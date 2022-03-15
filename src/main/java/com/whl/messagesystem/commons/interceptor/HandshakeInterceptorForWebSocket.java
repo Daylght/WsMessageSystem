@@ -2,10 +2,13 @@ package com.whl.messagesystem.commons.interceptor;
 
 import com.whl.messagesystem.commons.channel.Channel;
 import com.whl.messagesystem.commons.channel.group.PrivateGroupMessageChannel;
+import com.whl.messagesystem.commons.channel.group.PublicGroupMessageChannel;
 import com.whl.messagesystem.commons.channel.management.group.PublicGroupCreatedByAdminListChannel;
+import com.whl.messagesystem.commons.channel.management.group.PublicGroupCreatedByOutsideListChannel;
 import com.whl.messagesystem.commons.channel.user.GroupHallListChannel;
 import com.whl.messagesystem.commons.constant.GroupConstant;
 import com.whl.messagesystem.commons.utils.ResultUtil;
+import com.whl.messagesystem.dao.PublicGroupDao;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.service.group.GroupService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,6 +36,9 @@ public class HandshakeInterceptorForWebSocket implements HandshakeInterceptor {
     @Resource
     GroupService groupService;
 
+    @Resource
+    PublicGroupDao publicGroupDao;
+
     @Override
     public boolean beforeHandshake(ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse, WebSocketHandler webSocketHandler, Map<String, Object> map) throws Exception {
         log.info("拦截器：beforeHandshake");
@@ -51,6 +57,10 @@ public class HandshakeInterceptorForWebSocket implements HandshakeInterceptor {
                     channel = new GroupHallListChannel(adminId);
                     break;
                 }
+                case "publicGroupCreatedByOutsideList":{
+                    channel = new PublicGroupCreatedByOutsideListChannel();
+                    break;
+                }
                 case "privateGroupMessage": {
                      /*
                       下面这一块if用于处理groupName是错误的组名的情况（没有这个组）
@@ -58,7 +68,7 @@ public class HandshakeInterceptorForWebSocket implements HandshakeInterceptor {
                     if (!groupService.isExistGroup(groupName) && groupName != null) {
                         //获取响应对象
                         final HttpServletResponse servletResponse = ((ServletServerHttpResponse) serverHttpResponse).getServletResponse();
-                        final Result<Object> responseMessage = ResultUtil.error("比赛分组不存在");
+                        final Result<Object> responseMessage = ResultUtil.error("私有分组不存在");
                         //设置必要响应头并进行数据响应
                         servletResponse.setContentType("application/json;charset=UTF-8");
                         servletResponse.getWriter().print(responseMessage);
@@ -69,8 +79,19 @@ public class HandshakeInterceptorForWebSocket implements HandshakeInterceptor {
                     channel = new PrivateGroupMessageChannel(groupName);
                     break;
                 }
-                case "publicGroupCreatedByAdminList": {
-                    channel = new PublicGroupCreatedByAdminListChannel(adminId);
+                case "publicGroupMessage": {
+                    if (publicGroupDao.selectPublicGroupCountByName(groupName) == 0) {
+                        //获取响应对象
+                        final HttpServletResponse servletResponse = ((ServletServerHttpResponse) serverHttpResponse).getServletResponse();
+                        final Result<Object> responseMessage = ResultUtil.error("公共分组不存在");
+                        //设置必要响应头并进行数据响应
+                        servletResponse.setContentType("application/json;charset=UTF-8");
+                        servletResponse.getWriter().print(responseMessage);
+                        servletResponse.flushBuffer();
+                        return false;
+                    }
+
+                    channel = new PublicGroupMessageChannel(groupName);
                     break;
                 }
                 default: {

@@ -3,7 +3,7 @@ package com.whl.messagesystem.service.group;
 import com.alibaba.fastjson.JSONObject;
 import com.whl.messagesystem.commons.channel.Channel;
 import com.whl.messagesystem.commons.channel.group.PrivateGroupMessageChannel;
-import com.whl.messagesystem.commons.channel.management.group.PublicGroupCreatedByAdminListChannel;
+import com.whl.messagesystem.commons.channel.management.group.PublicGroupCreatedByOutsideListChannel;
 import com.whl.messagesystem.commons.channel.user.GroupHallListChannel;
 import com.whl.messagesystem.commons.constant.ResultEnum;
 import com.whl.messagesystem.commons.utils.ResultUtil;
@@ -12,6 +12,7 @@ import com.whl.messagesystem.dao.*;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.CreateGroupDTO;
 import com.whl.messagesystem.model.dto.CreatePublicGroupDTO;
+import com.whl.messagesystem.model.dto.OutsideCreatePublicGroupDTO;
 import com.whl.messagesystem.model.dto.SessionInfo;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.PublicGroup;
@@ -321,6 +322,7 @@ public class GroupServiceImpl implements GroupService {
             Integer maxCount = createPublicGroupDTO.getMaxCount();
             String adminId = createPublicGroupDTO.getAdminId();
 
+            // 不允许创建同名的公共分组
             if (isExistPublicGroup(groupName)) {
                 log.warn("该组名已被使用");
                 return ResponseEntity.ok(new Result<>(ResultEnum.ERROR.getStatus(), "该组名已被使用!", null));
@@ -334,16 +336,8 @@ public class GroupServiceImpl implements GroupService {
 
             if (publicGroupDao.insertPublicGroup(publicGroup)) {
                 publicGroup = publicGroupDao.selectPublicGroupByName(groupName);
-                PublicGroupCreatedByAdminListChannel channel = new PublicGroupCreatedByAdminListChannel(adminId);
-
-                Map<String, Object> map = new HashMap<>(2);
-                map.put("publicGroup", publicGroup);
-                map.put("link", channel.getChannelLink());
-                log.info("ws地址为: {}", channel.getChannelLink());
-                String message = JSONObject.toJSONString(WsResultUtil.createPublicGroup(map));
-
-                messageServiceImpl.publish(channel.getChannelName(), new TextMessage(message));
-                return ResponseEntity.ok(ResultUtil.success(message));
+                // 管理员创建公共分组后是不需要进行广播的，因为只有他才能看见自己创建的公共分组列表
+                return ResponseEntity.ok(ResultUtil.success(publicGroup));
             }
 
             throw new SQLException("public_group表插入记录失败");
@@ -448,6 +442,73 @@ public class GroupServiceImpl implements GroupService {
             throw new SQLException("user_group表删除关系失败 || group表删除记录失败");
         } catch (Exception e) {
             log.error("解散分组失败，组id: {}，异常信息: {}", groupId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    @Override
+    public ResponseEntity<Result> dismissPublicGroup(String groupId) {
+        try {
+            if (StringUtils.isEmpty(groupId)) {
+                throw new NullPointerException("参数为空");
+            }
+
+            PublicGroup publicGroup = publicGroupDao.selectPublicGroupById(Integer.parseInt(groupId));
+            if (ObjectUtils.isEmpty(publicGroup)) {
+                return ResponseEntity.ok(new Result<>(ResultEnum.ERROR.getStatus(), "该分组不存在或已被解散", null));
+            }
+
+            boolean adminCreated = publicGroup.isAdminCreated();
+
+            if ((publicGroupDao.deletePublicGroupById(Integer.parseInt(groupId)) == 1)) {
+                // 如果不是某个管理员创建的分组，那么其它管理员也应该实时更新组列表，因为所有的管理员都能看到组列表
+                if (!adminCreated) {
+                    Channel channel = new PublicGroupCreatedByOutsideListChannel();
+                    String message = JSONObject.toJSONString(WsResultUtil.dismissPublicGroup(new HashMap<String, Object>(1).put("groupId", groupId)));
+                    messageServiceImpl.publish(channel.getChannelName(), new TextMessage(message));
+                }
+                // 如果是管理员创建的分组，不需要通过ws进行列表实时更新，因为只有一个管理员能看到组列表
+                return ResponseEntity.ok(ResultUtil.success());
+            }
+
+            throw new SQLException("public_group表删除记录失败");
+        } catch (Exception e) {
+            log.error("解散公共分组失败，组id: {}，异常信息: {}", groupId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    @Override
+    public ResponseEntity<Result> outsideCreatePublicGroup(OutsideCreatePublicGroupDTO outsideCreatePublicGroupDTO) {
+        try {
+            if (ObjectUtils.isEmpty(outsideCreatePublicGroupDTO)) {
+                throw new NullPointerException("参数为空");
+            }
+
+            String groupName = outsideCreatePublicGroupDTO.getGroupName();
+            Integer maxCount = outsideCreatePublicGroupDTO.getMaxCount();
+
+            // 不允许创建同名的公共分组
+            if (isExistPublicGroup(groupName)) {
+                log.warn("该组名已被使用");
+                return ResponseEntity.ok(new Result<>(ResultEnum.ERROR.getStatus(), "该组名已被使用!", null));
+            }
+
+            PublicGroup publicGroup = new PublicGroup();
+            publicGroup.setGroupName(groupName);
+            publicGroup.setMaxCount(maxCount == 0 ? DEFAULT_MEMBER_COUNT : maxCount);
+            publicGroup.setAdminCreated(false);
+            publicGroup.setAdminId(null);
+
+            if (publicGroupDao.insertPublicGroup(publicGroup)) {
+                publicGroup = publicGroupDao.selectPublicGroupByName(groupName);
+                // 管理员创建公共分组后是不需要进行广播的，因为只有他才能看见自己创建的公共分组列表
+                return ResponseEntity.ok(ResultUtil.success(publicGroup));
+            }
+
+            throw new SQLException("public_group表插入记录失败");
+        } catch (Exception e) {
+            log.error("外部调用创建公共分组失败，参数: {}，异常信息: {}", outsideCreatePublicGroupDTO, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }

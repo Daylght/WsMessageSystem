@@ -17,6 +17,12 @@
         VALUES (#{publicGroup.groupName}, #{publicGroup.maxCount}, #{publicGroup.adminCreated}, #{publicGroup.adminId})
     </insert>
 
+    <delete id="deletePublicGroupById">
+        delete
+        from public_group
+        where group_id = #{groupId}
+    </delete>
+
     <select id="selectPublicGroupCountByName" resultType="java.lang.Integer">
         select count(*)
         from public_group
@@ -40,5 +46,11 @@
         select group_id, group_name, max_count, is_admin_created, admin_id
         from public_group
         where is_admin_created = 0
+    </select>
+
+    <select id="selectPublicGroupById" resultMap="publicGroupMap">
+        select group_id, group_name, max_count, is_admin_created, admin_id
+        from public_group
+        where group_id = #{groupId}
     </select>
 </mapper>

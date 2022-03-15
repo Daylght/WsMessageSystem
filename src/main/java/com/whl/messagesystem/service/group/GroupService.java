@@ -3,6 +3,7 @@ package com.whl.messagesystem.service.group;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.CreateGroupDTO;
 import com.whl.messagesystem.model.dto.CreatePublicGroupDTO;
+import com.whl.messagesystem.model.dto.OutsideCreatePublicGroupDTO;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.UserGroup;
 import org.springframework.http.ResponseEntity;
@@ -120,4 +121,18 @@ public interface GroupService {
      * @return
      */
     ResponseEntity<Result> dismissGroup(String groupId, HttpSession session);
+
+    /**
+     * 根据组id解散指定的公共分组
+     * @param groupId
+     * @return
+     */
+    ResponseEntity<Result> dismissPublicGroup(String groupId);
+
+    /**
+     * 由外部调用创建公共分组
+     * @param outsideCreatePublicGroupDTO
+     * @return
+     */
+    ResponseEntity<Result> outsideCreatePublicGroup(OutsideCreatePublicGroupDTO outsideCreatePublicGroupDTO);
 }

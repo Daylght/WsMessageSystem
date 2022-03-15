@@ -2,7 +2,7 @@ package com.whl.messagesystem.commons.channel.management.group;
 
 import com.whl.messagesystem.commons.channel.Channel;
 
-import java.net.InetAddress;
+import java.net.Inet4Address;
 import java.net.UnknownHostException;
 
 /**
@@ -30,15 +30,7 @@ public class PublicGroupCreatedByAdminListChannel implements Channel {
      * @return
      */
     public String getChannelLink() {
-        String localHostAddress = null;
-        try {
-            InetAddress address = InetAddress.getLocalHost();
-            localHostAddress = address.getHostAddress();
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            return "获取链接地址失败";
-        }
-
-        return "ws://" + localHostAddress + ":8888" + "/websocket?groupName=NoGroup&adminId=" + adminId + "&scene=" + SCENE;
+        // fixme:这里不应该写死，应该写成动态获取本机ip和端口的形式
+        return "ws://47.108.139.22:8888/websocket?groupName=NoGroup&adminId=" + adminId + "&scene=" + SCENE;
     }
 }

@@ -3,6 +3,7 @@ package com.whl.messagesystem.controller;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.CreateGroupDTO;
 import com.whl.messagesystem.model.dto.CreatePublicGroupDTO;
+import com.whl.messagesystem.model.dto.OutsideCreatePublicGroupDTO;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.UserGroup;
 import com.whl.messagesystem.service.group.GroupService;
@@ -36,6 +37,12 @@ public class GroupController {
     @PostMapping("/public/create")
     public ResponseEntity<Result> createPublicGroup(@RequestBody CreatePublicGroupDTO createPublicGroupDTO) {
         return groupService.createPublicGroup(createPublicGroupDTO);
+    }
+
+    @ApiOperation("解散公共分组(管理员)(外部调用)")
+    @DeleteMapping("/public/dismiss/{groupId}")
+    public ResponseEntity<Result> dismissPublicGroup(@PathVariable("groupId") String groupId) {
+        return groupService.dismissPublicGroup(groupId);
     }
 
     @ApiOperation("根据管理员id获取他创建的公共分组列表(管理员)")
@@ -102,6 +109,12 @@ public class GroupController {
     @DeleteMapping("/dismiss/{groupId}")
     public ResponseEntity<Result> dismissGroup(@PathVariable("groupId") String groupId, HttpSession session) {
         return groupService.dismissGroup(groupId, session);
+    }
+
+    @ApiOperation("外部调用创建公共分组(外部调用)")
+    @PostMapping("/public/outsideCreate")
+    public ResponseEntity<Result> outsideCreatePublicGroup(@RequestBody OutsideCreatePublicGroupDTO outsideCreatePublicGroupDTO) {
+        return groupService.outsideCreatePublicGroup(outsideCreatePublicGroupDTO);
     }
 
 }

@@ -8,7 +8,7 @@ import com.whl.messagesystem.commons.channel.Channel;
  */
 public class PrivateGroupMessageChannel implements Channel {
 
-    private static final String scene = "privateGroupMessage";
+    private static final String SCENE = "privateGroupMessage";
 
     private String groupName = null;
 
@@ -18,6 +18,6 @@ public class PrivateGroupMessageChannel implements Channel {
 
     @Override
     public String getChannelName() {
-        return scene + "#" + groupName;
+        return SCENE + "#" + groupName;
     }
 }

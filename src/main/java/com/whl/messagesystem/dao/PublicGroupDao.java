@@ -45,4 +45,19 @@ public interface PublicGroupDao {
      * @return
      */
     List<PublicGroup> selectPublicGroupsCreatedByOutside();
+
+    /**
+     * 在public_group表中删除指定的公共分组
+     * @param groupId
+     * @return
+     */
+    int deletePublicGroupById(int groupId);
+
+    /**
+     * 在public_group表中根据组id查询一条记录
+     * @param groupId
+     * @return
+     */
+    PublicGroup selectPublicGroupById(int groupId);
+
 }
