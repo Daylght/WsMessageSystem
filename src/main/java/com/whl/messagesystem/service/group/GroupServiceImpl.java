@@ -162,7 +162,7 @@ public class GroupServiceImpl implements GroupService {
 
             throw new SQLException("group表插入记录失败");
         } catch (Exception e) {
-            log.error("创建分组失败: {}", e.getMessage());
+            log.error("用户创建私有分组失败: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
@@ -521,6 +521,54 @@ public class GroupServiceImpl implements GroupService {
             return ResponseEntity.ok(ResultUtil.success(groupVos));
         } catch (Exception e) {
             log.error("获取未指定管理员的分组列表失败，异常信息: {}",e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    @Override
+    public ResponseEntity<Result> adminCreateGroup(CreateGroupDTO createGroupDTO) {
+        try {
+            if (ObjectUtils.isEmpty(createGroupDTO)) {
+                throw new NullPointerException("参数为空");
+            }
+
+            String groupName = createGroupDTO.getGroupName();
+            String creatorId = createGroupDTO.getCreatorId();
+            String adminId = createGroupDTO.getAdminId();
+            int maxCount = createGroupDTO.getMaxCount();
+            Boolean adminCreated = createGroupDTO.getAdminCreated();
+
+            /*
+            在插入记录前先判断有没有组重名的情况
+             */
+            if (isExistGroup(groupName)) {
+                log.warn("该组名已被使用");
+                return ResponseEntity.ok(new Result(ResultEnum.ERROR.getStatus(), "该组名已被使用!", null));
+            }
+
+            /*
+            如果未指定分组的人数上限，则默认为20
+             */
+            if (groupDao.insertAGroup(groupName, creatorId, adminId, maxCount == 0 ? DEFAULT_MEMBER_COUNT : maxCount, adminCreated)) {
+                // 查出本组的信息并传给前端
+                Group group = groupDao.findGroupByGroupName(groupName);
+                GroupVO groupVo = new GroupVO(group);
+                groupVo.setAdminName(adminDao.selectAdminByUserId(Integer.parseInt(creatorId)).getAdminName());
+                groupVo.setCreatorName(userDao.selectUserWithUserId(Integer.parseInt(creatorId)).getUserName());
+
+                String message = JSONObject.toJSONString(WsResultUtil.createGroup(groupVo));
+
+                Channel channel = new GroupHallListChannel(adminId);
+
+                // 向大厅广播刚创建的分组的相关信息
+                messageServiceImpl.publish(channel.getChannelName(), new TextMessage(message));
+
+                return ResponseEntity.ok(ResultUtil.success(group));
+            }
+
+            throw new SQLException("group表插入记录失败");
+        } catch (Exception e) {
+            log.error("管理员创建私有分组失败: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }

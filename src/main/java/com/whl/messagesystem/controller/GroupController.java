@@ -32,6 +32,12 @@ public class GroupController {
     public ResponseEntity<Result> createGroup(@RequestBody CreateGroupDTO createGroupDto, HttpSession session) {
         return groupService.createGroup(createGroupDto, session);
     }
+    
+    @ApiOperation("创建内部分组(管理员)")
+    @PostMapping("/adminCreate")
+    public ResponseEntity<Result> adminCreateGroup(@RequestBody CreateGroupDTO createGroupDTO) {
+        return groupService.adminCreateGroup(createGroupDTO);
+    }
 
     @ApiOperation("创建公共分组(管理员)")
     @PostMapping("/public/create")

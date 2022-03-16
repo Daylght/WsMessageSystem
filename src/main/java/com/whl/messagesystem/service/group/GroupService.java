@@ -141,4 +141,11 @@ public interface GroupService {
      * @return
      */
     ResponseEntity<Result> listGroupsWithoutAdmin();
+
+    /**
+     * 由管理员创建内部分组
+     * @param createGroupDTO
+     * @return
+     */
+    ResponseEntity<Result> adminCreateGroup(CreateGroupDTO createGroupDTO);
 }
