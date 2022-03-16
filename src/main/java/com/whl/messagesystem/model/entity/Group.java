@@ -13,4 +13,5 @@ public class Group {
     private int maxCount;
     private String adminId;
     private String creatorId;
+    private boolean adminCreated;
 }

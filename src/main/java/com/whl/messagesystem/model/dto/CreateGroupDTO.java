@@ -16,4 +16,5 @@ public class CreateGroupDTO {
     private Integer maxCount;
     private String adminId;
     private String creatorId;
+    private Boolean adminCreated;
 }

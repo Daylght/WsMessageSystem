@@ -10,6 +10,7 @@
         <result column="max_count" property="maxCount"/>
         <result column="admin_id" property="adminId"/>
         <result column="creator_id" property="creatorId"/>
+        <result column="is_admin_created" property="adminCreated"/>
     </resultMap>
 
     <resultMap id="groupVoMap" type="com.whl.messagesystem.model.vo.GroupVO">
@@ -23,8 +24,8 @@
     </resultMap>
 
     <insert id="insertAGroup">
-        insert into `group` (group_name, max_count, admin_id, creator_id)
-        VALUES (#{groupName}, #{maxCount}, #{adminId}, #{creatorId})
+        insert into `group` (group_id, group_name, max_count, admin_id, creator_id, is_admin_created)
+        VALUES (#{groupName}, #{maxCount}, #{adminId}, #{creatorId}, #{adminCreated})
     </insert>
 
     <update id="updateGroup">
@@ -48,31 +49,38 @@
     </delete>
 
     <select id="findGroupByGroupName" resultMap="groupMap">
-        select group_id, group_name, max_count, admin_id, creator_id
+        select group_id, group_name, max_count, admin_id, creator_id, is_admin_created
         from `group`
         where group_name = #{groupName}
     </select>
 
     <select id="selectAllGroups" resultMap="groupMap">
-        select group_id, group_name, max_count, admin_id, creator_id
+        select group_id, group_name, max_count, admin_id, creator_id, is_admin_created
         from `group`
     </select>
 
     <select id="selectGroupByGroupId" resultMap="groupMap">
-        select group_id, group_name, max_count, admin_id, creator_id
+        select group_id, group_name, max_count, admin_id, creator_id, is_admin_created
         from `group`
         where group_id = #{groupId}
     </select>
 
     <select id="selectGroupByUserId" resultMap="groupMap">
-        select g.group_id, g.group_name, g.max_count, g.admin_id, g.creator_id
+        select g.group_id, g.group_name, g.max_count, g.admin_id, g.creator_id, g.is_admin_created
         from `group` g
                  left join user_group ug on g.group_id = ug.group_id
         where ug.user_id = #{userId}
     </select>
 
     <select id="selectAllGroupsAndCreators" resultMap="groupVoMap">
-        select group_id, group_name, max_count, `group`.admin_id, creator_id, user_name, admin_name
+        select group_id,
+               group_name,
+               max_count,
+               `group`.admin_id,
+               creator_id,
+               is_admin_created,
+               user_name,
+               admin_name
         from `group`,
              user,
              admin
@@ -94,19 +102,34 @@
     </select>
 
     <select id="selectGroupByCreatorId" resultMap="groupMap">
-        select group_id, group_name, max_count, admin_id, creator_id
+        select group_id, group_name, max_count, admin_id, creator_id, is_admin_created
         from `group`
         where creator_id = #{creatorId}
     </select>
 
     <select id="selectAllGroupsAndCreatorsByAdminId" resultMap="groupVoMap">
-        select group_id, group_name, max_count, `group`.admin_id, creator_id, user_name, admin_name
+        select group_id,
+               group_name,
+               max_count,
+               `group`.admin_id,
+               creator_id,
+               is_admin_created,
+               user_name,
+               admin_name
         from `group`,
              user,
              admin
         where `group`.creator_id = user.user_id
           and `group`.admin_id = admin.admin_id
           and admin.admin_id = #{adminId}
+    </select>
+
+    <select id="selectAllGroupsAndCreatorsWithoutAdmin" resultMap="groupVoMap">
+        select group_id, group_name, max_count, creator_id, user_name
+        from `group`,
+             user
+        where `group`.creator_id = user.user_id
+          and admin_id = null
     </select>
 
 </mapper>

@@ -20,6 +20,7 @@ public class GroupVO {
     private String adminName;
     private String creatorId;
     private String creatorName;
+    private Boolean adminCreated;
 
     public GroupVO(Group group) {
         this.groupId = group.getGroupId();
@@ -27,5 +28,6 @@ public class GroupVO {
         this.maxCount = group.getMaxCount();
         this.adminId = group.getAdminId();
         this.creatorId = group.getCreatorId();
+        this.adminCreated = group.isAdminCreated();
     }
 }

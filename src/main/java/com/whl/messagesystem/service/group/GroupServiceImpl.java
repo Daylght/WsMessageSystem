@@ -120,6 +120,7 @@ public class GroupServiceImpl implements GroupService {
             String creatorId = createGroupDto.getCreatorId();
             String adminId = createGroupDto.getAdminId();
             int maxCount = createGroupDto.getMaxCount();
+            Boolean adminCreated = createGroupDto.getAdminCreated();
 
             /*
             在插入记录前先判断有没有组重名的情况
@@ -140,7 +141,7 @@ public class GroupServiceImpl implements GroupService {
             /*
             如果未指定分组的人数上限，则默认为20
              */
-            if (groupDao.insertAGroup(groupName, creatorId, adminId, maxCount == 0 ? DEFAULT_MEMBER_COUNT : maxCount)) {
+            if (groupDao.insertAGroup(groupName, creatorId, adminId, maxCount == 0 ? DEFAULT_MEMBER_COUNT : maxCount, adminCreated)) {
                 // 查出本组的信息并传给前端
                 Group group = groupDao.findGroupByGroupName(groupName);
                 SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
@@ -509,6 +510,17 @@ public class GroupServiceImpl implements GroupService {
             throw new SQLException("public_group表插入记录失败");
         } catch (Exception e) {
             log.error("外部调用创建公共分组失败，参数: {}，异常信息: {}", outsideCreatePublicGroupDTO, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    @Override
+    public ResponseEntity<Result> listGroupsWithoutAdmin() {
+        try {
+            List<GroupVO> groupVos = groupDao.selectAllGroupsAndCreatorsWithoutAdmin();
+            return ResponseEntity.ok(ResultUtil.success(groupVos));
+        } catch (Exception e) {
+            log.error("获取未指定管理员的分组列表失败，异常信息: {}",e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }

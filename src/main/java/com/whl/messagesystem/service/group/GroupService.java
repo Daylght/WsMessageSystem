@@ -135,4 +135,10 @@ public interface GroupService {
      * @return
      */
     ResponseEntity<Result> outsideCreatePublicGroup(OutsideCreatePublicGroupDTO outsideCreatePublicGroupDTO);
+
+    /**
+     * 获取未指定管理员的私有分组列表
+     * @return
+     */
+    ResponseEntity<Result> listGroupsWithoutAdmin();
 }

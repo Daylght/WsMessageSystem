@@ -27,7 +27,7 @@ public class GroupController {
     @Resource
     private GroupService groupService;
 
-    @ApiOperation("创建内部分组(用户)(管理员)")
+    @ApiOperation("创建内部分组(用户)")
     @PostMapping("/create")
     public ResponseEntity<Result> createGroup(@RequestBody CreateGroupDTO createGroupDto, HttpSession session) {
         return groupService.createGroup(createGroupDto, session);
@@ -76,9 +76,15 @@ public class GroupController {
     }
 
     @ApiOperation("根据管理员id获取分组列表(用户)(管理员)")
-    @GetMapping("list/{adminId}")
+    @GetMapping("/list/{adminId}")
     public ResponseEntity<Result> getGroupsListByAdminId(@PathVariable("adminId") String adminId) {
         return groupService.getGroupsListByAdminId(adminId);
+    }
+
+    @ApiOperation("获取未指定管理员的私有分组列表")
+    @GetMapping("/list/withoutAdmin")
+    public ResponseEntity<Result> listGroupsWithoutAdmin() {
+        return groupService.listGroupsWithoutAdmin();
     }
 
     @ApiOperation("删除分组(用户)(管理员)")
@@ -100,7 +106,7 @@ public class GroupController {
     }
 
     @ApiOperation("获取外部创建的公共分组列表(管理员)")
-    @GetMapping("/public")
+    @GetMapping("/public/outside")
     public ResponseEntity<Result> listPublicGroupsCreatedByOutside() {
         return groupService.listPublicGroupsCreatedByOutside();
     }

@@ -37,7 +37,7 @@ public interface GroupDao {
      * @param maxCount
      * @return
      */
-    boolean insertAGroup(@Param("groupName") String groupName, @Param("creatorId") String creatorId, @Param("adminId") String adminId, @Param("maxCount") int maxCount);
+    boolean insertAGroup(@Param("groupName") String groupName, @Param("creatorId") String creatorId, @Param("adminId") String adminId, @Param("maxCount") int maxCount, @Param("adminCreated") boolean adminCreated);
 
     /**
      * 查询所有的分组
@@ -106,4 +106,10 @@ public interface GroupDao {
      * @return
      */
     boolean deleteGroupByGroupId(int groupId);
+
+    /**
+     * 查询未指定管理员的私有分组以及创建者信息
+     * @return
+     */
+    List<GroupVO> selectAllGroupsAndCreatorsWithoutAdmin();
 }
