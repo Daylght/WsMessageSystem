@@ -130,6 +130,11 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
         return (String) session.getAttributes().get("channelName");
     }
 
+    /**
+     * 向指定的频道转发信息
+     * @param channelName
+     * @param payload
+     */
     private void passWebsocketPayload(String channelName, String payload) {
         CopyOnWriteArrayList<WebSocketSession> webSocketSessions = webSocketSessionsMap.get(channelName);
         webSocketSessions.forEach(webSocketSession -> {

@@ -43,4 +43,10 @@ public interface UserService {
      * 当前管理员所属的全部用户的列表
      */
     ResponseEntity<Result> listUsersByAdminId(String adminId);
+
+    /**
+     * 获取未指定管理员的用户列表
+     * @return
+     */
+    ResponseEntity<Result> listUsersWithoutAdmin();
 }

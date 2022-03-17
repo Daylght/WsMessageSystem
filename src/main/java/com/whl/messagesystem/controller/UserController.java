@@ -74,9 +74,18 @@ public class UserController {
      * 根据管理员id展示用户列表
      */
     @ApiOperation("根据管理员id展示用户列表(管理员)")
-    @PutMapping("/list/{adminId}")
+    @GetMapping("/list/{adminId}")
     public ResponseEntity<Result> listUsersByAdminId(@PathVariable("adminId") String adminId) {
         return userService.listUsersByAdminId(adminId);
+    }
+
+    /**
+     * 展示未指定管理员的用户列表
+     */
+    @ApiOperation("展示未指定管理员的用户列表")
+    @GetMapping("/listWithoutAdmin")
+    public ResponseEntity<Result> listUsersWithoutAdmin() {
+        return userService.listUsersWithoutAdmin();
     }
 
 }

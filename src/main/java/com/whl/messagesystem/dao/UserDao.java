@@ -69,4 +69,10 @@ public interface UserDao {
      * @return
      */
     List<User> selectUsersWithAdminId(int adminId);
+
+    /**
+     * 在user表中查询未指定管理员的用户列表
+     * @return
+     */
+    List<User> selectUsersWithoutAdmin();
 }

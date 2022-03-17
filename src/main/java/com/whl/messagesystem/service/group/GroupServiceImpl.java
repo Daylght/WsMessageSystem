@@ -3,6 +3,7 @@ package com.whl.messagesystem.service.group;
 import com.alibaba.fastjson.JSONObject;
 import com.whl.messagesystem.commons.channel.Channel;
 import com.whl.messagesystem.commons.channel.group.PrivateGroupMessageChannel;
+import com.whl.messagesystem.commons.channel.management.group.PrivateGroupWithAdminListChannel;
 import com.whl.messagesystem.commons.channel.management.group.PublicGroupCreatedByOutsideListChannel;
 import com.whl.messagesystem.commons.channel.user.GroupHallListChannel;
 import com.whl.messagesystem.commons.constant.ResultEnum;
@@ -150,12 +151,12 @@ public class GroupServiceImpl implements GroupService {
                 groupVo.setAdminName(adminDao.selectAdminByUserId(Integer.parseInt(creatorId)).getAdminName());
                 groupVo.setCreatorName(userDao.selectUserWithUserId(Integer.parseInt(creatorId)).getUserName());
 
+
                 String message = JSONObject.toJSONString(WsResultUtil.createGroup(groupVo));
-
-                Channel channel = new GroupHallListChannel(adminId);
-
+                TextMessage textMessage = new TextMessage(message);
                 // 向大厅广播刚创建的分组的相关信息
-                messageServiceImpl.publish(channel.getChannelName(), new TextMessage(message));
+                Channel groupHallListChannel = new GroupHallListChannel(adminId);
+                messageServiceImpl.publish(groupHallListChannel.getChannelName(), textMessage);
 
                 return ResponseEntity.ok(ResultUtil.success(group));
             }
@@ -241,13 +242,11 @@ public class GroupServiceImpl implements GroupService {
                 data.put("groupId", userGroup.getGroupId());
                 data.put("groupName", group.getGroupName());
 
+                // 组内广播此人加入的消息
                 String message = JSONObject.toJSONString(WsResultUtil.joinGroup(data));
-
                 Channel channel = new PrivateGroupMessageChannel(group.getGroupName());
-
                 messageServiceImpl.publish(channel.getChannelName(), new TextMessage(message));
 
-                log.info("加入分组成功");
                 return ResponseEntity.ok(ResultUtil.success());
             }
 
@@ -269,12 +268,12 @@ public class GroupServiceImpl implements GroupService {
                 data.put("userName", sessionInfo.getUser().getUserName());
                 data.put("userId", userId);
                 data.put("groupId", sessionInfo.getGroup().getGroupId());
-                String message = JSONObject.toJSONString(WsResultUtil.quitGroup(data));
 
                 sessionInfo.setGroup(null);
 
+                // 向组内广播此人退出的消息
+                String message = JSONObject.toJSONString(WsResultUtil.quitGroup(data));
                 Channel channel = new PrivateGroupMessageChannel(groupName);
-
                 messageServiceImpl.publish(channel.getChannelName(), new TextMessage(message));
 
                 return ResponseEntity.ok(ResultUtil.success());
@@ -371,11 +370,11 @@ public class GroupServiceImpl implements GroupService {
             String groupName = groupDao.selectGroupByUserId(Integer.parseInt(userId)).getGroupName();
 
             if (userGroupDao.deleteAnUserGroupByUserId(Integer.parseInt(userId))) {
+                // 向组内广播此人被踢出的消息
                 Channel channel = new PrivateGroupMessageChannel(groupName);
                 String message = JSONObject.toJSONString(WsResultUtil.kickMember(userId));
                 messageServiceImpl.publish(channel.getChannelName(), new TextMessage(message));
 
-                log.info("踢出成功");
                 return ResponseEntity.ok(ResultUtil.success());
             }
 
@@ -503,6 +502,12 @@ public class GroupServiceImpl implements GroupService {
 
             if (publicGroupDao.insertPublicGroup(publicGroup)) {
                 publicGroup = publicGroupDao.selectPublicGroupByName(groupName);
+
+                // 实时更新管理员端"外部创建的公共分组"列表
+                Channel channel = new PublicGroupCreatedByOutsideListChannel();
+                String message = JSONObject.toJSONString(WsResultUtil.createPublicGroup(publicGroup));
+                messageServiceImpl.publish(channel.getChannelName(), new TextMessage(message));
+
                 // 管理员创建公共分组后是不需要进行广播的，因为只有他才能看见自己创建的公共分组列表
                 return ResponseEntity.ok(ResultUtil.success(publicGroup));
             }
@@ -556,11 +561,9 @@ public class GroupServiceImpl implements GroupService {
                 groupVo.setAdminName(adminDao.selectAdminByUserId(Integer.parseInt(creatorId)).getAdminName());
                 groupVo.setCreatorName(userDao.selectUserWithUserId(Integer.parseInt(creatorId)).getUserName());
 
-                String message = JSONObject.toJSONString(WsResultUtil.createGroup(groupVo));
-
-                Channel channel = new GroupHallListChannel(adminId);
-
                 // 向大厅广播刚创建的分组的相关信息
+                String message = JSONObject.toJSONString(WsResultUtil.createGroup(groupVo));
+                Channel channel = new GroupHallListChannel(adminId);
                 messageServiceImpl.publish(channel.getChannelName(), new TextMessage(message));
 
                 return ResponseEntity.ok(ResultUtil.success(group));

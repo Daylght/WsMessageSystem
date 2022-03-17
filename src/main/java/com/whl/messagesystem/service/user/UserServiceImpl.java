@@ -186,4 +186,15 @@ public class UserServiceImpl implements UserService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
+
+    @Override
+    public ResponseEntity<Result> listUsersWithoutAdmin() {
+        try {
+            List<User> users = userDao.selectUsersWithoutAdmin();
+            return ResponseEntity.ok(ResultUtil.success(users));
+        } catch (Exception e) {
+            log.error("查询未指定管理员的用户列表失败: {}",e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
 }
