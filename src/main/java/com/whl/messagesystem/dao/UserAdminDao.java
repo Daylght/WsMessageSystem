@@ -16,4 +16,10 @@ public interface UserAdminDao {
      */
     boolean insertAnUserAdmin(@Param("userAdmin") UserAdmin userAdmin);
 
+    /**
+     * 在user_admin表中根据adminId删除所有的关系
+     * @param adminId
+     * @return
+     */
+    int deleteUserAdminsByAdminId(int adminId);
 }

@@ -21,10 +21,11 @@
         <result column="admin_name" property="adminName"/>
         <result column="creator_id" property="creatorId"/>
         <result column="user_name" property="creatorName"/>
+        <result column="is_admin_created" property="adminCreated"/>
     </resultMap>
 
     <insert id="insertAGroup">
-        insert into `group` (group_id, group_name, max_count, admin_id, creator_id, is_admin_created)
+        insert into `group` (group_name, max_count, admin_id, creator_id, is_admin_created)
         VALUES (#{groupName}, #{maxCount}, #{adminId}, #{creatorId}, #{adminCreated})
     </insert>
 
@@ -33,6 +34,12 @@
         set group_name=#{group.groupName} and max_count = #{group.maxCount} and admin_id = #{group.adminId} and
                        creator_id = #{group.creatorId}
         where group_id = #{group.groupId}
+    </update>
+
+    <update id="clearAdminId">
+        update `group`
+        set admin_id=null
+        where group_id = #{groupId}
     </update>
 
     <delete id="deleteGroups">
@@ -129,7 +136,32 @@
         from `group`,
              user
         where `group`.creator_id = user.user_id
-          and admin_id = null
+          and admin_id is null
+    </select>
+
+    <select id="selectGroupVOByGroupId" resultMap="groupVoMap">
+        select group_id,
+               group_name,
+               max_count,
+               `group`.admin_id,
+               creator_id,
+               is_admin_created,
+               user_name,
+               admin_name
+        from `group`,
+             user,
+             admin
+        where `group`.creator_id = user.user_id
+          and `group`.admin_id = admin.admin_id
+          and group_id = #{groupId}
+    </select>
+
+    <select id="selectGroupVOWithoutCreatorByAdminId" resultMap="groupVoMap">
+        select group_id, group_name, max_count, `group`.admin_id, is_admin_created, admin_name
+        from `group`
+                 left join admin a on `group`.admin_id = a.admin_id
+        where creator_id is null
+          and a.admin_id = #{groupId}
     </select>
 
 </mapper>

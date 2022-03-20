@@ -73,4 +73,12 @@ public class WsResultUtil {
         return websocketResult;
     }
 
+    public static WebsocketResult<Object> giveUpManage(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.GIVE_UP_MANAGE.getType());
+        websocketResult.setMessage(WsResultEnum.GIVE_UP_MANAGE.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
 }

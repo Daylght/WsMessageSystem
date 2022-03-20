@@ -25,7 +25,7 @@
     </select>
 
     <select id="selectAdminByUserId" resultMap="adminMap">
-        select a.admin_id, admin_name
+        select a.admin_id, admin_name, password
         from admin a
                  left join user_admin ua on a.admin_id = ua.admin_id
         where ua.user_id = #{userId}

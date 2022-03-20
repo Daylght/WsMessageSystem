@@ -9,4 +9,10 @@
         values (#{userAdmin.userId}, #{userAdmin.adminId})
     </insert>
 
+    <delete id="deleteUserAdminsByAdminId">
+        delete
+        from user_admin
+        where admin_id = #{adminId}
+    </delete>
+
 </mapper>

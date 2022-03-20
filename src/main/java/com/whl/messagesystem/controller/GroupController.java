@@ -35,8 +35,8 @@ public class GroupController {
     
     @ApiOperation("创建内部分组(管理员)")
     @PostMapping("/adminCreate")
-    public ResponseEntity<Result> adminCreateGroup(@RequestBody CreateGroupDTO createGroupDTO) {
-        return groupService.adminCreateGroup(createGroupDTO);
+    public ResponseEntity<Result> adminCreateGroup(@RequestBody CreateGroupDTO createGroupDTO, HttpSession session) {
+        return groupService.adminCreateGroup(createGroupDTO, session);
     }
 
     @ApiOperation("创建公共分组(管理员)")
@@ -81,7 +81,7 @@ public class GroupController {
         return groupService.getGroupsList();
     }
 
-    @ApiOperation("根据管理员id获取分组列表(用户)(管理员)")
+    @ApiOperation("根据管理员id获取私有分组列表(用户)(管理员)")
     @GetMapping("/list/{adminId}")
     public ResponseEntity<Result> getGroupsListByAdminId(@PathVariable("adminId") String adminId) {
         return groupService.getGroupsListByAdminId(adminId);
@@ -93,10 +93,10 @@ public class GroupController {
         return groupService.listGroupsWithoutAdmin();
     }
 
-    @ApiOperation("删除分组(用户)(管理员)")
-    @DeleteMapping("/remove/{groupIds}")
-    public ResponseEntity<Result> remove(@PathVariable("groupIds") int[] groupIds, HttpSession session) {
-        return groupService.remove(groupIds, session);
+    @ApiOperation("删除私有分组(管理员)")
+    @DeleteMapping("/remove/{groupId}")
+    public ResponseEntity<Result> remove(@PathVariable("groupId") String groupId) {
+        return groupService.remove(groupId);
     }
 
     @ApiOperation("修改分组信息(用户)(管理员)")
@@ -127,6 +127,12 @@ public class GroupController {
     @PostMapping("/public/outsideCreate")
     public ResponseEntity<Result> outsideCreatePublicGroup(@RequestBody OutsideCreatePublicGroupDTO outsideCreatePublicGroupDTO) {
         return groupService.outsideCreatePublicGroup(outsideCreatePublicGroupDTO);
+    }
+
+    @ApiOperation("放弃管理私有分组(管理员)")
+    @DeleteMapping("/giveUpManage/{groupId}")
+    public ResponseEntity<Result> giveUpManagePrivateGroup(@PathVariable("groupId") String groupId, HttpSession session) {
+        return groupService.giveUpManagePrivateGroup(groupId, session);
     }
 
 }

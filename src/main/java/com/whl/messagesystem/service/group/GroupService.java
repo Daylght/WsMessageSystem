@@ -40,13 +40,11 @@ public interface GroupService {
     ResponseEntity<Result> getGroupsList();
 
     /**
-     * 根据数组中提供的groupId批量删除分组<br>
-     * ps: 数组中仅有一个id也是可以的
-     *
-     * @param groupIds
+     * 根据groupId删除指定的分组
+     * @param groupId
      * @return
      */
-    ResponseEntity<Result> remove(int[] groupIds, HttpSession session);
+    ResponseEntity<Result> remove(String groupId);
 
     /**
      * 修改组的信息
@@ -147,5 +145,14 @@ public interface GroupService {
      * @param createGroupDTO
      * @return
      */
-    ResponseEntity<Result> adminCreateGroup(CreateGroupDTO createGroupDTO);
+    ResponseEntity<Result> adminCreateGroup(CreateGroupDTO createGroupDTO, HttpSession session);
+
+    /**
+     * 管理员放弃管理指定分组，使其进入"未指定管理员的分组"列表
+     * @param groupId
+     * @param session
+     * @return
+     */
+    ResponseEntity<Result> giveUpManagePrivateGroup(String groupId, HttpSession session);
+
 }

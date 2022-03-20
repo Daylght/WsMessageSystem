@@ -112,4 +112,25 @@ public interface GroupDao {
      * @return
      */
     List<GroupVO> selectAllGroupsAndCreatorsWithoutAdmin();
+
+    /**
+     * 根据groupId查询分组的详细信息
+     * @param groupId
+     * @return
+     */
+    GroupVO selectGroupVOByGroupId(int groupId);
+
+    /**
+     * 根据指定的groupId清空admin_id列的数据
+     * @param groupId
+     * @return
+     */
+    boolean clearAdminId(int groupId);
+
+    /**
+     * 根据管理员id查询管理员创建的小组
+     * @param groupId
+     * @return
+     */
+    List<GroupVO> selectGroupVOWithoutCreatorByAdminId(int groupId);
 }

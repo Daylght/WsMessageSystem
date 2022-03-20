@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.whl.messagesystem.commons.channel.Channel;
 import com.whl.messagesystem.commons.channel.group.PrivateGroupMessageChannel;
 import com.whl.messagesystem.commons.channel.management.group.PrivateGroupWithAdminListChannel;
+import com.whl.messagesystem.commons.channel.management.group.PrivateGroupWithoutAdminListChannel;
 import com.whl.messagesystem.commons.channel.management.group.PublicGroupCreatedByOutsideListChannel;
 import com.whl.messagesystem.commons.channel.user.GroupHallListChannel;
 import com.whl.messagesystem.commons.constant.ResultEnum;
@@ -15,10 +16,7 @@ import com.whl.messagesystem.model.dto.CreateGroupDTO;
 import com.whl.messagesystem.model.dto.CreatePublicGroupDTO;
 import com.whl.messagesystem.model.dto.OutsideCreatePublicGroupDTO;
 import com.whl.messagesystem.model.dto.SessionInfo;
-import com.whl.messagesystem.model.entity.Group;
-import com.whl.messagesystem.model.entity.PublicGroup;
-import com.whl.messagesystem.model.entity.User;
-import com.whl.messagesystem.model.entity.UserGroup;
+import com.whl.messagesystem.model.entity.*;
 import com.whl.messagesystem.model.vo.GroupVO;
 import com.whl.messagesystem.service.message.MessageServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +32,12 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import javax.xml.bind.ValidationException;
 import java.sql.SQLException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.whl.messagesystem.commons.constant.StringConstant.SESSION_INFO;
 
@@ -66,6 +67,9 @@ public class GroupServiceImpl implements GroupService {
     UserDao userDao;
 
     @Resource
+    UserAdminDao userAdminDao;
+
+    @Resource
     MessageServiceImpl messageServiceImpl;
 
 
@@ -87,10 +91,17 @@ public class GroupServiceImpl implements GroupService {
                 throw new NullPointerException("参数为空");
             }
 
-            List<GroupVO> groupVOs = groupDao.selectAllGroupsAndCreatorsByAdminId(Integer.parseInt(adminId));
-            return ResponseEntity.ok(ResultUtil.success(groupVOs));
+            List<GroupVO> groupVOWithoutCreator = groupDao.selectGroupVOWithoutCreatorByAdminId(Integer.parseInt(adminId));
+            List<GroupVO> groupVOWithCreator = groupDao.selectAllGroupsAndCreatorsByAdminId(Integer.parseInt(adminId));
+
+            Stream<GroupVO> s1 = groupVOWithCreator.stream();
+            Stream<GroupVO> s2 = groupVOWithoutCreator.stream();
+
+            List<GroupVO> result = Stream.concat(s1, s2).sorted(Comparator.comparing(GroupVO::getGroupId)).collect(Collectors.toList());
+
+            return ResponseEntity.ok(ResultUtil.success(result));
         } catch (Exception e) {
-            log.error("获取分组列表异常: {}", e.getMessage());
+            log.error("获取用户列表失败，参数: {}，异常信息: {}", adminId, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
@@ -169,30 +180,31 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResponseEntity<Result> remove(int[] groupIds, HttpSession session) {
+    public ResponseEntity<Result> remove(String groupId) {
         try {
-            if (ArrayUtils.isEmpty(groupIds)) {
-                throw new ValidationException("参数为空");
+            if (StringUtils.isEmpty(groupId)) {
+                throw new NullPointerException("参数为空");
             }
 
-            if (groupDao.deleteGroups(groupIds)) {
-                log.info("删除成功");
+            GroupVO groupVO = groupDao.selectGroupVOByGroupId(Integer.parseInt(groupId));
 
-                SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
-                String adminId = sessionInfo.getAdmin().getAdminId();
-                String message = JSONObject.toJSONString(WsResultUtil.deleteGroup(groupIds));
-
-                Channel channel = new GroupHallListChannel(adminId);
+            if (groupVO != null && groupDao.deleteGroupByGroupId(Integer.parseInt(groupId)) && userGroupDao.deleteUserGroupsByGroupId(Integer.parseInt(groupId)) >= 0) {
+                String message = JSONObject.toJSONString(WsResultUtil.deleteGroup(new HashMap<String, Object>(1).put("groupId", groupId)));
 
                 // 向大厅广播被删除的分组id
-                messageServiceImpl.publish(channel.getChannelName(), new TextMessage(message));
+                Channel groupHallListChannel = new GroupHallListChannel(groupVO.getAdminId());
+                messageServiceImpl.publish(groupHallListChannel.getChannelName(), new TextMessage(message));
+
+                // 向被删除的分组内广播消息
+                Channel privateGroupMessageChannel = new PrivateGroupMessageChannel(groupVO.getGroupName());
+                messageServiceImpl.publish(privateGroupMessageChannel.getChannelName(), new TextMessage(message));
 
                 return ResponseEntity.ok(ResultUtil.success());
             }
 
-            throw new SQLException("group表批量删除记录失败");
+            throw new SQLException("group表删除记录失败");
         } catch (Exception e) {
-            log.error("批量删除分组失败: {}", e.getMessage());
+            log.error("删除分组失败，参数: {}，异常信息: {}", groupId, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
@@ -525,15 +537,16 @@ public class GroupServiceImpl implements GroupService {
             List<GroupVO> groupVos = groupDao.selectAllGroupsAndCreatorsWithoutAdmin();
             return ResponseEntity.ok(ResultUtil.success(groupVos));
         } catch (Exception e) {
-            log.error("获取未指定管理员的分组列表失败，异常信息: {}",e.getMessage());
+            log.error("获取未指定管理员的分组列表失败，异常信息: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
 
     @Override
-    public ResponseEntity<Result> adminCreateGroup(CreateGroupDTO createGroupDTO) {
+    public ResponseEntity<Result> adminCreateGroup(CreateGroupDTO createGroupDTO, HttpSession session) {
         try {
             if (ObjectUtils.isEmpty(createGroupDTO)) {
+                log.error("参数为空");
                 throw new NullPointerException("参数为空");
             }
 
@@ -555,16 +568,24 @@ public class GroupServiceImpl implements GroupService {
             如果未指定分组的人数上限，则默认为20
              */
             if (groupDao.insertAGroup(groupName, creatorId, adminId, maxCount == 0 ? DEFAULT_MEMBER_COUNT : maxCount, adminCreated)) {
+                log.info("插入分组成功");
                 // 查出本组的信息并传给前端
                 Group group = groupDao.findGroupByGroupName(groupName);
+                log.info("查询分组信息成功: {}", group);
                 GroupVO groupVo = new GroupVO(group);
-                groupVo.setAdminName(adminDao.selectAdminByUserId(Integer.parseInt(creatorId)).getAdminName());
-                groupVo.setCreatorName(userDao.selectUserWithUserId(Integer.parseInt(creatorId)).getUserName());
+                log.info("创建groupvo对象成功: {}", groupVo);
+                SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+                Admin admin = sessionInfo.getAdmin();
+                log.info("查询管理员信息成功: {}", admin);
+                groupVo.setAdminName(admin.getAdminName());
+                log.info("填充groupVO成功");
+
 
                 // 向大厅广播刚创建的分组的相关信息
                 String message = JSONObject.toJSONString(WsResultUtil.createGroup(groupVo));
                 Channel channel = new GroupHallListChannel(adminId);
                 messageServiceImpl.publish(channel.getChannelName(), new TextMessage(message));
+                log.info("发送websocket消息成功");
 
                 return ResponseEntity.ok(ResultUtil.success(group));
             }
@@ -575,4 +596,40 @@ public class GroupServiceImpl implements GroupService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
+
+    @Override
+    public ResponseEntity<Result> giveUpManagePrivateGroup(String groupId, HttpSession session) {
+        try {
+            if (StringUtils.isEmpty(groupId)) {
+                throw new NullPointerException("参数异常");
+            }
+
+            SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+            String adminId = sessionInfo.getAdmin().getAdminId();
+
+            GroupVO groupVO = groupDao.selectGroupVOByGroupId(Integer.parseInt(groupId));
+
+            if (groupDao.clearAdminId(Integer.parseInt(groupId)) && userAdminDao.deleteUserAdminsByAdminId(Integer.parseInt(adminId)) >= 0) {
+                // 构造放弃管理分组的消息
+                String message = JSONObject.toJSONString(WsResultUtil.giveUpManage(groupId));
+                TextMessage textMessage = new TextMessage(message);
+
+                // 向被放弃管理的分组中广播消息
+                Channel privateGroupMessageChannel = new PrivateGroupMessageChannel(groupVO.getGroupName());
+                messageServiceImpl.publish(privateGroupMessageChannel.getChannelName(), textMessage);
+
+                // 实时更新"未指定管理员的私有分组"列表
+                Channel privateGroupWithoutAdminListChannel = new PrivateGroupWithoutAdminListChannel();
+                messageServiceImpl.publish(privateGroupWithoutAdminListChannel.getChannelName(), textMessage);
+
+                return ResponseEntity.ok(ResultUtil.success());
+            }
+
+            throw new SQLException("group表清空adminId失败 || user_admin表");
+        } catch (Exception e) {
+            log.error("放弃管理私有分组失败，参数: {}，异常信息: {}", groupId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
 }
