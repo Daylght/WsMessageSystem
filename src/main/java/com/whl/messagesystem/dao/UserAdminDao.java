@@ -22,4 +22,11 @@ public interface UserAdminDao {
      * @return
      */
     int deleteUserAdminsByAdminId(int adminId);
+
+    /**
+     * 在user_admin表中根据userId删除指定关系
+     * @param userId
+     * @return
+     */
+    boolean deleteUserAdminByUserId(int userId);
 }

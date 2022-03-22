@@ -4,6 +4,8 @@ import com.whl.messagesystem.model.entity.UserGroup;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 /**
  * @author whl
  * @date 2022/1/20 17:45
@@ -38,4 +40,11 @@ public interface UserGroupDao {
      * @return
      */
     int deleteUserGroupsByGroupId(int groupId);
+
+    /**
+     * 根据分组id查询所有的关系
+     * @param groupId
+     * @return
+     */
+    List<UserGroup> selectUserGroupsByGroupId(int groupId);
 }

@@ -3,6 +3,7 @@ package com.whl.messagesystem.controller;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.UserRegisterDTO;
 import com.whl.messagesystem.model.dto.UserInfo;
+import com.whl.messagesystem.model.entity.UserGroup;
 import com.whl.messagesystem.service.user.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -86,6 +87,24 @@ public class UserController {
     @GetMapping("/listWithoutAdmin")
     public ResponseEntity<Result> listUsersWithoutAdmin() {
         return userService.listUsersWithoutAdmin();
+    }
+
+    /**
+     * 管理员放弃管理用户
+     */
+    @ApiOperation("管理员放弃管理用户(管理员)")
+    @DeleteMapping("/giveUpManage/{userGroup}")
+    public ResponseEntity<Result> giveUpManageUser(@PathVariable("userGroup") UserGroup userGroup, HttpSession session) {
+        return userService.giveUpManageUser(userGroup, session);
+    }
+
+    /**
+     * 管理员选择一个未指定管理员的用户进行管理
+     */
+    @ApiOperation("管理员选择一个未指定管理员的用户进行管理(管理员)")
+    @PostMapping("/choiceUserToManage")
+    public ResponseEntity<Result> choiceUserToManage(@RequestBody UserGroup userGroup, HttpSession session) {
+        return userService.choiceUserToManage(userGroup, session);
     }
 
 }

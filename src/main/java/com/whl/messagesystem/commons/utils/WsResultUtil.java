@@ -73,10 +73,34 @@ public class WsResultUtil {
         return websocketResult;
     }
 
-    public static WebsocketResult<Object> giveUpManage(Object data) {
+    public static WebsocketResult<Object> giveUpManageGroup(Object data) {
         WebsocketResult<Object> websocketResult = new WebsocketResult<>();
-        websocketResult.setType(WsResultEnum.GIVE_UP_MANAGE.getType());
-        websocketResult.setMessage(WsResultEnum.GIVE_UP_MANAGE.getMessage());
+        websocketResult.setType(WsResultEnum.GIVE_UP_MANAGE_GROUP.getType());
+        websocketResult.setMessage(WsResultEnum.GIVE_UP_MANAGE_GROUP.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
+    public static WebsocketResult<Object> choiceManagePrivateGroup(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.CHOICE_GROUP_MANAGE.getType());
+        websocketResult.setMessage(WsResultEnum.CHOICE_GROUP_MANAGE.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
+    public static WebsocketResult<Object> giveUpManageUser(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.GIVE_UP_MANAGE_USER.getType());
+        websocketResult.setMessage(WsResultEnum.GIVE_UP_MANAGE_USER.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
+    public static WebsocketResult<Object> choiceManageUser(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.CHOICE_USER_MANAGE.getType());
+        websocketResult.setMessage(WsResultEnum.CHOICE_USER_MANAGE.getMessage());
         websocketResult.setData(data);
         return websocketResult;
     }

@@ -42,9 +42,10 @@ public interface GroupService {
     /**
      * 根据groupId删除指定的分组
      * @param groupId
+     * @param session
      * @return
      */
-    ResponseEntity<Result> remove(String groupId);
+    ResponseEntity<Result> remove(String groupId, HttpSession session);
 
     /**
      * 修改组的信息
@@ -155,4 +156,11 @@ public interface GroupService {
      */
     ResponseEntity<Result> giveUpManagePrivateGroup(String groupId, HttpSession session);
 
+    /**
+     * 管理员选择一个未指定管理员的分组进行管理
+     * @param groupId
+     * @param session
+     * @return
+     */
+    ResponseEntity<Result> choiceManagePrivateGroup(String groupId, HttpSession session);
 }

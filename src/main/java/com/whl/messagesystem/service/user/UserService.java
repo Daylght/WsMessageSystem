@@ -1,6 +1,7 @@
 package com.whl.messagesystem.service.user;
 
 import com.whl.messagesystem.model.Result;
+import com.whl.messagesystem.model.entity.UserGroup;
 import org.springframework.http.ResponseEntity;
 
 import javax.servlet.http.HttpSession;
@@ -49,4 +50,20 @@ public interface UserService {
      * @return
      */
     ResponseEntity<Result> listUsersWithoutAdmin();
+
+    /**
+     * 管理员放弃管理用户
+     * @param userGroup
+     * @param session
+     * @return
+     */
+    ResponseEntity<Result> giveUpManageUser(UserGroup userGroup, HttpSession session);
+
+    /**
+     * 管理员选择一个未指定管理员的用户进行管理
+     * @param userGroup
+     * @param session
+     * @return
+     */
+    ResponseEntity<Result> choiceUserToManage(UserGroup userGroup, HttpSession session);
 }

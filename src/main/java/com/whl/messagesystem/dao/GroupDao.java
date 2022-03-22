@@ -17,6 +17,7 @@ import java.util.List;
 public interface GroupDao {
     /**
      * 根据组名在group表中查找一条记录
+     *
      * @param groupName
      * @return
      */
@@ -24,6 +25,7 @@ public interface GroupDao {
 
     /**
      * 根据组id在group表中查找一条记录
+     *
      * @param groupId
      * @return
      */
@@ -31,6 +33,7 @@ public interface GroupDao {
 
     /**
      * 插入一条组记录
+     *
      * @param groupName
      * @param creatorId
      * @param adminId
@@ -41,12 +44,14 @@ public interface GroupDao {
 
     /**
      * 查询所有的分组
+     *
      * @return
      */
     List<Group> selectAllGroups();
 
     /**
      * 根据多个groupId批量删除group表中的记录
+     *
      * @param groupIds
      * @return
      */
@@ -54,6 +59,7 @@ public interface GroupDao {
 
     /**
      * 更新一条group记录
+     *
      * @param group
      * @return
      */
@@ -61,6 +67,7 @@ public interface GroupDao {
 
     /**
      * 根据userId查询用户所在的组
+     *
      * @param userId
      * @return
      */
@@ -68,12 +75,14 @@ public interface GroupDao {
 
     /**
      * 查询所有的分组以及他们的创建者
+     *
      * @return
      */
     List<GroupVO> selectAllGroupsAndCreators();
 
     /**
      * 根据创建人id查询他创建的组的个数
+     *
      * @param creatorId
      * @return
      */
@@ -81,6 +90,7 @@ public interface GroupDao {
 
     /**
      * 根据组id查询组内的成员，以list形式返回
+     *
      * @param groupId
      * @return
      */
@@ -88,6 +98,7 @@ public interface GroupDao {
 
     /**
      * 根据创建人id查询组
+     *
      * @param creatorId
      * @return
      */
@@ -95,6 +106,7 @@ public interface GroupDao {
 
     /**
      * 根据管理员id查询所有的分组以及他们的创建者
+     *
      * @param adminId
      * @return
      */
@@ -102,6 +114,7 @@ public interface GroupDao {
 
     /**
      * 根据组id删除这个分组
+     *
      * @param groupId
      * @return
      */
@@ -109,12 +122,14 @@ public interface GroupDao {
 
     /**
      * 查询未指定管理员的私有分组以及创建者信息
+     *
      * @return
      */
     List<GroupVO> selectAllGroupsAndCreatorsWithoutAdmin();
 
     /**
      * 根据groupId查询分组的详细信息
+     *
      * @param groupId
      * @return
      */
@@ -122,6 +137,7 @@ public interface GroupDao {
 
     /**
      * 根据指定的groupId清空admin_id列的数据
+     *
      * @param groupId
      * @return
      */
@@ -129,8 +145,18 @@ public interface GroupDao {
 
     /**
      * 根据管理员id查询管理员创建的小组
+     *
      * @param groupId
      * @return
      */
     List<GroupVO> selectGroupVOWithoutCreatorByAdminId(int groupId);
+
+    /**
+     * 更新指定分组的adminId
+     *
+     * @param adminId
+     * @param groupId
+     * @return
+     */
+    boolean updateAdminIdByGroupId(@Param("adminId") int adminId, @Param("groupId") int groupId);
 }

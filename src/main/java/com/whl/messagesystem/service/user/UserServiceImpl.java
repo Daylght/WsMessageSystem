@@ -1,26 +1,40 @@
 package com.whl.messagesystem.service.user;
 
+import com.alibaba.fastjson.JSONObject;
+import com.whl.messagesystem.commons.channel.Channel;
+import com.whl.messagesystem.commons.channel.management.user.UserWithoutAdminListChannel;
 import com.whl.messagesystem.commons.constant.ResultEnum;
 import com.whl.messagesystem.commons.utils.ResultUtil;
+import com.whl.messagesystem.commons.utils.WsResultUtil;
+import com.whl.messagesystem.dao.GroupDao;
 import com.whl.messagesystem.dao.UserAdminDao;
 import com.whl.messagesystem.dao.UserDao;
+import com.whl.messagesystem.dao.UserGroupDao;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.SessionInfo;
 import com.whl.messagesystem.model.entity.User;
 import com.whl.messagesystem.model.entity.UserAdmin;
+import com.whl.messagesystem.model.entity.UserGroup;
+import com.whl.messagesystem.service.group.GroupService;
+import com.whl.messagesystem.service.message.MessageServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.socket.TextMessage;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import javax.xml.bind.ValidationException;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.whl.messagesystem.commons.constant.StringConstant.SESSION_INFO;
 
@@ -33,7 +47,19 @@ import static com.whl.messagesystem.commons.constant.StringConstant.SESSION_INFO
 public class UserServiceImpl implements UserService {
 
     @Resource
+    GroupService groupService;
+
+    @Resource
+    MessageServiceImpl messageService;
+
+    @Resource
     UserDao userDao;
+
+    @Resource
+    GroupDao groupDao;
+
+    @Resource
+    UserGroupDao userGroupDao;
 
     @Resource
     UserAdminDao userAdminDao;
@@ -193,7 +219,69 @@ public class UserServiceImpl implements UserService {
             List<User> users = userDao.selectUsersWithoutAdmin();
             return ResponseEntity.ok(ResultUtil.success(users));
         } catch (Exception e) {
-            log.error("查询未指定管理员的用户列表失败: {}",e.getMessage());
+            log.error("查询未指定管理员的用户列表失败: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = {RuntimeException.class, Error.class})
+    public ResponseEntity<Result> giveUpManageUser(UserGroup userGroup, HttpSession session) {
+        try {
+            if (ObjectUtils.isEmpty(userGroup)) {
+                throw new NullPointerException("参数为空");
+            }
+
+            String userId = userGroup.getUserId();
+
+            if (groupDao.selectGroupCountByCreatorId(Integer.parseInt(userId)) == 1 || userGroupDao.selectUserGroupCountByUserId(Integer.parseInt(userId)) == 1) {
+                // 该用户是组长或是组员，对该组进行放弃管理的操作
+                String groupId = userGroup.getGroupId();
+                return groupService.giveUpManagePrivateGroup(groupId, session);
+            } else {
+                // 该用户未加入分组，删除该用户和管理员的关系
+                userAdminDao.deleteUserAdminByUserId(Integer.parseInt(userId));
+
+                // 实时更新"没有指定管理员的用户"列表
+                User user = userDao.selectUserWithUserId(Integer.parseInt(userId));
+                String message = JSONObject.toJSONString(WsResultUtil.giveUpManageUser(user));
+                Channel channel = new UserWithoutAdminListChannel();
+                messageService.publish(channel.getChannelName(), new TextMessage(message));
+
+                return ResponseEntity.ok(ResultUtil.success());
+            }
+        } catch (Exception e) {
+            log.error("管理员放弃管理用户失败，参数：{}，异常信息：{}", userGroup, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = {RuntimeException.class, Error.class})
+    public ResponseEntity<Result> choiceUserToManage(UserGroup userGroup, HttpSession session) {
+        try {
+            if (ObjectUtils.isEmpty(userGroup)) {
+                throw new NullPointerException("参数为空");
+            }
+
+            String userId = userGroup.getUserId();
+
+            if (groupDao.selectGroupCountByCreatorId(Integer.parseInt(userId)) == 1 || userGroupDao.selectUserGroupCountByUserId(Integer.parseInt(userId)) == 1) {
+                return groupService.choiceManagePrivateGroup(userGroup.getGroupId(), session);
+            } else {
+                SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+                String adminId = sessionInfo.getAdmin().getAdminId();
+                userAdminDao.insertAnUserAdmin(new UserAdmin(userId, adminId));
+
+                User user = userDao.selectUserWithUserId(Integer.parseInt(userId));
+                String message = JSONObject.toJSONString(WsResultUtil.choiceManageUser(user));
+                Channel userWithoutAdminListChannel = new UserWithoutAdminListChannel();
+                messageService.publish(userWithoutAdminListChannel.getChannelName(), new TextMessage(message));
+
+                return ResponseEntity.ok(ResultUtil.success(user));
+            }
+        } catch (Exception e) {
+            log.error("管理员选择一个未指定管理员的用户进行管理失败，参数：{}，异常信息：{}", userGroup, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }

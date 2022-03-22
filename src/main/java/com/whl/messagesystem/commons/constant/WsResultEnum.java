@@ -14,7 +14,10 @@ public enum WsResultEnum {
     DISMISS_GROUP(6, "解散分组"),
     CREATE_PUBLIC_GROUP(7, "新增公共分组"),
     DISMISS_PUBLIC_GROUP(8, "解散公共分组"),
-    GIVE_UP_MANAGE(12, "管理员放弃管理分组");
+    GIVE_UP_MANAGE_GROUP(12, "管理员放弃管理分组"),
+    CHOICE_GROUP_MANAGE(13, "管理员选择未指定管理员的私有分组进行管理"),
+    GIVE_UP_MANAGE_USER(14,"管理员放弃管理用户"),
+    CHOICE_USER_MANAGE(15,"管理员选择未指定管理员的用户进行管理");
 
     private int type;
     private String message;

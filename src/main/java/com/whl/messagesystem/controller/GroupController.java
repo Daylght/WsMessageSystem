@@ -10,6 +10,7 @@ import com.whl.messagesystem.service.group.GroupService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -32,7 +33,7 @@ public class GroupController {
     public ResponseEntity<Result> createGroup(@RequestBody CreateGroupDTO createGroupDto, HttpSession session) {
         return groupService.createGroup(createGroupDto, session);
     }
-    
+
     @ApiOperation("创建内部分组(管理员)")
     @PostMapping("/adminCreate")
     public ResponseEntity<Result> adminCreateGroup(@RequestBody CreateGroupDTO createGroupDTO, HttpSession session) {
@@ -95,8 +96,8 @@ public class GroupController {
 
     @ApiOperation("删除私有分组(管理员)")
     @DeleteMapping("/remove/{groupId}")
-    public ResponseEntity<Result> remove(@PathVariable("groupId") String groupId) {
-        return groupService.remove(groupId);
+    public ResponseEntity<Result> remove(@PathVariable("groupId") String groupId, HttpSession session) {
+        return groupService.remove(groupId,session);
     }
 
     @ApiOperation("修改分组信息(用户)(管理员)")
@@ -133,6 +134,12 @@ public class GroupController {
     @DeleteMapping("/giveUpManage/{groupId}")
     public ResponseEntity<Result> giveUpManagePrivateGroup(@PathVariable("groupId") String groupId, HttpSession session) {
         return groupService.giveUpManagePrivateGroup(groupId, session);
+    }
+
+    @ApiOperation("选择一个私有分组进行管理(管理员)")
+    @PostMapping("/choiceManagePrivateGroup/{groupId}")
+    public ResponseEntity<Result> choiceManagePrivateGroup(@PathVariable("groupId") String groupId, HttpSession session) {
+        return groupService.choiceManagePrivateGroup(groupId, session);
     }
 
 }

@@ -3,9 +3,9 @@ package com.whl.messagesystem.service.group;
 import com.alibaba.fastjson.JSONObject;
 import com.whl.messagesystem.commons.channel.Channel;
 import com.whl.messagesystem.commons.channel.group.PrivateGroupMessageChannel;
-import com.whl.messagesystem.commons.channel.management.group.PrivateGroupWithAdminListChannel;
 import com.whl.messagesystem.commons.channel.management.group.PrivateGroupWithoutAdminListChannel;
 import com.whl.messagesystem.commons.channel.management.group.PublicGroupCreatedByOutsideListChannel;
+import com.whl.messagesystem.commons.channel.management.user.UserWithoutAdminListChannel;
 import com.whl.messagesystem.commons.channel.user.GroupHallListChannel;
 import com.whl.messagesystem.commons.constant.ResultEnum;
 import com.whl.messagesystem.commons.utils.ResultUtil;
@@ -19,13 +19,14 @@ import com.whl.messagesystem.model.dto.SessionInfo;
 import com.whl.messagesystem.model.entity.*;
 import com.whl.messagesystem.model.vo.GroupVO;
 import com.whl.messagesystem.service.message.MessageServiceImpl;
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
 
 import javax.annotation.Resource;
@@ -180,23 +181,29 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    public ResponseEntity<Result> remove(String groupId) {
+    @Transactional(rollbackFor = {RuntimeException.class, Error.class})
+    public ResponseEntity<Result> remove(String groupId, HttpSession session) {
         try {
             if (StringUtils.isEmpty(groupId)) {
                 throw new NullPointerException("参数为空");
             }
 
-            GroupVO groupVO = groupDao.selectGroupVOByGroupId(Integer.parseInt(groupId));
+            Group group = groupDao.selectGroupByGroupId(Integer.parseInt(groupId));
+            log.info("要删除的分组信息: {}", group);
 
-            if (groupVO != null && groupDao.deleteGroupByGroupId(Integer.parseInt(groupId)) && userGroupDao.deleteUserGroupsByGroupId(Integer.parseInt(groupId)) >= 0) {
+            if (group != null && groupDao.deleteGroupByGroupId(Integer.parseInt(groupId)) && userGroupDao.deleteUserGroupsByGroupId(Integer.parseInt(groupId)) >= 0) {
+                log.info("删除分组成功 && 删除用户组关系成功");
                 String message = JSONObject.toJSONString(WsResultUtil.deleteGroup(new HashMap<String, Object>(1).put("groupId", groupId)));
+                log.info("构造ws消息: {}", message);
 
                 // 向大厅广播被删除的分组id
-                Channel groupHallListChannel = new GroupHallListChannel(groupVO.getAdminId());
+                SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+                String adminId = sessionInfo.getAdmin().getAdminId();
+                Channel groupHallListChannel = new GroupHallListChannel(adminId);
                 messageServiceImpl.publish(groupHallListChannel.getChannelName(), new TextMessage(message));
 
                 // 向被删除的分组内广播消息
-                Channel privateGroupMessageChannel = new PrivateGroupMessageChannel(groupVO.getGroupName());
+                Channel privateGroupMessageChannel = new PrivateGroupMessageChannel(group.getGroupName());
                 messageServiceImpl.publish(privateGroupMessageChannel.getChannelName(), new TextMessage(message));
 
                 return ResponseEntity.ok(ResultUtil.success());
@@ -598,20 +605,22 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
+    @Transactional(rollbackFor = {RuntimeException.class, Error.class})
     public ResponseEntity<Result> giveUpManagePrivateGroup(String groupId, HttpSession session) {
         try {
             if (StringUtils.isEmpty(groupId)) {
-                throw new NullPointerException("参数异常");
+                throw new NullPointerException("参数为空");
             }
 
             SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
             String adminId = sessionInfo.getAdmin().getAdminId();
 
             GroupVO groupVO = groupDao.selectGroupVOByGroupId(Integer.parseInt(groupId));
+            List<User> users = userDao.selectUsersWithAdminId(Integer.parseInt(adminId));
 
             if (groupDao.clearAdminId(Integer.parseInt(groupId)) && userAdminDao.deleteUserAdminsByAdminId(Integer.parseInt(adminId)) >= 0) {
                 // 构造放弃管理分组的消息
-                String message = JSONObject.toJSONString(WsResultUtil.giveUpManage(groupId));
+                String message = JSONObject.toJSONString(WsResultUtil.giveUpManageGroup(groupId));
                 TextMessage textMessage = new TextMessage(message);
 
                 // 向被放弃管理的分组中广播消息
@@ -621,6 +630,11 @@ public class GroupServiceImpl implements GroupService {
                 // 实时更新"未指定管理员的私有分组"列表
                 Channel privateGroupWithoutAdminListChannel = new PrivateGroupWithoutAdminListChannel();
                 messageServiceImpl.publish(privateGroupWithoutAdminListChannel.getChannelName(), textMessage);
+
+                // 实时更新"未指定管理员的用户"列表
+                String json = JSONObject.toJSONString(WsResultUtil.giveUpManageUser(users));
+                Channel userWithoutAdminListChannel = new UserWithoutAdminListChannel();
+                messageServiceImpl.publish(userWithoutAdminListChannel.getChannelName(), new TextMessage(json));
 
                 return ResponseEntity.ok(ResultUtil.success());
             }
@@ -632,4 +646,54 @@ public class GroupServiceImpl implements GroupService {
         }
     }
 
+    @Override
+    @Transactional(rollbackFor = {RuntimeException.class, Error.class})
+    public ResponseEntity<Result> choiceManagePrivateGroup(String groupId, HttpSession session) {
+        try {
+            if (StringUtils.isEmpty(groupId)) {
+                throw new NullPointerException("参数为空");
+            }
+
+            Group group = groupDao.selectGroupByGroupId(Integer.parseInt(groupId));
+            String creatorId = group.getCreatorId();
+            SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+            String adminId = sessionInfo.getAdmin().getAdminId();
+
+            if (groupDao.updateAdminIdByGroupId(Integer.parseInt(adminId), Integer.parseInt(groupId))) {
+                List<UserGroup> userGroups = userGroupDao.selectUserGroupsByGroupId(Integer.parseInt(groupId));
+                List<String> userIds = userGroups.stream().map(userGroup -> userGroup.getUserId()).collect(Collectors.toList());
+                userIds.add(creatorId);
+
+                userIds.forEach(userId -> userAdminDao.insertAnUserAdmin(new UserAdmin(userId, adminId)));
+
+                Map<String, Object> map = new HashMap<>(2);
+                map.put("groupId", groupId);
+                map.put("adminId", adminId);
+                TextMessage textMessage = new TextMessage(JSONObject.toJSONString(WsResultUtil.choiceManagePrivateGroup(map)));
+
+                // 实时更新"未指定管理员的私有分组"列表
+                Channel privateGroupWithoutAdminListChannel = new PrivateGroupWithoutAdminListChannel();
+                messageServiceImpl.publish(privateGroupWithoutAdminListChannel.getChannelName(), textMessage);
+
+                // 实时更新大厅中的组列表
+                Channel groupHallListChannel = new GroupHallListChannel(adminId);
+                messageServiceImpl.publish(groupHallListChannel.getChannelName(), textMessage);
+
+                // 实时更新"未指定管理员的用户"列表
+                List<User> users = userDao.selectUsersWithAdminId(Integer.parseInt(adminId));
+                String message = JSONObject.toJSONString(WsResultUtil.choiceManageUser(users));
+                Channel userWithoutAdminListChannel = new UserWithoutAdminListChannel();
+                messageServiceImpl.publish(userWithoutAdminListChannel.getChannelName(), new TextMessage(message));
+
+                group.setAdminId(adminId);
+
+                return ResponseEntity.ok(ResultUtil.success(group));
+            }
+
+            throw new SQLException("更新user_group表异常 || 插入user_admin表异常");
+        } catch (Exception e) {
+            log.error("管理员选择管理未指定管理员的分组失败，参数：{}，异常信息：{}", groupId, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
 }

@@ -49,4 +49,11 @@ public interface SessionService {
      * @return
      */
     ResponseEntity<Result> removeGroupInfoFromSession(HttpSession session);
+
+    /**
+     * 移除sessionInfo中的管理员信息
+     * @param session
+     * @return
+     */
+    ResponseEntity<Result> removeAdminInfoFromSession(HttpSession session);
 }

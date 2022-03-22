@@ -70,12 +70,21 @@ public class SessionController {
     }
 
     /**
-     * 更新sessionInfo中的分组信息
+     * 移除sessionInfo中的分组信息
      */
     @ApiOperation("移除sessionInfo中的分组信息(用户)")
     @DeleteMapping("/group")
     public ResponseEntity<Result> removeGroupInfoFromSession(HttpSession session) {
         return sessionService.removeGroupInfoFromSession(session);
+    }
+
+    /**
+     * 移除sessionInfo中的管理员信息
+     */
+    @ApiOperation("移除sessionInfo中的管理员信息")
+    @DeleteMapping("/admin")
+    public ResponseEntity<Result> removeAdminInfoFromSession(HttpSession session){
+        return sessionService.removeAdminInfoFromSession(session);
     }
 
 }

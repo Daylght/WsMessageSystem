@@ -42,6 +42,12 @@
         where group_id = #{groupId}
     </update>
 
+    <update id="updateAdminIdByGroupId">
+        update `group`
+        set admin_id=#{adminId}
+        where group_id = #{groupId}
+    </update>
+
     <delete id="deleteGroups">
         delete from `group` where group_id in
         <foreach collection="array" item="id" open="(" separator="," close=")">

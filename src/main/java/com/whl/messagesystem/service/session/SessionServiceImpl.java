@@ -249,4 +249,15 @@ public class SessionServiceImpl implements SessionService {
         }
     }
 
+    @Override
+    public ResponseEntity<Result> removeAdminInfoFromSession(HttpSession session) {
+        try {
+            SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+            sessionInfo.setAdmin(null);
+            return ResponseEntity.ok(ResultUtil.success(sessionInfo));
+        } catch (Exception e) {
+            log.error("从sessionInfo中移除管理员信息异常: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
 }
