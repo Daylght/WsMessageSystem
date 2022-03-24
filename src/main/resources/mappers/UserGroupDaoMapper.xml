@@ -38,4 +38,10 @@
         where group_id = #{groupId}
     </select>
 
+    <select id="selectUserGroupByUserId" resultMap="userGroupMap">
+        select user_id, group_id
+        from user_group
+        where user_id = #{userId}
+    </select>
+
 </mapper>

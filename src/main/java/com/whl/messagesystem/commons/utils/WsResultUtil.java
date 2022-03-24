@@ -105,4 +105,28 @@ public class WsResultUtil {
         return websocketResult;
     }
 
+    public static WebsocketResult<Object> logicDeleteUser(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.LOGIC_DELETE_USER.getType());
+        websocketResult.setMessage(WsResultEnum.LOGIC_DELETE_USER.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
+    public static WebsocketResult<Object> recoverUser(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.RECOVER_USER.getType());
+        websocketResult.setMessage(WsResultEnum.RECOVER_USER.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
+    public static WebsocketResult<Object> completeDeleteUser(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.COMPLETE_DELETE_USER.getType());
+        websocketResult.setMessage(WsResultEnum.COMPLETE_DELETE_USER.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
 }

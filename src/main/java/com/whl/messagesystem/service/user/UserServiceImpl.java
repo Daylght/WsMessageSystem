@@ -2,6 +2,7 @@ package com.whl.messagesystem.service.user;
 
 import com.alibaba.fastjson.JSONObject;
 import com.whl.messagesystem.commons.channel.Channel;
+import com.whl.messagesystem.commons.channel.management.user.UserRecoverListWithoutAdminChannel;
 import com.whl.messagesystem.commons.channel.management.user.UserWithoutAdminListChannel;
 import com.whl.messagesystem.commons.constant.ResultEnum;
 import com.whl.messagesystem.commons.utils.ResultUtil;
@@ -18,7 +19,6 @@ import com.whl.messagesystem.model.entity.UserGroup;
 import com.whl.messagesystem.service.group.GroupService;
 import com.whl.messagesystem.service.message.MessageServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
@@ -29,12 +29,8 @@ import org.springframework.web.socket.TextMessage;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
-import javax.xml.bind.ValidationException;
 import java.sql.SQLException;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import static com.whl.messagesystem.commons.constant.StringConstant.SESSION_INFO;
 
@@ -143,14 +139,34 @@ public class UserServiceImpl implements UserService {
                 throw new NullPointerException("参数为空");
             }
 
-            log.info("逻辑删除的用户id为: {}", userId);
             if (userDao.logicalDeleteAnUser(userId)) {
-                return ResponseEntity.ok(ResultUtil.success());
+                UserAdmin userAdmin = userAdminDao.selectUserAdminByUserId(userId);
+                User user = userDao.selectUserWithUserId(userId);
+                UserGroup userGroup = userGroupDao.selectUserGroupByUserId(userId);
+
+                // 该用户在分组中，执行踢出组员的方法
+                if (userGroup != null) {
+                    groupService.kickGroupMember(String.valueOf(userId));
+                }
+
+                // 该用户不属于某个管理员，实时更新"回收站中的不属于管理员的用户"和"未指定管理员的用户"两个列表
+                if (userAdmin == null) {
+                    String message = JSONObject.toJSONString(WsResultUtil.logicDeleteUser(user));
+                    TextMessage textMessage = new TextMessage(message);
+
+                    Channel userRecoverListWithoutAdminChannel = new UserRecoverListWithoutAdminChannel();
+                    messageService.publish(userRecoverListWithoutAdminChannel.getChannelName(), textMessage);
+
+                    Channel userWithoutAdminListChannel = new UserWithoutAdminListChannel();
+                    messageService.publish(userWithoutAdminListChannel.getChannelName(), textMessage);
+                }
+
+                return ResponseEntity.ok(ResultUtil.success(user));
             }
 
             throw new SQLException("user表逻辑删除用户失败");
         } catch (Exception e) {
-            log.error("逻辑删除用户失败: {}", e.getMessage());
+            log.error("逻辑删除用户失败，参数：{}，异常信息：{}", userId, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
@@ -158,17 +174,27 @@ public class UserServiceImpl implements UserService {
     /**
      * 永久删除用户
      *
-     * @param userIds
+     * @param userId
      */
     @Override
-    public ResponseEntity<Result> completelyDeleteUser(int[] userIds) {
+    public ResponseEntity<Result> completelyDeleteUser(int userId) {
         try {
-            if (ArrayUtils.isEmpty(userIds)) {
+            if (userId == 0) {
                 throw new NullPointerException("参数为空");
             }
 
-            log.info("永久删除的用户id为: {}", Arrays.toString(userIds));
-            if (userDao.completelyDeleteUsers(userIds)) {
+            User user = userDao.selectUserWithUserId(userId);
+            UserAdmin userAdmin = userAdminDao.selectUserAdminByUserId(userId);
+
+            // 删除user表中的用户记录以及user_admin表中的关系记录
+            if (userDao.completelyDeleteUser(userId) && userAdminDao.deleteUserAdminByUserId(userId) >= 0) {
+                // 用户不属于管理员，实时更新"回收站中未指定管理员的用户列表"
+                if (userAdmin == null) {
+                    String message = JSONObject.toJSONString(WsResultUtil.completeDeleteUser(user));
+                    Channel channel = new UserRecoverListWithoutAdminChannel();
+                    messageService.publish(channel.getChannelName(), new TextMessage(message));
+                }
+
                 return ResponseEntity.ok(ResultUtil.success());
             }
 
@@ -180,15 +206,29 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public ResponseEntity<Result> recoverUser(int[] userIds) {
+    public ResponseEntity<Result> recoverUser(int userId) {
         try {
-            if (ArrayUtils.isEmpty(userIds)) {
+            if (userId == 0) {
                 throw new NullPointerException("参数为空");
             }
 
-            log.info("恢复的用户id为: {}", Arrays.toString(userIds));
-            if (userDao.recoverUsers(userIds)) {
-                return ResponseEntity.ok(ResultUtil.success());
+            if (userDao.recoverUser(userId)) {
+                UserAdmin userAdmin = userAdminDao.selectUserAdminByUserId(userId);
+                User user = userDao.selectUserWithUserId(userId);
+
+                if (userAdmin == null) {
+                    // 该用户不属于某个管理员，实时更新"回收站中的不属于管理员的用户"和"未指定管理员的用户"两个列表
+                    String message = JSONObject.toJSONString(WsResultUtil.recoverUser(user));
+                    TextMessage textMessage = new TextMessage(message);
+
+                    Channel userRecoverListWithoutAdminChannel = new UserRecoverListWithoutAdminChannel();
+                    messageService.publish(userRecoverListWithoutAdminChannel.getChannelName(), textMessage);
+
+                    Channel userWithoutAdminListChannel = new UserWithoutAdminListChannel();
+                    messageService.publish(userWithoutAdminListChannel.getChannelName(), textMessage);
+                }
+
+                return ResponseEntity.ok(ResultUtil.success(user));
             }
 
             throw new SQLException("user表恢复用户失败");

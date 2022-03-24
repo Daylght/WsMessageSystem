@@ -16,8 +16,11 @@ public enum WsResultEnum {
     DISMISS_PUBLIC_GROUP(8, "解散公共分组"),
     GIVE_UP_MANAGE_GROUP(12, "管理员放弃管理分组"),
     CHOICE_GROUP_MANAGE(13, "管理员选择未指定管理员的私有分组进行管理"),
-    GIVE_UP_MANAGE_USER(14,"管理员放弃管理用户"),
-    CHOICE_USER_MANAGE(15,"管理员选择未指定管理员的用户进行管理");
+    GIVE_UP_MANAGE_USER(14, "管理员放弃管理用户"),
+    CHOICE_USER_MANAGE(15, "管理员选择未指定管理员的用户进行管理"),
+    LOGIC_DELETE_USER(16, "逻辑删除用户账户"),
+    RECOVER_USER(17, "恢复被逻辑删除的用户账户"),
+    COMPLETE_DELETE_USER(18, "彻底删除用户账户");
 
     private int type;
     private String message;

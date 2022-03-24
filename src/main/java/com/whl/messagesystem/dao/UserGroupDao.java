@@ -47,4 +47,11 @@ public interface UserGroupDao {
      * @return
      */
     List<UserGroup> selectUserGroupsByGroupId(int groupId);
+
+    /**
+     * 根据userId查询一条关系
+     * @param userId
+     * @return
+     */
+    UserGroup selectUserGroupByUserId(int userId);
 }

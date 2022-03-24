@@ -28,13 +28,17 @@ public interface UserService {
 
     /**
      * 永久删除用户
+     * @param userId
+     * @return
      */
-    ResponseEntity<Result> completelyDeleteUser(int[] userIds);
+    ResponseEntity<Result> completelyDeleteUser(int userId);
 
     /**
      * 恢复被逻辑删除的用户
+     * @param userId
+     * @return
      */
-    ResponseEntity<Result> recoverUser(int[] userIds);
+    ResponseEntity<Result> recoverUser(int userId);
 
     /**
      * 根据管理员id展示用户列表

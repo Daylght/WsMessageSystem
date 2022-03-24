@@ -49,14 +49,14 @@ public interface UserDao {
     User getActiveUserWithName(String userName);
 
     /**
-     * 根据userIds批量删除user记录
+     * 根据userId删除user记录
      */
-    boolean completelyDeleteUsers(int[] userIds);
+    boolean completelyDeleteUser(int userId);
 
     /**
-     * 把指定userIds的记录的show_status批量置为0
+     * 把指定userId的记录的show_status置为0
      */
-    boolean recoverUsers(int[] userIds);
+    boolean recoverUser(int userId);
 
     /**
      * 根据指定的userId查询学生信息

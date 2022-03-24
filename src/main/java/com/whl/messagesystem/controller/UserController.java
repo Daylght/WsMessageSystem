@@ -57,18 +57,18 @@ public class UserController {
      * 彻底删除用户
      */
     @ApiOperation("彻底删除用户(管理员)")
-    @DeleteMapping("/completelyDeleteUser/{userIds}")
-    public ResponseEntity<Result> completelyDeleteUser(@PathVariable("userIds") String[] userIds) {
-        return userService.completelyDeleteUser(Arrays.stream(userIds).mapToInt(Integer::parseInt).toArray());
+    @DeleteMapping("/completelyDeleteUser/{userId}")
+    public ResponseEntity<Result> completelyDeleteUser(@PathVariable("userId") String userId) {
+        return userService.completelyDeleteUser(Integer.parseInt(userId));
     }
 
     /**
      * 恢复用户
      */
     @ApiOperation("恢复被逻辑删除的用户(管理员)")
-    @PutMapping("/recover")
-    public ResponseEntity<Result> recoverUser(@RequestBody String[] userIds) {
-        return userService.recoverUser(Arrays.stream(userIds).mapToInt(Integer::parseInt).toArray());
+    @PutMapping("/recover/{userId}")
+    public ResponseEntity<Result> recoverUser(@PathVariable("userId") String userId) {
+        return userService.recoverUser(Integer.parseInt(userId));
     }
 
     /**
