@@ -75,6 +75,7 @@ public class HandshakeInterceptorForWebSocket implements HandshakeInterceptor {
                         servletResponse.setContentType("application/json;charset=UTF-8");
                         servletResponse.getWriter().print(responseMessage);
                         servletResponse.flushBuffer();
+                        System.out.println("这个组不存在不能进行广播");
                         return false;
                     }
 

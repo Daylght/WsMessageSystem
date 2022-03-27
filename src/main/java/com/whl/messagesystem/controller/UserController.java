@@ -1,8 +1,8 @@
 package com.whl.messagesystem.controller;
 
 import com.whl.messagesystem.model.Result;
-import com.whl.messagesystem.model.dto.UserRegisterDTO;
 import com.whl.messagesystem.model.dto.UserInfo;
+import com.whl.messagesystem.model.dto.UserRegisterDTO;
 import com.whl.messagesystem.model.entity.UserGroup;
 import com.whl.messagesystem.service.user.UserService;
 import io.swagger.annotations.Api;
@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
-import java.util.Arrays;
 
 /**
  * @author whl
@@ -93,9 +92,9 @@ public class UserController {
      * 管理员放弃管理用户
      */
     @ApiOperation("管理员放弃管理用户(管理员)")
-    @DeleteMapping("/giveUpManage/{userGroup}")
-    public ResponseEntity<Result> giveUpManageUser(@PathVariable("userGroup") UserGroup userGroup, HttpSession session) {
-        return userService.giveUpManageUser(userGroup, session);
+    @DeleteMapping("/giveUpManage/{userId}&{groupId}")
+    public ResponseEntity<Result> giveUpManageUser(@PathVariable("userId") String userId, @PathVariable("groupId") String groupId, HttpSession session) {
+        return userService.giveUpManageUser(new UserGroup(userId, groupId), session);
     }
 
     /**

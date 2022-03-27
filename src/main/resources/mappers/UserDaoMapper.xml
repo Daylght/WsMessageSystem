@@ -84,8 +84,8 @@
 
     <select id="selectUsersWithoutAdmin" resultMap="userMap">
         select u.user_id, u.user_name, u.password, u.show_status
-        from user as u
-                 left join user_admin as ua on u.user_id = ua.user_id
-        where ua.admin_id = null
+        from user u,
+             user_admin ua
+        where u.user_id not in (select ua.user_id from user_admin)
     </select>
 </mapper>

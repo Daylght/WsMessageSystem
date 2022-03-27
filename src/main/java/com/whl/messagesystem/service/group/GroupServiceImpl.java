@@ -3,6 +3,7 @@ package com.whl.messagesystem.service.group;
 import com.alibaba.fastjson.JSONObject;
 import com.whl.messagesystem.commons.channel.Channel;
 import com.whl.messagesystem.commons.channel.group.PrivateGroupMessageChannel;
+import com.whl.messagesystem.commons.channel.management.group.PrivateGroupWithAdminListChannel;
 import com.whl.messagesystem.commons.channel.management.group.PrivateGroupWithoutAdminListChannel;
 import com.whl.messagesystem.commons.channel.management.group.PublicGroupCreatedByOutsideListChannel;
 import com.whl.messagesystem.commons.channel.management.user.UserWithoutAdminListChannel;
@@ -191,22 +192,28 @@ public class GroupServiceImpl implements GroupService {
             Group group = groupDao.selectGroupByGroupId(Integer.parseInt(groupId));
             log.info("要删除的分组信息: {}", group);
 
-            if (group != null && groupDao.deleteGroupByGroupId(Integer.parseInt(groupId)) && userGroupDao.deleteUserGroupsByGroupId(Integer.parseInt(groupId)) >= 0) {
-                log.info("删除分组成功 && 删除用户组关系成功");
-                String message = JSONObject.toJSONString(WsResultUtil.deleteGroup(new HashMap<String, Object>(1).put("groupId", groupId)));
-                log.info("构造ws消息: {}", message);
-
-                // 向大厅广播被删除的分组id
-                SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
-                String adminId = sessionInfo.getAdmin().getAdminId();
-                Channel groupHallListChannel = new GroupHallListChannel(adminId);
-                messageServiceImpl.publish(groupHallListChannel.getChannelName(), new TextMessage(message));
+            if (group != null && userGroupDao.deleteUserGroupsByGroupId(Integer.parseInt(groupId)) >= 0) {
+                String message = JSONObject.toJSONString(WsResultUtil.deleteGroup(group));
+                TextMessage textMessage = new TextMessage(message);
 
                 // 向被删除的分组内广播消息
                 Channel privateGroupMessageChannel = new PrivateGroupMessageChannel(group.getGroupName());
-                messageServiceImpl.publish(privateGroupMessageChannel.getChannelName(), new TextMessage(message));
+                messageServiceImpl.publish(privateGroupMessageChannel.getChannelName(), textMessage);
 
-                return ResponseEntity.ok(ResultUtil.success());
+                if (groupDao.deleteGroupByGroupId(Integer.parseInt(groupId))) {
+                    SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+                    String adminId = sessionInfo.getAdmin().getAdminId();
+
+                    // 向大厅广播被删除的分组id
+                    Channel groupHallListChannel = new GroupHallListChannel(adminId);
+                    messageServiceImpl.publish(groupHallListChannel.getChannelName(), textMessage);
+
+                    // 更新"未指定管理员的私有分组"列表
+                    Channel privateGroupWithoutAdminListChannel = new PrivateGroupWithoutAdminListChannel();
+                    messageServiceImpl.publish(privateGroupWithoutAdminListChannel.getChannelName(), textMessage);
+
+                    return ResponseEntity.ok(ResultUtil.success());
+                }
             }
 
             throw new SQLException("group表删除记录失败");
@@ -614,9 +621,12 @@ public class GroupServiceImpl implements GroupService {
 
             SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
             String adminId = sessionInfo.getAdmin().getAdminId();
+            log.info("adminId: {}", adminId);
 
             GroupVO groupVO = groupDao.selectGroupVOByGroupId(Integer.parseInt(groupId));
+            log.info("groupVO: {}", groupVO);
             List<User> users = userDao.selectUsersWithAdminId(Integer.parseInt(adminId));
+            log.info("users: {}", users);
 
             if (groupDao.clearAdminId(Integer.parseInt(groupId)) && userAdminDao.deleteUserAdminsByAdminId(Integer.parseInt(adminId)) >= 0) {
                 // 构造放弃管理分组的消息
@@ -630,6 +640,10 @@ public class GroupServiceImpl implements GroupService {
                 // 实时更新"未指定管理员的私有分组"列表
                 Channel privateGroupWithoutAdminListChannel = new PrivateGroupWithoutAdminListChannel();
                 messageServiceImpl.publish(privateGroupWithoutAdminListChannel.getChannelName(), textMessage);
+
+                // 更新大厅列表
+                Channel groupHallListChannel = new GroupHallListChannel(adminId);
+                messageServiceImpl.publish(groupHallListChannel.getChannelName(), textMessage);
 
                 // 实时更新"未指定管理员的用户"列表
                 String json = JSONObject.toJSONString(WsResultUtil.giveUpManageUser(users));

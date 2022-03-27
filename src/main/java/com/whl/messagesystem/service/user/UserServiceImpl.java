@@ -13,6 +13,8 @@ import com.whl.messagesystem.dao.UserDao;
 import com.whl.messagesystem.dao.UserGroupDao;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.SessionInfo;
+import com.whl.messagesystem.model.dto.UserGroupInfoDTO;
+import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.model.entity.User;
 import com.whl.messagesystem.model.entity.UserAdmin;
 import com.whl.messagesystem.model.entity.UserGroup;
@@ -30,7 +32,10 @@ import org.springframework.web.socket.TextMessage;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.whl.messagesystem.commons.constant.StringConstant.SESSION_INFO;
 
@@ -246,7 +251,13 @@ public class UserServiceImpl implements UserService {
             }
 
             List<User> users = userDao.selectUsersWithAdminId(Integer.parseInt(adminId));
-            return ResponseEntity.ok(ResultUtil.success(users));
+            List<Group> groups = users.stream().map(user -> groupDao.selectGroupByUserId(Integer.parseInt(user.getUserId()))).collect(Collectors.toList());
+            List<UserGroupInfoDTO> userGroupInfoDTOList = new ArrayList<>();
+            for (int i = 0; i < users.size(); i++) {
+                userGroupInfoDTOList.add(new UserGroupInfoDTO(users.get(i), groups.get(i)));
+            }
+
+            return ResponseEntity.ok(ResultUtil.success(userGroupInfoDTOList));
         } catch (Exception e) {
             log.error("查询用户列表失败: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
@@ -257,7 +268,13 @@ public class UserServiceImpl implements UserService {
     public ResponseEntity<Result> listUsersWithoutAdmin() {
         try {
             List<User> users = userDao.selectUsersWithoutAdmin();
-            return ResponseEntity.ok(ResultUtil.success(users));
+            List<Group> groups = users.stream().map(user -> groupDao.selectGroupByUserId(Integer.parseInt(user.getUserId()))).collect(Collectors.toList());
+            List<UserGroupInfoDTO> userGroupInfoDTOList = new ArrayList<>();
+            for (int i = 0; i < users.size(); i++) {
+                userGroupInfoDTOList.add(new UserGroupInfoDTO(users.get(i), groups.get(i)));
+            }
+
+            return ResponseEntity.ok(ResultUtil.success(userGroupInfoDTOList));
         } catch (Exception e) {
             log.error("查询未指定管理员的用户列表失败: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
