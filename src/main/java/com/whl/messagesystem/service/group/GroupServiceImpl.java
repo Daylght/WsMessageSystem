@@ -674,10 +674,12 @@ public class GroupServiceImpl implements GroupService {
             String adminId = sessionInfo.getAdmin().getAdminId();
 
             if (groupDao.updateAdminIdByGroupId(Integer.parseInt(adminId), Integer.parseInt(groupId))) {
+                // 把组长和组员的userId放入List中
                 List<UserGroup> userGroups = userGroupDao.selectUserGroupsByGroupId(Integer.parseInt(groupId));
                 List<String> userIds = userGroups.stream().map(userGroup -> userGroup.getUserId()).collect(Collectors.toList());
                 userIds.add(creatorId);
 
+                // 向user_admin表插入关系
                 userIds.forEach(userId -> userAdminDao.insertAnUserAdmin(new UserAdmin(userId, adminId)));
 
                 Map<String, Object> map = new HashMap<>(2);

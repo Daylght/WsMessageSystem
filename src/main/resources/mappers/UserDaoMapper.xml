@@ -83,9 +83,8 @@
     </select>
 
     <select id="selectUsersWithoutAdmin" resultMap="userMap">
-        select u.user_id, u.user_name, u.password, u.show_status
-        from user u,
-             user_admin ua
-        where u.user_id not in (select ua.user_id from user_admin)
+        select distinct user_id, user_name, password, show_status
+        from user
+        where user_id not in (select ua.user_id from user_admin ua)
     </select>
 </mapper>

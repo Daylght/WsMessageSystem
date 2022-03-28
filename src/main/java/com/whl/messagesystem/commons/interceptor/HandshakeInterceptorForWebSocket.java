@@ -43,7 +43,6 @@ public class HandshakeInterceptorForWebSocket implements HandshakeInterceptor {
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse, WebSocketHandler webSocketHandler, Map<String, Object> map) throws Exception {
-        log.info("拦截器：beforeHandshake");
         try {
             //转换获取HttpServletRequest对象来获取请求参数
             final HttpServletRequest httpServletRequest = ((ServletServerHttpRequest) serverHttpRequest).getServletRequest();
@@ -75,7 +74,6 @@ public class HandshakeInterceptorForWebSocket implements HandshakeInterceptor {
                         servletResponse.setContentType("application/json;charset=UTF-8");
                         servletResponse.getWriter().print(responseMessage);
                         servletResponse.flushBuffer();
-                        System.out.println("这个组不存在不能进行广播");
                         return false;
                     }
 

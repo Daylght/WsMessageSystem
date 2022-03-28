@@ -323,9 +323,11 @@ public class UserServiceImpl implements UserService {
 
             String userId = userGroup.getUserId();
 
+            // 用户是组长或是组员，需要对整个组执行管理的操作
             if (groupDao.selectGroupCountByCreatorId(Integer.parseInt(userId)) == 1 || userGroupDao.selectUserGroupCountByUserId(Integer.parseInt(userId)) == 1) {
                 return groupService.choiceManagePrivateGroup(userGroup.getGroupId(), session);
             } else {
+                // 用户未加入分组，对他单独进行管理的操作
                 SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
                 String adminId = sessionInfo.getAdmin().getAdminId();
                 userAdminDao.insertAnUserAdmin(new UserAdmin(userId, adminId));

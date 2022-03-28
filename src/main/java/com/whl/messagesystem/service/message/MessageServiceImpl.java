@@ -47,10 +47,9 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         super.afterConnectionClosed(session, status);
-        //获取链接
+
         String channelName = getChannelName(session);
         webSocketSessionsMap.get(channelName).remove(session);
-        log.info("从{}频道中移除当前用户的websocket会话", channelName);
     }
 
     @Override
@@ -58,9 +57,7 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
         super.afterConnectionEstablished(session);
 
         String channelName = getChannelName(session);
-
         if (webSocketSessionsMap.get(channelName) == null) {
-            log.warn("{}的websocket尚未初始化，现在进行初始化", channelName);
             //多个比赛的集合初始化是同步的
             synchronized (this) {
                 if (webSocketSessionsMap.get(channelName) == null) {
@@ -71,13 +68,10 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
             }
         } else {
             //对集合的操作也是同步的
-            log.info("{}的websocket已被初始化，把当前用户的会话加入该小组的websocket", channelName);
             synchronized (webSocketSessionsMap.get(channelName)) {
                 webSocketSessionsMap.get(channelName).add(session);
             }
         }
-        log.info("afterConnectionEstablished ------ 连接已建立");
-
     }
 
 
@@ -98,7 +92,6 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
                         }
                     } else {
                         webSocketSessions.remove(webSocketSession);
-                        log.warn("移除一个已经断开了连接的websocket: {}", channelName);
                     }
                 });
             }
@@ -112,7 +105,6 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
             try {
                 if (webSocketSession.isOpen()) {
                     webSocketSession.close();
-                    log.info("WebSocketSessionId={}已断开", webSocketSession.getId());
                 }
             } catch (IOException e) {
                 log.error("删除websocket频道异常: {}", e.getMessage());
