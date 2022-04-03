@@ -2,6 +2,7 @@ package com.whl.messagesystem.dao;
 
 import com.whl.messagesystem.model.entity.Admin;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public interface AdminDao {
      * 查找所有的管理员id与name，以list形式返回
      * @return
      */
-    List<Admin> selectAllAdminsWithoutPassword();
+    List<Admin> selectAllAdmins();
 
     /**
      * 根据userId查询用户隶属的管理员
@@ -52,4 +53,11 @@ public interface AdminDao {
      * @return
      */
     boolean deleteAdminByAdminId(int adminId);
+
+    /**
+     * 在admin表中更新一条记录
+     * @param admin
+     * @return
+     */
+    boolean updateAdminNameAndPassword(@Param("admin") Admin admin);
 }

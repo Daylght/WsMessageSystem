@@ -15,12 +15,21 @@
         VALUES (#{adminName}, #{password})
     </insert>
 
+    <update id="updateAdminNameAndPassword">
+        update admin
+        set admin_name = #{admin.adminName},
+            password   = #{admin.password}
+        where admin_id = #{admin.adminId}
+    </update>
+
     <delete id="deleteAdminByAdminId">
-        delete from admin where admin_id = #{adminId}
+        delete
+        from admin
+        where admin_id = #{adminId}
     </delete>
 
-    <select id="selectAllAdminsWithoutPassword" resultMap="adminMap">
-        select admin_id, admin_name
+    <select id="selectAllAdmins" resultMap="adminMap">
+        select admin_id, admin_name, password
         from admin
     </select>
 

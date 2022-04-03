@@ -6,6 +6,7 @@ import com.whl.messagesystem.commons.constant.StringConstant;
 import com.whl.messagesystem.commons.utils.ResultUtil;
 import com.whl.messagesystem.dao.AdminDao;
 import com.whl.messagesystem.model.Result;
+import com.whl.messagesystem.model.dto.AdminInfo;
 import com.whl.messagesystem.model.dto.AdminRegisterDTO;
 import com.whl.messagesystem.model.dto.SessionInfo;
 import com.whl.messagesystem.model.entity.Admin;
@@ -19,9 +20,10 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
-import java.security.InvalidParameterException;
 import java.sql.SQLException;
 import java.util.List;
+
+import static com.whl.messagesystem.commons.constant.StringConstant.SESSION_INFO;
 
 /**
  * @author whl
@@ -40,7 +42,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public ResponseEntity<Result> getAdminList() {
         try {
-            List<Admin> admins = adminDao.selectAllAdminsWithoutPassword();
+            List<Admin> admins = adminDao.selectAllAdmins();
             return ResponseEntity.ok(ResultUtil.success(admins));
         } catch (Exception e) {
             log.error("获取管理员列表异常: {}", e.getMessage());
@@ -88,7 +90,7 @@ public class AdminServiceImpl implements AdminService {
 
             SessionInfo sessionInfo = (SessionInfo) session.getAttribute(StringConstant.SESSION_INFO);
             if (RoleConstant.ADMIN.equals(sessionInfo.getRole()) && adminId.equals(sessionInfo.getAdmin().getAdminId())) {
-                if(adminDao.deleteAdminByAdminId(Integer.parseInt(adminId))) {
+                if (adminDao.deleteAdminByAdminId(Integer.parseInt(adminId))) {
                     sessionService.logout(session);
                     return ResponseEntity.ok(ResultUtil.success());
                 }
@@ -98,6 +100,34 @@ public class AdminServiceImpl implements AdminService {
             return ResponseEntity.ok(ResultUtil.error("必须由管理员本人执行注销操作"));
         } catch (Exception e) {
             log.error("注销管理员账号异常: {}", e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
+
+    @Override
+    public ResponseEntity<Result> updateAdminNameAndPassword(AdminInfo adminInfo, HttpSession session) {
+        try {
+            if (ObjectUtils.isEmpty(adminInfo)) {
+                throw new NullPointerException("参数为空");
+            }
+
+            Admin admin = new Admin();
+            admin.setAdminId(adminInfo.getAdminId());
+            admin.setAdminName(adminInfo.getAdminName());
+            admin.setPassword(adminInfo.getPassword());
+
+            if (adminDao.updateAdminNameAndPassword(admin)) {
+                // 更新会话
+                SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+                sessionInfo.setAdmin(admin);
+                session.setAttribute(SESSION_INFO, sessionInfo);
+
+                return ResponseEntity.ok(ResultUtil.success());
+            }
+
+            throw new SQLException("admin表更新记录失败");
+        } catch (Exception e) {
+            log.error("更新管理员的用户名与密码失败，参数：{}，异常信息：{}", adminInfo, e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }

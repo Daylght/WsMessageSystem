@@ -1,6 +1,7 @@
 package com.whl.messagesystem.controller;
 
 import com.whl.messagesystem.model.Result;
+import com.whl.messagesystem.model.dto.AdminInfo;
 import com.whl.messagesystem.model.dto.AdminRegisterDTO;
 import com.whl.messagesystem.service.admin.AdminService;
 import io.swagger.annotations.Api;
@@ -38,6 +39,12 @@ public class AdminController {
     @DeleteMapping("/delete/{adminId}")
     public ResponseEntity<Result> deleteAdmin(@PathVariable("adminId") String adminId, HttpSession session) {
         return adminService.deleteAdmin(adminId, session);
+    }
+
+    @ApiOperation("更新管理员的用户名与密码(管理员)")
+    @PutMapping("/updateNameAndPassword")
+    public ResponseEntity<Result> updateAdminNameAndPassword(@RequestBody AdminInfo adminInfo, HttpSession session) {
+        return adminService.updateAdminNameAndPassword(adminInfo, session);
     }
 
 }

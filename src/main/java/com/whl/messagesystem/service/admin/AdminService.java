@@ -1,6 +1,7 @@
 package com.whl.messagesystem.service.admin;
 
 import com.whl.messagesystem.model.Result;
+import com.whl.messagesystem.model.dto.AdminInfo;
 import com.whl.messagesystem.model.dto.AdminRegisterDTO;
 import org.springframework.http.ResponseEntity;
 
@@ -13,7 +14,7 @@ import javax.servlet.http.HttpSession;
 public interface AdminService {
 
     /**
-     * 获取所有管理员的列表,只包含id和name，不包含password
+     * 获取所有管理员的列表
      */
     ResponseEntity<Result> getAdminList();
 
@@ -31,4 +32,12 @@ public interface AdminService {
      * @return
      */
     ResponseEntity<Result> deleteAdmin(String adminId, HttpSession session);
+
+    /**
+     * 更新管理员的用户名与密码
+     * @param adminInfo
+     * @param session
+     * @return
+     */
+    ResponseEntity<Result> updateAdminNameAndPassword(AdminInfo adminInfo, HttpSession session);
 }

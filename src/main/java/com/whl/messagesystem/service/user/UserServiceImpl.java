@@ -115,7 +115,7 @@ public class UserServiceImpl implements UserService {
             user.setUserId(userId);
             user.setUserName(userName);
             user.setPassword(password);
-            log.info("更新的用户信息: {}", user);
+
             if (userDao.updateUserNameAndPassword(user)) {
                 // 更新会话
                 SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
@@ -256,6 +256,14 @@ public class UserServiceImpl implements UserService {
             for (int i = 0; i < users.size(); i++) {
                 userGroupInfoDTOList.add(new UserGroupInfoDTO(users.get(i), groups.get(i)));
             }
+            userGroupInfoDTOList.forEach(userGroupInfoDTO -> {
+                if (userGroupInfoDTO.getGroup() == null) {
+                    Group group = groupDao.selectGroupByCreatorId(Integer.parseInt(userGroupInfoDTO.getUser().getUserId()));
+                    if (group != null) {
+                        userGroupInfoDTO.setGroup(group);
+                    }
+                }
+            });
 
             return ResponseEntity.ok(ResultUtil.success(userGroupInfoDTOList));
         } catch (Exception e) {
@@ -273,6 +281,14 @@ public class UserServiceImpl implements UserService {
             for (int i = 0; i < users.size(); i++) {
                 userGroupInfoDTOList.add(new UserGroupInfoDTO(users.get(i), groups.get(i)));
             }
+            userGroupInfoDTOList.forEach(userGroupInfoDTO -> {
+                if (userGroupInfoDTO.getGroup() == null) {
+                    Group group = groupDao.selectGroupByCreatorId(Integer.parseInt(userGroupInfoDTO.getUser().getUserId()));
+                    if (group != null) {
+                        userGroupInfoDTO.setGroup(group);
+                    }
+                }
+            });
 
             return ResponseEntity.ok(ResultUtil.success(userGroupInfoDTOList));
         } catch (Exception e) {
