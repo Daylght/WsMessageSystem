@@ -47,4 +47,10 @@ public class AdminController {
         return adminService.updateAdminNameAndPassword(adminInfo, session);
     }
 
+    @ApiOperation("选择管理员(用户)")
+    @PostMapping("/choice/{adminId}")
+    public ResponseEntity<Result> choiceAnAdmin(@PathVariable("adminId") String adminId, HttpSession session) {
+        return adminService.choiceAnAdmin(adminId, session);
+    }
+
 }

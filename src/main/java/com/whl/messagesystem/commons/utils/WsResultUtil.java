@@ -129,4 +129,28 @@ public class WsResultUtil {
         return websocketResult;
     }
 
+    public static WebsocketResult<Object> registerAdmin(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.REGISTER_ADMIN.getType());
+        websocketResult.setMessage(WsResultEnum.REGISTER_ADMIN.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
+    public static WebsocketResult<Object> deleteAdmin(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.DELETE_ADMIN.getType());
+        websocketResult.setMessage(WsResultEnum.DELETE_ADMIN.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
+    public static WebsocketResult<Object> updateAdminNameAndPassword(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.UPDATE_ADMIN_NAME_AND_PASSWORD.getType());
+        websocketResult.setMessage(WsResultEnum.UPDATE_ADMIN_NAME_AND_PASSWORD.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
 }

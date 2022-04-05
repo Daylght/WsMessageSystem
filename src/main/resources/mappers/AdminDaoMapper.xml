@@ -52,4 +52,15 @@
         where admin_name = #{adminName}
     </select>
 
+    <select id="selectAdminCount" resultType="java.lang.Integer">
+        select count(*)
+        from admin
+    </select>
+
+    <select id="selectAdminByAdminId" resultMap="adminMap">
+        select admin_id, admin_name, password
+        from admin
+        where admin_id = #{adminId}
+    </select>
+
 </mapper>

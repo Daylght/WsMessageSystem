@@ -60,4 +60,17 @@ public interface AdminDao {
      * @return
      */
     boolean updateAdminNameAndPassword(@Param("admin") Admin admin);
+
+    /**
+     * 在admin表中查询记录的行数
+     * @return
+     */
+    int selectAdminCount();
+
+    /**
+     * 在admin表中根据id查询记录
+     * @param adminId
+     * @return
+     */
+    Admin selectAdminByAdminId(int adminId);
 }

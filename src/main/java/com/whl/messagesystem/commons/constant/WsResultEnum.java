@@ -20,7 +20,10 @@ public enum WsResultEnum {
     CHOICE_USER_MANAGE(15, "管理员选择未指定管理员的用户进行管理"),
     LOGIC_DELETE_USER(16, "逻辑删除用户账户"),
     RECOVER_USER(17, "恢复被逻辑删除的用户账户"),
-    COMPLETE_DELETE_USER(18, "彻底删除用户账户");
+    COMPLETE_DELETE_USER(18, "彻底删除用户账户"),
+    REGISTER_ADMIN(19, "注册新管理员"),
+    DELETE_ADMIN(20, "注销管理员账号"),
+    UPDATE_ADMIN_NAME_AND_PASSWORD(21, "更新管理员账号密码");
 
     private int type;
     private String message;

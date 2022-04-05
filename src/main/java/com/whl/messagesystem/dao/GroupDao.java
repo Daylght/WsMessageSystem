@@ -159,4 +159,11 @@ public interface GroupDao {
      * @return
      */
     boolean updateAdminIdByGroupId(@Param("adminId") int adminId, @Param("groupId") int groupId);
+
+    /**
+     * 在group表中根据管理员id查询其管理的所有分组
+     * @param adminId
+     * @return
+     */
+    List<Group> selectGroupsByAdminId(int adminId);
 }

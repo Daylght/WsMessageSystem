@@ -40,4 +40,12 @@ public interface AdminService {
      * @return
      */
     ResponseEntity<Result> updateAdminNameAndPassword(AdminInfo adminInfo, HttpSession session);
+
+    /**
+     * 用户选择一个管理员作为自己的管理员
+     * @param adminId
+     * @param session
+     * @return
+     */
+    ResponseEntity<Result> choiceAnAdmin(String adminId, HttpSession session);
 }

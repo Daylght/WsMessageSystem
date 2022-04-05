@@ -170,4 +170,10 @@
           and a.admin_id = #{groupId}
     </select>
 
+    <select id="selectGroupsByAdminId" resultMap="groupMap">
+        select group_id, group_name, max_count, admin_id, creator_id, is_admin_created
+        from `group`
+        where admin_id = #{adminId}
+    </select>
+
 </mapper>

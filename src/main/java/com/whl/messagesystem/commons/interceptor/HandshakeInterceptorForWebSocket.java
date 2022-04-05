@@ -3,6 +3,7 @@ package com.whl.messagesystem.commons.interceptor;
 import com.whl.messagesystem.commons.channel.Channel;
 import com.whl.messagesystem.commons.channel.group.PrivateGroupMessageChannel;
 import com.whl.messagesystem.commons.channel.group.PublicGroupMessageChannel;
+import com.whl.messagesystem.commons.channel.management.AdminListChannel;
 import com.whl.messagesystem.commons.channel.management.group.PrivateGroupWithoutAdminListChannel;
 import com.whl.messagesystem.commons.channel.management.group.PublicGroupCreatedByOutsideListChannel;
 import com.whl.messagesystem.commons.channel.management.user.UserRecoverListWithoutAdminChannel;
@@ -103,8 +104,12 @@ public class HandshakeInterceptorForWebSocket implements HandshakeInterceptor {
                     channel = new UserWithoutAdminListChannel();
                     break;
                 }
-                case "userRecoverListWithoutAdmin":{
+                case "userRecoverListWithoutAdmin": {
                     channel = new UserRecoverListWithoutAdminChannel();
+                    break;
+                }
+                case "adminList": {
+                    channel = new AdminListChannel();
                     break;
                 }
                 default: {
