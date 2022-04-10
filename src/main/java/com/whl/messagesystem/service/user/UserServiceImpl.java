@@ -329,7 +329,6 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(rollbackFor = {RuntimeException.class, Error.class})
     public ResponseEntity<Result> choiceUserToManage(UserGroup userGroup, HttpSession session) {
         try {
             if (ObjectUtils.isEmpty(userGroup)) {

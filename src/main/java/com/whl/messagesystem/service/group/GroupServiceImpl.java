@@ -631,11 +631,13 @@ public class GroupServiceImpl implements GroupService {
             log.info("adminId: {}", adminId);
 
             GroupVO groupVO = groupDao.selectGroupVOByGroupId(Integer.parseInt(groupId));
-            log.info("groupVO: {}", groupVO);
-            List<User> users = userDao.selectUsersWithAdminId(Integer.parseInt(adminId));
-            log.info("users: {}", users);
+            List<User> users = groupDao.selectUsersWithGroupId(Integer.parseInt(groupId));
+            User creator = userDao.selectUserWithUserId(Integer.parseInt(groupVO.getCreatorId()));
+            users.add(creator);
 
-            if (groupDao.clearAdminId(Integer.parseInt(groupId)) && userAdminDao.deleteUserAdminsByAdminId(Integer.parseInt(adminId)) >= 0) {
+            if (groupDao.clearAdminId(Integer.parseInt(groupId))) {
+                users.forEach(user -> userAdminDao.deleteUserAdminByUserId(Integer.parseInt(user.getUserId())));
+
                 // 构造放弃管理分组的消息
                 String message = JSONObject.toJSONString(WsResultUtil.giveUpManageGroup(groupId));
                 TextMessage textMessage = new TextMessage(message);
@@ -653,7 +655,10 @@ public class GroupServiceImpl implements GroupService {
                 messageService.publish(groupHallListChannel.getChannelName(), textMessage);
 
                 // 实时更新"未指定管理员的用户"列表
-                String json = JSONObject.toJSONString(WsResultUtil.giveUpManageUser(users));
+                Map<String, Object> map = new HashMap<>();
+                map.put("users", users);
+                map.put("groupName", groupVO.getGroupName());
+                String json = JSONObject.toJSONString(WsResultUtil.giveUpManageUser(map));
                 Channel userWithoutAdminListChannel = new UserWithoutAdminListChannel();
                 messageService.publish(userWithoutAdminListChannel.getChannelName(), new TextMessage(json));
 
@@ -683,7 +688,7 @@ public class GroupServiceImpl implements GroupService {
             if (groupDao.updateAdminIdByGroupId(Integer.parseInt(adminId), Integer.parseInt(groupId))) {
                 // 把组长和组员的userId放入List中
                 List<UserGroup> userGroups = userGroupDao.selectUserGroupsByGroupId(Integer.parseInt(groupId));
-                List<String> userIds = userGroups.stream().map(userGroup -> userGroup.getUserId()).collect(Collectors.toList());
+                List<String> userIds = userGroups.stream().map(UserGroup::getUserId).collect(Collectors.toList());
                 userIds.add(creatorId);
 
                 // 向user_admin表插入关系

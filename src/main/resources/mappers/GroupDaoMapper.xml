@@ -108,7 +108,7 @@
     </select>
 
     <select id="selectUsersWithGroupId" resultMap="com.whl.messagesystem.dao.UserDao.userMap">
-        select u.user_id, u.user_name
+        select u.user_id, u.user_name, u.password, u.show_status
         from user u
                  left join user_group ug on u.user_id = ug.user_id
         where ug.group_id = #{groupId}
