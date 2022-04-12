@@ -105,6 +105,14 @@ public class WsResultUtil {
         return websocketResult;
     }
 
+    public static WebsocketResult<Object> choiceAdmin(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.CHOICE_ADMIN.getType());
+        websocketResult.setMessage(WsResultEnum.CHOICE_ADMIN.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
     public static WebsocketResult<Object> logicDeleteUser(Object data) {
         WebsocketResult<Object> websocketResult = new WebsocketResult<>();
         websocketResult.setType(WsResultEnum.LOGIC_DELETE_USER.getType());
@@ -137,6 +145,14 @@ public class WsResultUtil {
         return websocketResult;
     }
 
+    public static WebsocketResult<Object> registerUser(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.REGISTER_USER.getType());
+        websocketResult.setMessage(WsResultEnum.REGISTER_USER.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
     public static WebsocketResult<Object> deleteAdmin(Object data) {
         WebsocketResult<Object> websocketResult = new WebsocketResult<>();
         websocketResult.setType(WsResultEnum.DELETE_ADMIN.getType());
@@ -149,6 +165,14 @@ public class WsResultUtil {
         WebsocketResult<Object> websocketResult = new WebsocketResult<>();
         websocketResult.setType(WsResultEnum.UPDATE_ADMIN_NAME_AND_PASSWORD.getType());
         websocketResult.setMessage(WsResultEnum.UPDATE_ADMIN_NAME_AND_PASSWORD.getMessage());
+        websocketResult.setData(data);
+        return websocketResult;
+    }
+
+    public static WebsocketResult<Object> updateUserNameAndPassword(Object data) {
+        WebsocketResult<Object> websocketResult = new WebsocketResult<>();
+        websocketResult.setType(WsResultEnum.UPDATE_USER_NAME_AND_PASSWORD.getType());
+        websocketResult.setMessage(WsResultEnum.UPDATE_USER_NAME_AND_PASSWORD.getMessage());
         websocketResult.setData(data);
         return websocketResult;
     }

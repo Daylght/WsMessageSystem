@@ -1,5 +1,6 @@
 package com.whl.messagesystem.model.entity;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
  * @date 2021/12/7 17:05
  */
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class User {
     /**

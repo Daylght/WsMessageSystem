@@ -23,7 +23,10 @@ public enum WsResultEnum {
     COMPLETE_DELETE_USER(18, "彻底删除用户账户"),
     REGISTER_ADMIN(19, "注册新管理员"),
     DELETE_ADMIN(20, "注销管理员账号"),
-    UPDATE_ADMIN_NAME_AND_PASSWORD(21, "更新管理员账号密码");
+    UPDATE_ADMIN_NAME_AND_PASSWORD(21, "更新管理员账号密码"),
+    REGISTER_USER(22, "新用户注册"),
+    UPDATE_USER_NAME_AND_PASSWORD(23, "更新用户账号密码"),
+    CHOICE_ADMIN(24, "用户选择管理员");
 
     private int type;
     private String message;

@@ -3,6 +3,7 @@ package com.whl.messagesystem.service.admin;
 import com.alibaba.fastjson.JSONObject;
 import com.whl.messagesystem.commons.channel.Channel;
 import com.whl.messagesystem.commons.channel.management.AdminListChannel;
+import com.whl.messagesystem.commons.channel.management.user.UserWithAdminListChannel;
 import com.whl.messagesystem.commons.constant.ResultEnum;
 import com.whl.messagesystem.commons.constant.RoleConstant;
 import com.whl.messagesystem.commons.constant.StringConstant;
@@ -16,10 +17,8 @@ import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.AdminInfo;
 import com.whl.messagesystem.model.dto.AdminRegisterDTO;
 import com.whl.messagesystem.model.dto.SessionInfo;
-import com.whl.messagesystem.model.entity.Admin;
-import com.whl.messagesystem.model.entity.Group;
-import com.whl.messagesystem.model.entity.PublicGroup;
-import com.whl.messagesystem.model.entity.UserAdmin;
+import com.whl.messagesystem.model.dto.UserGroupInfoDTO;
+import com.whl.messagesystem.model.entity.*;
 import com.whl.messagesystem.service.group.GroupService;
 import com.whl.messagesystem.service.message.MessageServiceImpl;
 import com.whl.messagesystem.service.session.SessionService;
@@ -204,6 +203,17 @@ public class AdminServiceImpl implements AdminService {
             if (userAdminDao.insertAnUserAdmin(new UserAdmin(userId, adminId))) {
                 Admin admin = adminDao.selectAdminByAdminId(Integer.parseInt(adminId));
                 sessionInfo.setAdmin(admin);
+
+                // 实时更新管理员端的用户列表
+                User user = sessionInfo.getUser();
+                Group group = sessionInfo.getGroup();
+                UserGroupInfoDTO userGroupInfoDTO = new UserGroupInfoDTO();
+                userGroupInfoDTO.setGroup(group);
+                userGroupInfoDTO.setUser(user);
+                String message = JSONObject.toJSONString(WsResultUtil.choiceAdmin(userGroupInfoDTO));
+                Channel userWithAdminListChannel = new UserWithAdminListChannel(adminId);
+                messageService.publish(userWithAdminListChannel.getChannelName(), new TextMessage(message));
+
                 return ResponseEntity.ok(ResultUtil.success());
             }
 

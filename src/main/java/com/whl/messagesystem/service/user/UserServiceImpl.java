@@ -3,6 +3,7 @@ package com.whl.messagesystem.service.user;
 import com.alibaba.fastjson.JSONObject;
 import com.whl.messagesystem.commons.channel.Channel;
 import com.whl.messagesystem.commons.channel.management.user.UserRecoverListWithoutAdminChannel;
+import com.whl.messagesystem.commons.channel.management.user.UserWithAdminListChannel;
 import com.whl.messagesystem.commons.channel.management.user.UserWithoutAdminListChannel;
 import com.whl.messagesystem.commons.constant.ResultEnum;
 import com.whl.messagesystem.commons.utils.ResultUtil;
@@ -89,7 +90,12 @@ public class UserServiceImpl implements UserService {
                 String userId = userDao.getUserIdWithName(userName);
                 UserAdmin userAdmin = new UserAdmin(userId, adminId);
                 if (userAdminDao.insertAnUserAdmin(userAdmin)) {
-                    log.info("用户注册成功");
+                    user.setUserId(userId);
+                    user.setShowStatus(0);
+                    String message = JSONObject.toJSONString(WsResultUtil.registerUser(user));
+                    Channel userWithAdminListChannel = new UserWithAdminListChannel(adminId);
+                    messageService.publish(userWithAdminListChannel.getChannelName(), new TextMessage(message));
+
                     return ResponseEntity.ok(ResultUtil.success());
                 }
             }
@@ -121,6 +127,15 @@ public class UserServiceImpl implements UserService {
                 SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
                 sessionInfo.setUser(user);
                 session.setAttribute(SESSION_INFO, sessionInfo);
+
+                String message = JSONObject.toJSONString(WsResultUtil.updateUserNameAndPassword(user));
+                Channel channel;
+                if (sessionInfo.getGroup() == null) {
+                    channel = new UserWithoutAdminListChannel();
+                } else {
+                    channel = new UserWithAdminListChannel(sessionInfo.getAdmin().getAdminId());
+                }
+                messageService.publish(channel.getChannelName(), new TextMessage(message));
 
                 return ResponseEntity.ok(ResultUtil.success());
             }
