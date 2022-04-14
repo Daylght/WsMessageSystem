@@ -200,22 +200,40 @@ public class AdminServiceImpl implements AdminService {
             SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
             String userId = sessionInfo.getUser().getUserId();
 
-            if (userAdminDao.insertAnUserAdmin(new UserAdmin(userId, adminId))) {
+            if (groupDao.selectGroupByCreatorId(Integer.parseInt(userId)) == null) {
+                userAdminDao.insertAnUserAdmin(new UserAdmin(userId, adminId));
+                User user = sessionInfo.getUser();
                 Admin admin = adminDao.selectAdminByAdminId(Integer.parseInt(adminId));
                 sessionInfo.setAdmin(admin);
-
-                // 实时更新管理员端的用户列表
-                User user = sessionInfo.getUser();
-                Group group = sessionInfo.getGroup();
-                UserGroupInfoDTO userGroupInfoDTO = new UserGroupInfoDTO();
-                userGroupInfoDTO.setGroup(group);
-                userGroupInfoDTO.setUser(user);
-                String message = JSONObject.toJSONString(WsResultUtil.choiceAdmin(userGroupInfoDTO));
+                String message = JSONObject.toJSONString(WsResultUtil.choiceAdmin(user));
                 Channel userWithAdminListChannel = new UserWithAdminListChannel(adminId);
                 messageService.publish(userWithAdminListChannel.getChannelName(), new TextMessage(message));
-
                 return ResponseEntity.ok(ResultUtil.success());
+            } else {
+                if (userAdminDao.insertAnUserAdmin(new UserAdmin(userId, adminId))) {
+                    List<User> members = groupDao.selectUsersWithGroupId(Integer.parseInt(sessionInfo.getGroup().getGroupId()));
+                    members.forEach(member -> userAdminDao.insertAnUserAdmin(new UserAdmin(member.getUserId(), adminId)));
+
+                    groupDao.updateAdminIdByGroupId(Integer.parseInt(adminId), Integer.parseInt(sessionInfo.getGroup().getGroupId()));
+
+                    Admin admin = adminDao.selectAdminByAdminId(Integer.parseInt(adminId));
+                    sessionInfo.setAdmin(admin);
+
+                    // 实时更新管理员端的用户列表
+                    User user = sessionInfo.getUser();
+                    Group group = sessionInfo.getGroup();
+                    UserGroupInfoDTO userGroupInfoDTO = new UserGroupInfoDTO();
+                    userGroupInfoDTO.setGroup(group);
+                    userGroupInfoDTO.setUser(user);
+                    String message = JSONObject.toJSONString(WsResultUtil.choiceAdmin(userGroupInfoDTO));
+                    Channel userWithAdminListChannel = new UserWithAdminListChannel(adminId);
+                    messageService.publish(userWithAdminListChannel.getChannelName(), new TextMessage(message));
+
+                    return ResponseEntity.ok(ResultUtil.success());
+                }
             }
+
+
 
             throw new SQLException("user_admin表插入失败");
         } catch (Exception e) {

@@ -2,6 +2,7 @@ package com.whl.messagesystem.service.session;
 
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.LoginDTO;
+import com.whl.messagesystem.model.entity.Admin;
 import com.whl.messagesystem.model.entity.Group;
 import org.springframework.http.ResponseEntity;
 
@@ -56,4 +57,12 @@ public interface SessionService {
      * @return
      */
     ResponseEntity<Result> removeAdminInfoFromSession(HttpSession session);
+
+    /**
+     * 设置sessionInfo中的管理员信息
+     * @param admin
+     * @param session
+     * @return
+     */
+    ResponseEntity<Result> setAdminInfoOnSession(Admin admin, HttpSession session);
 }

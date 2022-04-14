@@ -2,6 +2,7 @@ package com.whl.messagesystem.controller;
 
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.LoginDTO;
+import com.whl.messagesystem.model.entity.Admin;
 import com.whl.messagesystem.model.entity.Group;
 import com.whl.messagesystem.service.session.SessionService;
 import io.swagger.annotations.Api;
@@ -85,6 +86,15 @@ public class SessionController {
     @DeleteMapping("/admin")
     public ResponseEntity<Result> removeAdminInfoFromSession(HttpSession session){
         return sessionService.removeAdminInfoFromSession(session);
+    }
+
+    /**
+     * 设置sessionInfo中的管理员信息
+     */
+    @ApiOperation("设置sessionInfo中的管理员信息")
+    @PostMapping("/admin")
+    public ResponseEntity<Result> setAdminInfoOnSession(@RequestBody Admin admin, HttpSession session) {
+        return sessionService.setAdminInfoOnSession(admin, session);
     }
 
 }

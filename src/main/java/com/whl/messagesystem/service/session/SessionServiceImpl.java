@@ -260,4 +260,16 @@ public class SessionServiceImpl implements SessionService {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
+
+    @Override
+    public ResponseEntity<Result> setAdminInfoOnSession(Admin admin, HttpSession session) {
+        try {
+            SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
+            sessionInfo.setAdmin(admin);
+            return ResponseEntity.ok(ResultUtil.success());
+        } catch (Exception e) {
+            log.error("设置sessionInfo中的管理员信息异常，参数：{}，异常信息： {}", admin, e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
+        }
+    }
 }

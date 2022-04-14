@@ -6,6 +6,7 @@ import com.whl.messagesystem.commons.channel.group.PrivateGroupMessageChannel;
 import com.whl.messagesystem.commons.channel.group.PublicGroupMessageChannel;
 import com.whl.messagesystem.commons.channel.management.group.PrivateGroupWithoutAdminListChannel;
 import com.whl.messagesystem.commons.channel.management.group.PublicGroupCreatedByOutsideListChannel;
+import com.whl.messagesystem.commons.channel.management.user.UserWithAdminListChannel;
 import com.whl.messagesystem.commons.channel.management.user.UserWithoutAdminListChannel;
 import com.whl.messagesystem.commons.channel.user.GroupHallListChannel;
 import com.whl.messagesystem.commons.constant.ResultEnum;
@@ -163,7 +164,6 @@ public class GroupServiceImpl implements GroupService {
                 groupVo.setAdminName(adminDao.selectAdminByUserId(Integer.parseInt(creatorId)).getAdminName());
                 groupVo.setCreatorName(userDao.selectUserWithUserId(Integer.parseInt(creatorId)).getUserName());
 
-
                 String message = JSONObject.toJSONString(WsResultUtil.createGroup(groupVo));
                 TextMessage textMessage = new TextMessage(message);
                 // 向大厅广播刚创建的分组的相关信息
@@ -271,8 +271,12 @@ public class GroupServiceImpl implements GroupService {
 
                 // 组内广播此人加入的消息
                 String message = JSONObject.toJSONString(WsResultUtil.joinGroup(data));
-                Channel channel = new PrivateGroupMessageChannel(group.getGroupName());
-                messageService.publish(channel.getChannelName(), new TextMessage(message));
+                TextMessage textMessage = new TextMessage(message);
+                Channel privateGroupMessageChannel = new PrivateGroupMessageChannel(group.getGroupName());
+                messageService.publish(privateGroupMessageChannel.getChannelName(), textMessage);
+
+                Channel userWithAdminListChannel = new UserWithAdminListChannel(sessionInfo.getAdmin().getAdminId());
+                messageService.publish(userWithAdminListChannel.getChannelName(), textMessage);
 
                 return ResponseEntity.ok(ResultUtil.success());
             }
@@ -673,7 +677,6 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    @Transactional(rollbackFor = {RuntimeException.class, Error.class})
     public ResponseEntity<Result> choiceManagePrivateGroup(String groupId, HttpSession session) {
         try {
             if (StringUtils.isEmpty(groupId)) {
@@ -696,7 +699,7 @@ public class GroupServiceImpl implements GroupService {
 
                 Map<String, Object> map = new HashMap<>(2);
                 map.put("groupId", groupId);
-                map.put("adminId", adminId);
+                map.put("admin", sessionInfo.getAdmin());
                 TextMessage textMessage = new TextMessage(JSONObject.toJSONString(WsResultUtil.choiceManagePrivateGroup(map)));
 
                 // 实时更新"未指定管理员的私有分组"列表

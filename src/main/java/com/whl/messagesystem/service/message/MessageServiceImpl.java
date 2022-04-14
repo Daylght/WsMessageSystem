@@ -100,16 +100,23 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
 
     @Override
     public void deleteChannel(String channelName) {
-        List<WebSocketSession> webSocketSessionList = webSocketSessionsMap.get(channelName);
-        webSocketSessionList.forEach(webSocketSession -> {
-            try {
-                if (webSocketSession.isOpen()) {
-                    webSocketSession.close();
+        /**
+         * 若此channel尚未被初始化，则需要做判断
+         * 若直接删除可能会出现NPE
+         */
+        if (webSocketSessionsMap.containsKey(channelName)) {
+            List<WebSocketSession> webSocketSessionList = webSocketSessionsMap.get(channelName);
+            webSocketSessionList.forEach(webSocketSession -> {
+                try {
+                    if (webSocketSession != null && webSocketSession.isOpen()) {
+                        webSocketSession.close();
+                    }
+                } catch (IOException e) {
+                    log.error("删除websocket频道异常: {}", e.getMessage());
                 }
-            } catch (IOException e) {
-                log.error("删除websocket频道异常: {}", e.getMessage());
-            }
-        });
+            });
+            webSocketSessionsMap.remove(channelName);
+        }
     }
 
     /**
@@ -124,6 +131,7 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
 
     /**
      * 向指定的频道转发信息
+     *
      * @param channelName
      * @param payload
      */
@@ -137,6 +145,14 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
                 log.warn("webSocket出现异常并断开，频道名: {}，异常信息: {}", channelName, e.getMessage());
             }
         });
+    }
+
+    public boolean containsChannel(String channelName) {
+        return webSocketSessionsMap.containsKey(channelName);
+    }
+
+    public int connectionsCount(String channelName) {
+        return webSocketSessionsMap.get(channelName).size();
     }
 
 }

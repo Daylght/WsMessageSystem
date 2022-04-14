@@ -15,10 +15,7 @@ import com.whl.messagesystem.dao.UserGroupDao;
 import com.whl.messagesystem.model.Result;
 import com.whl.messagesystem.model.dto.SessionInfo;
 import com.whl.messagesystem.model.dto.UserGroupInfoDTO;
-import com.whl.messagesystem.model.entity.Group;
-import com.whl.messagesystem.model.entity.User;
-import com.whl.messagesystem.model.entity.UserAdmin;
-import com.whl.messagesystem.model.entity.UserGroup;
+import com.whl.messagesystem.model.entity.*;
 import com.whl.messagesystem.service.group.GroupService;
 import com.whl.messagesystem.service.message.MessageServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -169,16 +166,19 @@ public class UserServiceImpl implements UserService {
                     groupService.kickGroupMember(String.valueOf(userId));
                 }
 
+                String message = JSONObject.toJSONString(WsResultUtil.logicDeleteUser(user));
+                TextMessage textMessage = new TextMessage(message);
+
                 // 该用户不属于某个管理员，实时更新"回收站中的不属于管理员的用户"和"未指定管理员的用户"两个列表
                 if (userAdmin == null) {
-                    String message = JSONObject.toJSONString(WsResultUtil.logicDeleteUser(user));
-                    TextMessage textMessage = new TextMessage(message);
+                    Channel userWithoutAdminListChannel = new UserWithoutAdminListChannel();
+                    messageService.publish(userWithoutAdminListChannel.getChannelName(), textMessage);
 
                     Channel userRecoverListWithoutAdminChannel = new UserRecoverListWithoutAdminChannel();
                     messageService.publish(userRecoverListWithoutAdminChannel.getChannelName(), textMessage);
-
-                    Channel userWithoutAdminListChannel = new UserWithoutAdminListChannel();
-                    messageService.publish(userWithoutAdminListChannel.getChannelName(), textMessage);
+                } else {
+                    Channel userWithAdminListChannel = new UserWithAdminListChannel(userAdmin.getAdminId());
+                    messageService.publish(userWithAdminListChannel.getChannelName(), textMessage);
                 }
 
                 return ResponseEntity.ok(ResultUtil.success(user));
