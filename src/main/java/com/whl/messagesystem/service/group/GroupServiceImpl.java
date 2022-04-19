@@ -304,8 +304,13 @@ public class GroupServiceImpl implements GroupService {
 
                 // 向组内广播此人退出的消息
                 String message = JSONObject.toJSONString(WsResultUtil.quitGroup(data));
-                Channel channel = new PrivateGroupMessageChannel(groupName);
-                messageService.publish(channel.getChannelName(), new TextMessage(message));
+                TextMessage textMessage = new TextMessage(message);
+                Channel privateGroupMessageChannel = new PrivateGroupMessageChannel(groupName);
+                messageService.publish(privateGroupMessageChannel.getChannelName(), textMessage);
+
+                // 向管理员广播此人退出的消息
+                Channel userWithAdminListChannel = new UserWithAdminListChannel(sessionInfo.getAdmin().getAdminId());
+                messageService.publish(userWithAdminListChannel.getChannelName(), textMessage);
 
                 return ResponseEntity.ok(ResultUtil.success());
             }
@@ -327,15 +332,25 @@ public class GroupServiceImpl implements GroupService {
             List<User> groupMembersList = groupDao.selectUsersWithGroupId(Integer.parseInt(groupId));
 
             SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
-            int creatorId = Integer.parseInt(sessionInfo.getGroup().getCreatorId());
-            User creator = userDao.selectUserWithUserId(creatorId);
-            creator.setPassword(null);
+            if (sessionInfo.getGroup().getCreatorId() != null) {
+                int creatorId = Integer.parseInt(sessionInfo.getGroup().getCreatorId());
+                User creator = userDao.selectUserWithUserId(creatorId);
+                creator.setPassword(null);
 
-            Map<String, Object> groupMembersAndCreator = new HashMap<>(groupMembersList.size() + 1);
-            groupMembersAndCreator.put("creator", creator);
-            groupMembersAndCreator.put("members", groupMembersList);
+                Map<String, Object> groupMembersAndCreator = new HashMap<>();
+                groupMembersAndCreator.put("creator", creator);
+                groupMembersAndCreator.put("members", groupMembersList);
 
-            return ResponseEntity.ok(ResultUtil.success(groupMembersAndCreator));
+                return ResponseEntity.ok(ResultUtil.success(groupMembersAndCreator));
+            } else {
+                Map<String, Object> groupMembersAndCreator = new HashMap<>();
+                groupMembersAndCreator.put("creator", null);
+                groupMembersAndCreator.put("members", groupMembersList);
+
+                return ResponseEntity.ok(ResultUtil.success(groupMembersAndCreator));
+            }
+
+
         } catch (Exception e) {
             log.error("获取组员列表失败: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
@@ -594,24 +609,17 @@ public class GroupServiceImpl implements GroupService {
             如果未指定分组的人数上限，则默认为20
              */
             if (groupDao.insertAGroup(groupName, creatorId, adminId, maxCount == 0 ? DEFAULT_MEMBER_COUNT : maxCount, adminCreated)) {
-                log.info("插入分组成功");
                 // 查出本组的信息并传给前端
                 Group group = groupDao.findGroupByGroupName(groupName);
-                log.info("查询分组信息成功: {}", group);
                 GroupVO groupVo = new GroupVO(group);
-                log.info("创建groupvo对象成功: {}", groupVo);
                 SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
                 Admin admin = sessionInfo.getAdmin();
-                log.info("查询管理员信息成功: {}", admin);
                 groupVo.setAdminName(admin.getAdminName());
-                log.info("填充groupVO成功");
-
 
                 // 向大厅广播刚创建的分组的相关信息
                 String message = JSONObject.toJSONString(WsResultUtil.createGroup(groupVo));
                 Channel channel = new GroupHallListChannel(adminId);
                 messageService.publish(channel.getChannelName(), new TextMessage(message));
-                log.info("发送websocket消息成功");
 
                 return ResponseEntity.ok(ResultUtil.success(group));
             }
@@ -701,6 +709,10 @@ public class GroupServiceImpl implements GroupService {
                 map.put("groupId", groupId);
                 map.put("admin", sessionInfo.getAdmin());
                 TextMessage textMessage = new TextMessage(JSONObject.toJSONString(WsResultUtil.choiceManagePrivateGroup(map)));
+
+                // 向组内广播纳入管理的消息
+                Channel privateGroupMessageChannel = new PrivateGroupMessageChannel(group.getGroupName());
+                messageService.publish(privateGroupMessageChannel.getChannelName(), textMessage);
 
                 // 实时更新"未指定管理员的私有分组"列表
                 Channel privateGroupWithoutAdminListChannel = new PrivateGroupWithoutAdminListChannel();

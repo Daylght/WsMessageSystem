@@ -56,8 +56,6 @@ public class SessionServiceImpl implements SessionService {
     public ResponseEntity<Result> getSessionInfo(HttpSession session) {
         try {
             SessionInfo sessionInfo = (SessionInfo) session.getAttribute(SESSION_INFO);
-            log.info("当前用户/管理员信息: {}", sessionInfo);
-
             if (sessionInfo == null) {
                 Result result = new Result(ResultEnum.ERROR.getStatus(), "未登录", null);
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).body(result);
@@ -102,8 +100,6 @@ public class SessionServiceImpl implements SessionService {
                 if (user != null) {
 
                     if (user.getPassword().equals(password)) {
-                        log.info("用户名、密码校验通过");
-
                         Group group = groupDao.selectGroupByUserId(Integer.parseInt(user.getUserId()));
 
                         /*
@@ -170,8 +166,6 @@ public class SessionServiceImpl implements SessionService {
                 if (admin != null) {
 
                     if (admin.getPassword().equals(password)) {
-                        log.info("管理员名、密码校验通过");
-
                         SessionInfo sessionInfo = new SessionInfo();
                         sessionInfo.setRole(RoleConstant.ADMIN);
                         sessionInfo.setAdmin(admin);
@@ -202,7 +196,6 @@ public class SessionServiceImpl implements SessionService {
     public ResponseEntity<Result> logout(HttpSession session) {
         try {
             session.removeAttribute(SESSION_INFO);
-            log.info("当前用户/管理员登出成功");
             return ResponseEntity.ok(ResultUtil.success());
         } catch (Exception e) {
             log.error("登出异常: {}", e.getMessage());

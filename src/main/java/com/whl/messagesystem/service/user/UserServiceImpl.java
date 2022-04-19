@@ -24,16 +24,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.whl.messagesystem.commons.constant.StringConstant.SESSION_INFO;
 
@@ -177,6 +177,7 @@ public class UserServiceImpl implements UserService {
                     Channel userRecoverListWithoutAdminChannel = new UserRecoverListWithoutAdminChannel();
                     messageService.publish(userRecoverListWithoutAdminChannel.getChannelName(), textMessage);
                 } else {
+                    // 用户属于管理员，向userWithAdminList发送逻辑删除的消息
                     Channel userWithAdminListChannel = new UserWithAdminListChannel(userAdmin.getAdminId());
                     messageService.publish(userWithAdminListChannel.getChannelName(), textMessage);
                 }
@@ -362,7 +363,11 @@ public class UserServiceImpl implements UserService {
                 userAdminDao.insertAnUserAdmin(new UserAdmin(userId, adminId));
 
                 User user = userDao.selectUserWithUserId(Integer.parseInt(userId));
-                String message = JSONObject.toJSONString(WsResultUtil.choiceManageUser(user));
+                Admin admin = sessionInfo.getAdmin();
+                Map<String, Object> map = new HashMap<>();
+                map.put("user", user);
+                map.put("admin", admin);
+                String message = JSONObject.toJSONString(WsResultUtil.choiceManageUser(map));
                 Channel userWithoutAdminListChannel = new UserWithoutAdminListChannel();
                 messageService.publish(userWithoutAdminListChannel.getChannelName(), new TextMessage(message));
 
