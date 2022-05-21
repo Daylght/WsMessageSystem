@@ -100,9 +100,9 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
 
     @Override
     public void deleteChannel(String channelName) {
-        /**
-         * 若此channel尚未被初始化，则需要做判断
-         * 若直接删除可能会出现NPE
+        /*
+          若此channel尚未被初始化，则需要做判断
+          若直接删除可能会出现NPE
          */
         if (webSocketSessionsMap.containsKey(channelName)) {
             List<WebSocketSession> webSocketSessionList = webSocketSessionsMap.get(channelName);
@@ -147,12 +147,22 @@ public class MessageServiceImpl extends TextWebSocketHandler implements MessageS
         });
     }
 
+    /**
+     * 判断一个频道是否已存在
+     * @param channelName
+     * @return
+     */
     public boolean containsChannel(String channelName) {
         return webSocketSessionsMap.containsKey(channelName);
     }
 
+    /**
+     * 获取一个频道中的连接数
+     * @param channelName
+     * @return
+     */
     public int connectionsCount(String channelName) {
-        return webSocketSessionsMap.get(channelName).size();
+        return containsChannel(channelName) ? webSocketSessionsMap.get(channelName).size() : 0;
     }
 
 }

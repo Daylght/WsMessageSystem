@@ -16,7 +16,7 @@ public interface AdminService {
     /**
      * 获取所有管理员的列表
      */
-    ResponseEntity<Result> getAdminList();
+    ResponseEntity<Result> listAdmin();
 
     /**
      * 注册新管理员

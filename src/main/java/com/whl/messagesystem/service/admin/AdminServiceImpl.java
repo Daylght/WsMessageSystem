@@ -67,7 +67,7 @@ public class AdminServiceImpl implements AdminService {
     MessageServiceImpl messageService;
 
     @Override
-    public ResponseEntity<Result> getAdminList() {
+    public ResponseEntity<Result> listAdmin() {
         try {
             List<Admin> admins = adminDao.selectAllAdmins();
             return ResponseEntity.ok(ResultUtil.success(admins));

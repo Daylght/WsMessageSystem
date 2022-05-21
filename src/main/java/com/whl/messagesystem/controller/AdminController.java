@@ -26,7 +26,7 @@ public class AdminController {
 
     @GetMapping("/list")
     public ResponseEntity<Result> getAdminList() {
-        return adminService.getAdminList();
+        return adminService.listAdmin();
     }
 
     @ApiOperation("管理员注册(管理员)")
