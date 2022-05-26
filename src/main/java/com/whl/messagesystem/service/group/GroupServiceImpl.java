@@ -181,7 +181,6 @@ public class GroupServiceImpl implements GroupService {
     }
 
     @Override
-    @Transactional(rollbackFor = {RuntimeException.class, Error.class})
     public ResponseEntity<Result> remove(String groupId, HttpSession session) {
         try {
             if (StringUtils.isEmpty(groupId)) {
@@ -416,10 +415,17 @@ public class GroupServiceImpl implements GroupService {
             String groupName = groupDao.selectGroupByUserId(Integer.parseInt(userId)).getGroupName();
 
             if (userGroupDao.deleteAnUserGroupByUserId(Integer.parseInt(userId))) {
+                String message = JSONObject.toJSONString(WsResultUtil.kickMember(userId));
+                TextMessage textMessage = new TextMessage(message);
+
                 // 向组内广播此人被踢出的消息
                 Channel channel = new PrivateGroupMessageChannel(groupName);
-                String message = JSONObject.toJSONString(WsResultUtil.kickMember(userId));
-                messageService.publish(channel.getChannelName(), new TextMessage(message));
+                messageService.publish(channel.getChannelName(), textMessage);
+
+                // 向管理员广播此人被踢出的消息
+                Admin admin = adminDao.selectAdminByUserId(Integer.parseInt(userId));
+                Channel userWithAdminListChannel = new UserWithAdminListChannel(admin.getAdminId());
+                messageService.publish(userWithAdminListChannel.getChannelName(), textMessage);
 
                 return ResponseEntity.ok(ResultUtil.success());
             }
