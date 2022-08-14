@@ -26,6 +26,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
+import java.util.Arrays;
 
 import static com.whl.messagesystem.commons.constant.StringConstant.SESSION_INFO;
 
@@ -81,6 +82,7 @@ public class SessionServiceImpl implements SessionService {
             session.removeAttribute(SESSION_INFO);
 
             // 判断用户输入的验证码是否正确
+            log.info("登录所用的sessionId: {}", session.getId());
             String sessionVerifyCode = (String) session.getAttribute("VerifyCode");
             sessionVerifyCode = sessionVerifyCode.toLowerCase();
             if (!loginDto.getServerCode().toLowerCase().equals(sessionVerifyCode)) {
@@ -134,6 +136,7 @@ public class SessionServiceImpl implements SessionService {
             }
         } catch (Exception e) {
             log.error("登录异常: {}", e.getMessage());
+            log.error("堆栈信息: {0}", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ResultUtil.error());
         }
     }
@@ -213,6 +216,7 @@ public class SessionServiceImpl implements SessionService {
             VerifyCode verifyCode = iVerifyCodeGen.generate(80, 28);
             String code = verifyCode.getCode();
             log.info("验证码: {}", code);
+            log.info("获取验证码的sessionId: {}", request.getSession().getId());
             //将VerifyCode绑定session
             request.getSession().setAttribute("VerifyCode", code);
             //设置响应头
@@ -223,6 +227,7 @@ public class SessionServiceImpl implements SessionService {
             response.setDateHeader("Expires", 0);
             //设置响应内容类型
             response.setContentType("image/jpeg");
+            log.info(Arrays.toString(request.getCookies()));
             response.getOutputStream().write(verifyCode.getImgBytes());
             response.getOutputStream().flush();
         } catch (IOException e) {

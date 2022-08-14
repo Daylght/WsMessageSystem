@@ -13,7 +13,6 @@ import lombok.NoArgsConstructor;
 @Data
 public class User {
     /**
-     * todo:插入一个管理员账户作为后台管理系统的登录账号
      * userId: 自增主键，无意义
      * userName: 用户名
      * password: 密码
