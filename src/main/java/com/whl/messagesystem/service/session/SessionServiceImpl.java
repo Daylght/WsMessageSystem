@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -219,6 +220,15 @@ public class SessionServiceImpl implements SessionService {
             log.info("获取验证码的sessionId: {}", request.getSession().getId());
             //将VerifyCode绑定session
             request.getSession().setAttribute("VerifyCode", code);
+
+            //设置Cookie
+            /*Cookie cookie = new Cookie("VerifyCode", code);
+            cookie.setDomain(request.getServerName());
+            response.addCookie(cookie);*/
+
+            response.setHeader("Set-Cookie", "JSESSIONID="+request.getSession().getId()+"; Domain="+
+                    request.getServerName()+"; Path=/; HttpOnly");
+
             //设置响应头
             response.setHeader("Pragma", "no-cache");
             //设置响应头
